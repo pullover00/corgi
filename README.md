@@ -4,30 +4,42 @@ Scene change detection for RGB-D image pairs: given two photos of the same
 place taken at different times, produce a per-pixel map of what changed,
 classified as `added`, `removed`, `moved`, or `replaced`.
 
-This repository is the **object-consistent full target masks** method: the
-final, winning configuration extracted from a larger research repository
-(internally: `GOLDILOCS`) and pruned down to only the code path that produces
-it. It edits a frozen baseline change-detection raster ("R4") by finding old
-objects whose identity disappears in the same aligned image slot, gating
-candidates on whether they are a plausible object, expanding to compatible
-neighboring fragments, resolving depth-authoritative ownership against
-`REMOVED` pixels, cleaning up obsolete source footprints, arbitrating class
-consensus across every coherent target object, and suppressing floor-dominant
-`ADDED` components.
+This repository is the **object-consistent full target masks** method: a
+complete, self-contained 11-stage pipeline, extracted from a larger research
+repository (internally: `GOLDILOCS`) and pruned down to only the code path
+that produces this result. All 11 stages are part of the method and part of
+the contribution: MASt3R reconstruction, SAM2/SAM3 segmentation and tracking,
+SAM3/DINOv2 appearance features, and a change-detection resolver (stages
+1-10) build a first per-pixel change prediction; the final stage then
+refines it into the object-consistent result the method is named for, by
+finding old objects whose identity disappears in the same aligned image
+slot, gating candidates on whether they are a plausible object, expanding to
+compatible neighboring fragments, resolving depth-authoritative ownership
+against `REMOVED` pixels, cleaning up obsolete source footprints, arbitrating
+class consensus across every coherent target object, and suppressing
+floor-dominant `ADDED` components.
+
+Stages 1-10 are commonly referred to below as "the base pipeline" (its final
+internal prediction is labeled `r4_no_geometry_ablation`, or "R4", in the
+code and configs -- a name from the pipeline's own development history, not
+a reference to an external baseline). The base pipeline is not a separate or
+borrowed prior result: it was built as part of the same effort and is
+included here in full, not as a frozen artifact you have to supply
+yourself.
 
 ## Result
 
-Evaluated on 25 ChangeSim pairs (`fixed10` + `new15`), against a frozen R4
-baseline (`r4_no_geometry_ablation`) that this method edits:
+Evaluated end to end on 25 ChangeSim pairs (`fixed10` + `new15`). The first
+row is what stages 1-10 alone produce; the method is stages 1-11 together:
 
-| method | changed IoU | unchanged IoU | binary mIoU | added IoU | removed IoU | moved IoU | replaced IoU | multiclass mIoU |
+| pipeline | changed IoU | unchanged IoU | binary mIoU | added IoU | removed IoU | moved IoU | replaced IoU | multiclass mIoU |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|
-| R4 baseline (frozen input) | 41.88 | 94.34 | 68.11 | 36.80 | 31.30 | 17.62 | 14.92 | 39.00 |
-| **Object-consistent full target masks** | **42.80** | **94.50** | **68.65** | **38.53** | **33.65** | **17.79** | **21.18** | **41.13** |
-| Object-consistent guarded output (more conservative sibling) | 42.57 | 94.48 | 68.53 | 38.53 | 33.65 | 17.79 | 20.05 | 40.90 |
+| Stages 1-10 only (base pipeline, "R4") | 41.88 | 94.34 | 68.11 | 36.80 | 31.30 | 17.62 | 14.92 | 39.00 |
+| **Stages 1-11 (object-consistent full target masks)** | **42.80** | **94.50** | **68.65** | **38.53** | **33.65** | **17.79** | **21.18** | **41.13** |
+| Stages 1-11, guarded output (more conservative stage-11 variant) | 42.57 | 94.48 | 68.53 | 38.53 | 33.65 | 17.79 | 20.05 | 40.90 |
 
-The full-mask variant is what this repository is named for and what
-`scripts/run_slot_inconsistency_replacement_experiment.py` writes to
+The full-mask variant is what this repository is named for and what stage 11
+(`scripts/run_slot_inconsistency_replacement_experiment.py`) writes to
 `labels_full_mask.png` (`report.json`'s `full_mask_candidate`). Its guarded
 sibling (`labels.png` / `labels_guarded.png`) restricts a confirmed
 replacement to a more conservative footprint; both are computed by the same
@@ -65,10 +77,12 @@ failure-case examples, carried over from the original research report.
 
 ## Pipeline architecture
 
-The method is the last of 11 stages. Every stage is independently runnable
-and caches its outputs by pair, so a partial run resumes cheaply. Stages 2
-and 3 each run twice per split, at two different SAM3 proposal-grid
-densities -- see "Two SAM3 grid densities" below.
+The method is all 11 stages together, run end to end from raw RGB-D image
+pairs to the final object-consistent raster; none of stages 1-10 is a
+third-party baseline. Every stage is independently runnable and caches its
+outputs by pair, so a partial run resumes cheaply. Stages 2 and 3 each run
+twice per split, at two different SAM3 proposal-grid densities -- see "Two
+SAM3 grid densities" below.
 
 | # | Stage | Script | What it does |
 |---|---|---|---|
@@ -81,8 +95,8 @@ densities -- see "Two SAM3 grid densities" below.
 | 7 | Guarded hybrid | `scripts/run_sam3_guarded_hybrid_experiment.py` | Merges identity/moved evidence onto the stage-3 raster from cached evidence only (no model calls); only its `replacement_only` variant is consumed downstream. |
 | 8 | Feature-veto gate (A0-A4) | `scripts/run_sam3_feature_veto_gate_experiment.py` | Five ablation variants of a same-place feature-veto gate; only `a3_guarded_direct_replacement` is consumed downstream. |
 | 9 | Obvious-object sentinel | `scripts/run_obvious_object_sentinel_experiment.py` | Fresh SAM3 pass over the real (un-warped) T0 image plus targeted SAM2 "verified absence" tracking; composes four variants, only the `a3_guarded_direct_replacement`-based raster is consumed downstream. |
-| 10 | Real-image association resolver ("R4") | `scripts/run_real_image_association_resolver.py` | Five resolver variants (`r0`-`r4`); **`r4_no_geometry_ablation` is the frozen baseline the final method edits.** |
-| 11 | **Object-consistent replacement (this method)** | `scripts/run_slot_inconsistency_replacement_experiment.py` | Edits R4 as described above. Writes `labels_full_mask.png` (the headline result), `labels_guarded.png`, `report.json`, and a self-contained `index.html` visual report. |
+| 10 | Real-image association resolver ("R4") | `scripts/run_real_image_association_resolver.py` | Five resolver variants (`r0`-`r4`) composing all evidence gathered so far into a first per-pixel change prediction; **`r4_no_geometry_ablation` is the one stage 11 refines, and the last stage of the base pipeline.** |
+| 11 | **Object-consistent replacement (final refinement)** | `scripts/run_slot_inconsistency_replacement_experiment.py` | Refines stage 10's prediction as described above. Writes `labels_full_mask.png` (the headline result), `labels_guarded.png`, `report.json`, and a self-contained `index.html` visual report. |
 
 Run the whole thing with:
 
@@ -172,11 +186,12 @@ python scripts/build_changesim_manifest.py data/changesim/Warehouse_6
 ## Repository layout
 
 ```
-src/ocmask/            core library: reconstruction pipeline, adapters
-                        (MASt3R/SAM2/DINOv2), metrics, config loading
+src/ocmask/            core library shared by every stage: stage 1's
+                        reconstruction pipeline, adapters (MASt3R/SAM2/
+                        DINOv2), metrics, config loading
 src/ocmask/stages/      stages 2-11's algorithmic core (proposals, tracking,
                         identity/feature comparison, the resolver variants,
-                        and slot_inconsistency.py -- the method itself)
+                        and slot_inconsistency.py -- the final refinement)
 scripts/                one runner script per stage, plus run_pipeline.py
 configs/stage01_*.yaml  stage 1 config
 configs/stages/         stage 2-11 configs, one (or one per split) each
@@ -187,12 +202,17 @@ docs/method.md          full decision procedure + worked failure-case examples
 
 ## Evaluation discipline
 
-`scripts/run_slot_inconsistency_replacement_experiment.py` writes predictions
-and their SHA-256 hashes to `predictions_frozen.json` before ground truth is
+Every stage script -- including stage 10, which produces the base pipeline's
+own prediction, and stage 11, which refines it -- writes its predictions and
+their SHA-256 hashes to `predictions_frozen.json` before ground truth is
 opened; ground truth is used only afterward, for scoring and the visual
-failure audit in `index.html`. This mirrors the discipline used throughout
-the original research repository and is why every stage script validates its
-declared parent's `selection.json`/`report.json` before trusting it.
+failure audit in `index.html`. This is an internal discipline applied to
+every stage of this one pipeline, not a comparison against a separately
+produced or third-party baseline: it exists so that no stage's thresholds
+could be tuned against the test labels after the fact, including R4's own.
+Each stage script also validates its declared parent's
+`selection.json`/`report.json` before trusting it, so a stage can't silently
+run against a stale or mismatched upstream cache.
 
 ## Licenses
 
