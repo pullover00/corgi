@@ -1,0 +1,499 @@
+# Object-Consistent Masks -- single merged pipeline configuration.
+#
+# One section per stage (see README.md's architecture table), containing
+# only the winning-path settings: every ChangeSim manifest/split/variant
+# ablation key from the original per-stage research configs has been
+# dropped. Values are copied verbatim from the validated
+# fixed10-densegrid96 / A3 / R4 configuration, not re-derived.
+#
+# ${VAR}-style placeholders (sam3_proposals.sam3_source etc.) are
+# expanded from the environment by ocmask.config.load_config -- see
+# README.md's "External SAM3/SAM3.1 dependency" section.
+
+schema_version: 1
+reconstruction:
+  seed: 2026
+  device: cuda
+  mixed_precision: true
+  image:
+    width: 640
+    height: 480
+  geometry:
+    depth_epsilon: 0.001
+    z_buffer_epsilon: 0.0001
+    matching_confidence_threshold: 0.0
+    minimum_valid_depth: 1.0e-06
+    splat_radius: 0
+    hole_fill_enabled: true
+    hole_fill_min_neighbors: 5
+    hole_fill_max_relative_depth: 0.02
+  mast3r:
+    checkpoint: checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth
+    lr1: 0.07
+    niter1: 500
+    lr2: 0.014
+    niter2: 200
+    optim_level: coarse
+    matching_conf_thr: 0
+    shared_intrinsics: false
+    desc_conf: 3d
+    desc_conf_output_key: desc_conf
+    subsample: 8
+    scenegraph_type: complete
+    winsize: 1
+  sam2:
+    checkpoint: checkpoints/sam2.1_hiera_large.pt
+    model_cfg: configs/sam2.1/sam2.1_hiera_l.yaml
+    mixed_precision: true
+    compile_image_encoder: true
+    vos_optimized: true
+    points_per_side: 64
+    pred_iou_thresh: 0.8
+    stability_score_thresh: 0.8
+    crop_n_layers: 1
+    crop_n_points_downscale_factor: 2
+    multimask_output: true
+    use_m2m: false
+  tracking:
+    minimum_mask_area: 32
+    minimum_track_iou: 0.2
+    track_area_ratio_bounds:
+    - 0.5
+    - 2.0
+    minimum_track_score: 0.0
+    no3d_movement_iou: 0.5
+    visibility_alpha: 0.8
+    replacement_overlap_iou: 0.1
+  ssim:
+    enabled: false
+    win_size: 7
+    gaussian_weights: true
+    sigma: 1.5
+    channel_axis: 2
+    threshold_stddevs: 1.0
+  labels:
+    priority:
+    - warped
+    - moved
+    - removed
+    - added
+    - unchanged
+sam3_proposals:
+  sam3_source: ${SAM3_SOURCE}
+  sam3_source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+  sam3_image_checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+  sam3_image_checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+  sam31_checkpoint: ${SAM31_CHECKPOINT}
+  sam31_checkpoint_sha256: 0567debeec80ba4ac6369540c6c248025283cb3ff2b92827509e57e2b3541cb6
+  proposals:
+    points_per_side: 96
+    points_per_batch: 32
+    pred_iou_threshold: 0.8
+    stability_threshold: 0.8
+    stability_offset: 1.0
+    crop_layers: 1
+    crop_downscale_factor: 2
+    box_nms_threshold: 0.7
+    crop_nms_threshold: 0.7
+    minimum_mask_area: 32
+    multimask_output: true
+    mask_to_mask_refinement: false
+  tracking:
+    batch_size: 8
+    minimum_object_score: 0.0
+    use_flash_attention_3: false
+    use_real_rope: false
+    prompt: exact_binary_mask
+sam2_tracking_v4:
+  proposals:
+    points_per_side: 96
+    points_per_batch: 32
+    pred_iou_threshold: 0.8
+    stability_threshold: 0.8
+    stability_offset: 1.0
+    crop_layers: 1
+    crop_downscale_factor: 2
+    box_nms_threshold: 0.7
+    crop_nms_threshold: 0.7
+    minimum_mask_area: 32
+    multimask_output: true
+    mask_to_mask_refinement: false
+  tracking:
+    prompt: exact_binary_mask
+    backend_config: parent_sam2
+  baseline_protocol:
+    classification_gate: iou_area
+    geometry:
+      splat_radius: 0
+      hole_fill_enabled: true
+      hole_fill_min_neighbors: 5
+      hole_fill_max_relative_depth: 0.02
+    tracking:
+      minimum_mask_area: 32
+      minimum_track_iou: 0.2
+      track_area_ratio_bounds:
+      - 0.5
+      - 2.0
+      visibility_alpha: 0.8
+      replacement_overlap_iou: 0.1
+    ssim_enabled: false
+sam3_features:
+  sam3:
+    source: ${SAM3_SOURCE}
+    source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+    checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+    checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+    mixed_precision: bfloat16
+    feature_level: image_embedding
+    minimum_feature_cells: 4.0
+  matching:
+    fallback_minimum_cosine: 0.65
+    minimum_bidirectional_margin: 0.0
+    require_mutual_nearest: true
+    area_ratio_bounds:
+    - 0.25
+    - 4.0
+    same_location_bonus: 0.05
+    calibration_control_iou: 0.5
+    calibration_negative_iou: 0.05
+    calibration_maximum_negative_acceptance: 0.05
+    calibration_minimum_positive_acceptance: 0.7
+    calibration_minimum_positive_count: 4
+    calibration_minimum_negative_count: 12
+  classification:
+    unchanged_mask_iou: 0.5
+    unchanged_area_ratio_bounds:
+    - 0.5
+    - 2.0
+    orientation_anisotropy: 0.25
+    orientation_change_degrees: 20.0
+    replacement_minimum_iou: 0.3
+    replacement_maximum_centroid_distance: 0.1
+    replacement_identity_margin: 0.1
+    duplicate_suppression_iou: 0.8
+    visibility_alpha: 0.8
+    minimum_mask_area: 32
+    replacement_overlap_iou: 0.1
+dinov2_features:
+  dinov2:
+    source: src/dinov2
+    source_commit: 7764ea0f912e53c92e82eb78a2a1631e92725fc8
+    checkpoint: checkpoints/dinov2_vitb14_reg4_pretrain.pth
+    checkpoint_sha256: 73182a088cf94833c94b1666d1c99e02fe87e2007bff57b564fb6206e25dba71
+    model: dinov2_vitb14_reg
+    mixed_precision: true
+    full_image_width: 896
+    full_image_height: 672
+    patch_size: 14
+    minimum_feature_cells: 4.0
+  matching:
+    fallback_minimum_cosine: 0.65
+    minimum_bidirectional_margin: 0.0
+    require_mutual_nearest: true
+    area_ratio_bounds:
+    - 0.25
+    - 4.0
+    same_location_bonus: 0.05
+    calibration_control_iou: 0.5
+    calibration_negative_iou: 0.05
+    calibration_maximum_negative_acceptance: 0.05
+    calibration_minimum_positive_acceptance: 0.7
+    calibration_minimum_positive_count: 4
+    calibration_minimum_negative_count: 12
+  classification:
+    unchanged_mask_iou: 0.5
+    unchanged_area_ratio_bounds:
+    - 0.5
+    - 2.0
+    orientation_anisotropy: 0.25
+    orientation_change_degrees: 20.0
+    replacement_minimum_iou: 0.3
+    replacement_maximum_centroid_distance: 0.1
+    replacement_identity_margin: 0.1
+    duplicate_suppression_iou: 0.8
+    visibility_alpha: 0.8
+    minimum_mask_area: 32
+    replacement_overlap_iou: 0.1
+moved_association:
+  tracking_cache:
+    require_parent_scalar_replay: true
+guarded_hybrid:
+  replacement:
+    eligible_parent_labels:
+    - added
+    - removed
+    output_label: replaced
+feature_veto:
+  sam3:
+    source: ${SAM3_SOURCE}
+    source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+    checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+    checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+    mixed_precision: bfloat16
+    feature_level: image_embedding
+    descriptor_pooling: soft_mask_mean
+    minimum_feature_cells: 4.0
+    reuse_identity_feature_cache: true
+  clean_gate:
+    backend: sam2
+    prompt: exact_binary_mask
+    minimum_track_score: 0.0
+    minimum_track_iou: 0.2
+    track_area_ratio_bounds:
+    - 0.5
+    - 2.0
+    accepted_label: unchanged
+    feature_policy: veto_only
+    allow_feature_rescue_to_unchanged: false
+  same_place_pairing:
+    minimum_spatial_iou: 0.3
+    maximum_normalized_centroid_distance: 0.1
+    centroid_normalization: per_axis_image_fraction_euclidean
+    area_ratio_bounds:
+    - 0.25
+    - 4.0
+    require_valid_descriptors: true
+    require_mutual_spatial_nearest: true
+    one_to_one: true
+    deterministic_tie_break:
+    - spatial_iou_descending
+    - source_proposal_id_ascending
+    - target_proposal_id_ascending
+  feature_thresholds:
+    fallback_same_identity_cosine: 0.65
+    calibration_control_iou: 0.5
+    calibration_negative_iou: 0.05
+    calibration_maximum_negative_acceptance: 0.05
+    calibration_negative_quantile_method: higher
+    calibration_minimum_positive_acceptance: 0.7
+    calibration_minimum_positive_count: 4
+    calibration_minimum_negative_count: 12
+    invalid_calibration_policy: use_fallback
+    different_identity_margin: 0.1
+    similar_rule: cosine_greater_than_or_equal_to_same_threshold
+    hard_veto_rule: cosine_strictly_below_same_threshold
+    guarded_different_rule: cosine_less_than_or_equal_to_same_threshold_minus_margin
+    guarded_uncertain_rule: strictly_between_different_and_same_thresholds
+    invalid_or_missing_feature_policy: keep_original_gate_decision
+  promotion:
+    atomic_source_target_pair: true
+    promote_only_accepted_members: true
+    preserve_existing_rejections: true
+    similar_pair_policy: keep_original_gate_decisions
+    uncertain_pair_policy: keep_original_gate_decisions
+    no_counterpart_policy: keep_original_gate_decision
+    nonreciprocal_pair_policy: keep_original_gate_decision
+  changed_object_pipeline:
+    backend: sam2
+    backend_config: parent_sam2
+    prompt: exact_binary_mask
+    source_to_target:
+      input: render_0_to_1
+      output: image1
+      success_label: moved
+      failure_label: removed
+      apply_aligned_iou_area_gate: false
+    target_to_source:
+      input: image1
+      output: render_0_to_1
+      success_label: moved
+      failure_label: added
+      apply_aligned_iou_area_gate: false
+    visibility_alpha: 0.8
+    minimum_mask_area: 32
+    replacement_overlap_iou: 0.1
+    ssim_enabled: false
+    label_priority:
+    - warped
+    - moved
+    - removed
+    - added
+    - unchanged
+  direct_replacement:
+    enabled_variants:
+    - a3_guarded_direct_replacement
+    - a4_guarded_replacement_moved_reasoning
+    feature_band: confidently_different
+    reserve_pair_before_moved_association: true
+    rasterization: source_target_intersection
+    restrict_to_guarded_changed_support: true
+    apply_after_normal_label_composition: true
+    output_label: replaced
+obvious_object_sentinel:
+  sam3:
+    source: ${SAM3_SOURCE}
+    source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+    checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+    checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+    mixed_precision: bfloat16
+    proposal_generation:
+      points_per_side: 96
+      points_per_batch: 32
+      pred_iou_threshold: 0.8
+      stability_threshold: 0.8
+      stability_offset: 1.0
+      crop_layers: 1
+      crop_downscale_factor: 2
+      box_nms_threshold: 0.7
+      crop_nms_threshold: 0.7
+      minimum_mask_area_pixels: 32
+      multimask_output: true
+      mask_to_mask_refinement: false
+    features:
+      level: image_embedding
+      pooling: soft_mask_mean
+      minimum_feature_cells: 4.0
+  candidate_selection:
+    minimum_mask_area_fraction: 0.01
+    minimum_bbox_side_fraction: 0.02
+    minimum_predicted_iou: 0.8
+    minimum_stability_score: 0.8
+    frame_border_contact_policy: abstain
+    border_contact_definition: any_foreground_pixel_on_image_boundary
+    duplicate_suppression:
+      mask_iou: 0.8
+      containment_fraction: 0.8
+      deterministic_order:
+      - predicted_iou_descending
+      - stability_score_descending
+      - mask_area_descending
+      - proposal_id_ascending
+  geometry_observability:
+    projection: deterministic_nearest_depth_z_buffer
+    splat_radius: 0
+    owner_aware_hole_filling: false
+    require_bidirectional_support: true
+    minimum_observable_fraction: 0.8
+    depth_epsilon: 0.001
+    minimum_valid_depth: 1.0e-06
+    occluded_or_out_of_frame_policy: abstain
+    invalid_or_inconsistent_depth_policy: abstain
+  targeted_absence_verification:
+    enabled_for_variants:
+    - o3_verified_absence
+    required: true
+    backend: sam2
+    baseline_config_reference: gate_parent_evaluation/report.json:pairs[].parent_artifacts/config.json
+    checkpoint: checkpoints/sam2.1_hiera_large.pt
+    checkpoint_sha256: 2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318
+    model_cfg: configs/sam2.1/sam2.1_hiera_l.yaml
+    prompt: exact_binary_mask
+    source_candidate_direction: real_i0_to_real_i1
+    target_candidate_direction: real_i1_to_real_i0
+    minimum_track_score: 0.0
+    minimum_track_iou: 0.2
+    track_area_ratio_bounds:
+    - 0.5
+    - 2.0
+    qualifying_outcome: object_absent
+    object_present_policy: veto
+    ambiguous_or_rejected_policy: abstain
+association_resolver:
+  association:
+    inventory: selected_large_real_image_instances
+    fallback_same_identity_cosine: 0.65
+    minimum_bidirectional_margin: 0.0
+    require_mutual_nearest: true
+    area_ratio_bounds:
+    - 0.25
+    - 4.0
+    geometry_in_identity_score: false
+  endpoint_verification:
+    backend: sam2
+    prompt: exact_binary_mask
+    qualifying_outcome: object_absent
+    ambiguous_policy: abstain
+    geometry_visibility_alpha: 0.8
+    depth_epsilon: 0.001
+    surrounding_ring_radius_pixels: 8
+    surrounding_ring_minimum_pixels: 64
+    surrounding_ring_relative_depth_tolerance: 0.1
+    geometry_acceptance: object_interior_or_surrounding_static_ring
+  replacement:
+    require_both_endpoints_verified_absent: true
+    require_confidently_different_identity: true
+    different_identity_margin: 0.1
+    require_bidirectional_location: true
+    minimum_directional_iou: 0.3
+    rasterization: source_projection_intersect_target_mask
+object_consistent_masks:
+  consolidation:
+    minimum_iou: 0.45
+    minimum_containment: 0.82
+    maximum_centroid_distance_fraction: 0.08
+  slot_inconsistency:
+    minimum_aligned_iou: 0.04
+    minimum_containment: 0.2
+    maximum_centroid_distance_fraction: 0.08
+    minimum_slot_score: 0.25
+    minimum_target_to_source_area_ratio: 0.25
+    maximum_target_to_source_area_ratio: 4.0
+    minimum_patch_cells: 4
+    same_patch_cosine: 0.68
+    minimum_lost_identity_fraction: 0.35
+    minimum_target_slot_coverage: 0.2
+    sam_mismatch_maximum: 0.72
+    dino_mismatch_maximum: 0.58
+    color_mismatch_maximum: 0.35
+    minimum_mismatch_signals: 2
+    minimum_cleanup_mismatch_signals: 3
+    minimum_cleanup_aligned_iou: 0.45
+    minimum_cleanup_containment: 0.6
+    minimum_cleanup_area_ratio: 0.65
+    maximum_cleanup_area_ratio: 1.5
+    minimum_cleanup_slot_score: 0.45
+    minimum_cleanup_added_removed_fraction: 0.5
+    fragmented_surface_maximum_compactness: 0.25
+    fragmented_surface_maximum_bbox_fill: 0.25
+    fragmented_surface_minimum_components: 5
+    thin_surface_minimum_aspect_ratio: 3.5
+    thin_surface_maximum_half_thickness: 5.0
+    thin_surface_maximum_compactness: 0.45
+    compact_cleanup_minimum_compactness: 0.8
+    compact_cleanup_minimum_bbox_fill: 0.7
+    compact_cleanup_maximum_aspect_ratio: 2.0
+    compact_cleanup_maximum_components: 2
+    asymmetric_cleanup_minimum_containment: 0.85
+    asymmetric_cleanup_maximum_area_ratio: 0.65
+    asymmetric_cleanup_minimum_slot_score: 0.45
+    asymmetric_cleanup_maximum_centroid_distance_fraction: 0.04
+    asymmetric_cleanup_minimum_largest_component_fraction: 0.8
+    weak_identity_maximum_target_components: 6
+    weak_identity_minimum_added_removed_fraction: 0.08
+    sam_rescue_minimum: 0.84
+    dino_rescue_minimum: 0.74
+    retained_identity_rescue_fraction: 0.62
+    confident_moved_track_iou_minimum: 0.7
+    confident_moved_color_minimum: 0.45
+    elsewhere_sam_minimum: 0.82
+    elsewhere_dino_minimum: 0.7
+    maximum_elsewhere_aligned_iou: 0.05
+    depth_ownership_tie_margin_m: 0.0
+    depth_ownership_minimum_pixels: 8
+    depth_ownership_minimum_fraction: 0.25
+    plausible_object_minimum_compactness: 0.45
+    plausible_fragment_minimum_compactness: 0.33
+    plausible_fragment_minimum_aligned_iou: 0.45
+    plausible_object_minimum_slot_score: 0.33
+    companion_maximum_gap_pixels: 6.0
+    companion_minimum_area_ratio: 0.5
+    companion_maximum_area_ratio: 2.0
+    companion_maximum_depth_difference_m: 0.08
+    companion_minimum_sam_cosine: 0.8
+    companion_minimum_dino_cosine: 0.8
+    companion_minimum_color_intersection: 0.5
+    consensus_minimum_changed_fraction: 0.5
+    consensus_minimum_dominant_fraction: 0.75
+    consensus_minimum_pixels: 32
+    arbitration_minimum_changed_fraction: 0.75
+    arbitration_minimum_pixels: 32
+    arbitration_minimum_compactness: 0.45
+    arbitration_minimum_bbox_fill: 0.35
+    arbitration_maximum_components: 6
+    arbitration_minimum_largest_component_fraction: 0.8
+    arbitration_minimum_dominant_fraction: 0.75
+    arbitration_minimum_added_removed_fraction: 0.08
+    arbitration_minimum_replaced_fraction_with_moved: 0.5
+    floor_distance_tolerance_m: 0.05
+    floor_component_minimum_pixels: 32
+    floor_component_minimum_fraction: 0.7
