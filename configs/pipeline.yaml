@@ -3,8 +3,9 @@
 # One section per stage (see README.md's architecture table), containing
 # only the winning-path settings: every ChangeSim manifest/split/variant
 # ablation key from the original per-stage research configs has been
-# dropped. Values are copied verbatim from the validated
-# fixed10-densegrid96 / A3 / R4 configuration, not re-derived.
+# dropped. Values are copied verbatim from the validated research
+# configuration that produced this repository's reported result, not
+# re-derived.
 #
 # ${VAR}-style placeholders (sam3_proposals.sam3_source etc.) are
 # expanded from the environment by ocmask.config.load_config -- see
@@ -214,15 +215,14 @@ dinov2_features:
     visibility_alpha: 0.8
     minimum_mask_area: 32
     replacement_overlap_iou: 0.1
-moved_association:
-  tracking_cache:
-    require_parent_scalar_replay: true
-guarded_hybrid:
+motion_and_replacement_evidence:
   replacement:
     eligible_parent_labels:
     - added
     - removed
     output_label: replaced
+  moved_verification:
+    minimum_track_candidate_iou: 0.20
 feature_veto:
   sam3:
     source: ${SAM3_SOURCE}
@@ -310,9 +310,6 @@ feature_veto:
     - added
     - unchanged
   direct_replacement:
-    enabled_variants:
-    - a3_guarded_direct_replacement
-    - a4_guarded_replacement_moved_reasoning
     feature_band: confidently_different
     reserve_pair_before_moved_association: true
     rasterization: source_target_intersection
@@ -368,26 +365,6 @@ obvious_object_sentinel:
     minimum_valid_depth: 1.0e-06
     occluded_or_out_of_frame_policy: abstain
     invalid_or_inconsistent_depth_policy: abstain
-  targeted_absence_verification:
-    enabled_for_variants:
-    - o3_verified_absence
-    required: true
-    backend: sam2
-    baseline_config_reference: gate_parent_evaluation/report.json:pairs[].parent_artifacts/config.json
-    checkpoint: checkpoints/sam2.1_hiera_large.pt
-    checkpoint_sha256: 2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318
-    model_cfg: configs/sam2.1/sam2.1_hiera_l.yaml
-    prompt: exact_binary_mask
-    source_candidate_direction: real_i0_to_real_i1
-    target_candidate_direction: real_i1_to_real_i0
-    minimum_track_score: 0.0
-    minimum_track_iou: 0.2
-    track_area_ratio_bounds:
-    - 0.5
-    - 2.0
-    qualifying_outcome: object_absent
-    object_present_policy: veto
-    ambiguous_or_rejected_policy: abstain
 association_resolver:
   association:
     inventory: selected_large_real_image_instances

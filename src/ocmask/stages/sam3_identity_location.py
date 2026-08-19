@@ -836,3 +836,110 @@ def compose_identity_labels(
         "moved": len(moved),
         "direct_replaced": len(replaced),
     }
+
+
+@dataclass(frozen=True)
+class AppearanceFeatures:
+    """Everything the rest of the pipeline needs from the dense-feature stage.
+
+    ``source_map``/``target_map`` are the raw dense SAM3 embeddings (kept so
+    later stages -- the feature-veto gate, the association resolver -- can
+    pool descriptors for their own object lists without a second backbone
+    pass). ``source_features``/``target_features`` are already-pooled
+    per-proposal descriptors for the same visible object lists used here,
+    reused as-is by the feature-veto gate rather than recomputed.
+    ``identity_threshold`` is ``calibration.threshold`` (it already falls
+    back to the configured default when calibration is invalid; callers
+    never need to branch on ``calibration.valid`` themselves).
+    ``match_records`` is the per-pair identity/location decision trail
+    (unchanged/moved/replaced) that the motion-and-replacement evidence
+    stage pairs against proposal masks; nothing here rasterizes its own
+    label map (see ``classify_identity_location``'s docstring for why that
+    raster itself is not part of the winning composition).
+    """
+
+    source_map: np.ndarray
+    target_map: np.ndarray
+    source_features: FeatureDescriptorBatch
+    target_features: FeatureDescriptorBatch
+    calibration: SimilarityCalibration
+    match_records: list[dict[str, Any]]
+
+    @property
+    def identity_threshold(self) -> float:
+        return float(self.calibration.threshold)
+
+
+def compute_appearance_features(
+    source_objects: Sequence[ObjectMask],
+    target_objects: Sequence[ObjectMask],
+    source_render: np.ndarray,
+    target_image: np.ndarray,
+    source_changed: np.ndarray,
+    target_changed: np.ndarray,
+    extractor: Sam3FeatureExtractor,
+    config: dict[str, Any],
+) -> AppearanceFeatures:
+    """Dense SAM3 appearance features plus a pair-internal identity threshold.
+
+    Faithful extraction of ``scripts/run_sam3_identity_location_experiment.py``'s
+    per-pair computation (see that script around its ``_pair_inputs``/main-loop
+    feature and classification steps). ``source_objects``/``target_objects``
+    must be the same *visible* (cross-render-covered, area-filtered) proposal
+    lists stage 3 tracked; ``source_changed``/``target_changed`` are boolean
+    arrays aligned with them, True where stage 3's clean-render gate rejected
+    that proposal (i.e. membership in its ``source_changed_proposal_ids`` /
+    ``target_changed_proposal_ids`` diagnostics) -- calibration treats the
+    complement (statically accepted proposals) as its identity controls.
+
+    Only ``(source_map, target_map, calibration.threshold)`` were originally
+    scoped as downstream-relevant; reading the motion-and-replacement
+    evidence stage's actual data dependency (its ``decisions.json`` input is
+    this function's ``match_records``) showed ``classify_identity_location``
+    is load-bearing too, not dead code -- so it is computed here as well.
+    ``compose_identity_labels`` (this module's own standalone label raster)
+    remains genuinely unused downstream and is not called.
+    """
+
+    source_map = extractor.feature_map(source_render)
+    target_map = extractor.feature_map(target_image)
+    sam3_cfg = config["sam3"]
+    minimum_cells = float(sam3_cfg["minimum_feature_cells"])
+    source_features = mask_descriptors(source_map, source_objects, minimum_feature_cells=minimum_cells)
+    target_features = mask_descriptors(target_map, target_objects, minimum_feature_cells=minimum_cells)
+    spatial_iou = pairwise_mask_iou(source_objects, target_objects)
+    matching = config["matching"]
+    calibration = calibrate_identity_threshold(
+        cosine_similarity_matrix(source_features, target_features),
+        spatial_iou,
+        ~np.asarray(source_changed, dtype=bool),
+        ~np.asarray(target_changed, dtype=bool),
+        source_features.valid,
+        target_features.valid,
+        fallback_threshold=float(matching["fallback_minimum_cosine"]),
+        control_iou=float(matching["calibration_control_iou"]),
+        negative_iou=float(matching["calibration_negative_iou"]),
+        maximum_negative_acceptance=float(matching["calibration_maximum_negative_acceptance"]),
+        minimum_positive_acceptance=float(matching["calibration_minimum_positive_acceptance"]),
+        minimum_positive_count=int(matching["calibration_minimum_positive_count"]),
+        minimum_negative_count=int(matching["calibration_minimum_negative_count"]),
+    )
+    classification = classify_identity_location(
+        source_objects,
+        target_objects,
+        source_features,
+        target_features,
+        source_changed,
+        target_changed,
+        calibration,
+        config,
+        spatial_iou=spatial_iou,
+    )
+    return AppearanceFeatures(
+        source_map=source_map,
+        target_map=target_map,
+        source_features=source_features,
+        target_features=target_features,
+        calibration=calibration,
+        match_records=classification.match_records,
+    )

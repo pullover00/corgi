@@ -384,3 +384,43 @@ def compose_guarded_variant(
     )
     return output, diagnostics
 
+
+def refine_with_motion_and_replacement_evidence(
+    baseline: np.ndarray,
+    match_records: Sequence[Mapping],
+    source_masks: Sequence[np.ndarray],
+    target_masks: Sequence[np.ndarray],
+    forward_tracks: Mapping[int, np.ndarray],
+    reverse_tracks: Mapping[int, np.ndarray],
+    *,
+    minimum_track_candidate_iou: float,
+) -> tuple[np.ndarray, HybridDiagnostics]:
+    """Fuse same-place replacement and moved-object verification onto ``baseline``.
+
+    This is the winning-path entry point for this module: it evaluates both
+    interventions (replacement evidence promoting baseline ADDED/REMOVED
+    pixels to REPLACED, and moved-track verification splitting baseline
+    MOVED pixels back into REMOVED/ADDED where only one direction of
+    tracking actually supports it) and applies both together -- the
+    composition the original research code labeled "combined_guarded_hybrid"
+    internally. ``baseline`` is stage 3's re-tracked label raster;
+    ``match_records`` is the appearance stage's identity/location decision
+    trail (``AppearanceFeatures.match_records``); ``source_masks``/
+    ``target_masks`` are the *raw*, proposal-ID-ordered (1-based) SAM3
+    proposal masks, not the visibility-filtered subset; ``forward_tracks``/
+    ``reverse_tracks`` map a changed proposal's ID to its accepted SAM2
+    propagation mask (empty dicts are valid and simply contribute no moved
+    verification evidence).
+    """
+
+    evidence = make_hybrid_evidence(
+        baseline,
+        match_records,
+        source_masks,
+        target_masks,
+        forward_tracks,
+        reverse_tracks,
+        minimum_track_candidate_iou=minimum_track_candidate_iou,
+    )
+    return compose_guarded_variant(baseline, evidence, "combined_guarded_hybrid")
+

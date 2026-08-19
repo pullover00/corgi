@@ -875,7 +875,8 @@ def merge_objects_with_parent(
     output[moved] = int(Label.MOVED)
     # The baseline applies replacement after normal priority composition, so
     # it wins over added/removed/moved.  Only the still-higher warped label is
-    # protected when these incremental predictions are merged into A0.
+    # protected when these incremental predictions are merged into the
+    # parent (``parent_labels``) raster.
     replaced = (new == int(Label.REPLACED)) & (parent != int(Label.WARPED))
     output[replaced] = int(Label.REPLACED)
     return output, len(retained)
@@ -935,3 +936,112 @@ def apply_direct_semantics(
     ):
         raise AssertionError("direct semantic reasoning changed binary support")
     return output
+
+
+class _TrackerProtocol:
+    """Structural type for the tracker this stage needs: see adapters/sam2.py."""
+
+    def track(
+        self, masks: Sequence[np.ndarray], source_image: np.ndarray, target_image: np.ndarray
+    ) -> list[Any]:  # pragma: no cover - protocol only
+        raise NotImplementedError
+
+
+def apply_feature_veto_direct_replacement(
+    source: Sequence[ObjectMask],
+    target: Sequence[ObjectMask],
+    source_features: FeatureDescriptorBatch,
+    target_features: FeatureDescriptorBatch,
+    source_gate_accepted: np.ndarray,
+    target_gate_accepted: np.ndarray,
+    baseline_labels: np.ndarray,
+    coverage: np.ndarray,
+    tracker: _TrackerProtocol,
+    source_image: np.ndarray,
+    target_image: np.ndarray,
+    *,
+    same_threshold: float,
+    config: Mapping[str, Any],
+) -> tuple[np.ndarray, FeatureVetoResult]:
+    """Gate same-place proposal pairs on appearance, then paint direct replacement.
+
+    Faithful extraction of the "guarded direct replacement" composition from
+    ``scripts/run_sam3_feature_veto_gate_experiment.py`` (the one variant, of
+    five the original ablation computed, that is load-bearing here): pair
+    visible source/target proposals by aligned location, veto a same-place
+    pair whose SAM3 descriptors read confidently different, re-track exactly
+    those newly guarded proposals with a fresh forward/backward SAM2 pass,
+    merge the results onto ``baseline_labels`` (stage 7's motion-and-
+    replacement-refined raster) with the standard visibility/priority
+    protocol, and finally paint the conservative intersection of every
+    confidently-different pair directly as REPLACED. The other four
+    ablation rungs (a plain baseline replay, a hard/uncertain veto without
+    direct replacement, and a variant that also folds in moved-object
+    reasoning) are not computed -- see this module's docstring for why only
+    this one is load-bearing for the method.
+
+    ``source``/``target`` must be the same visible proposal lists, in the
+    same order, as ``source_features``/``target_features`` were pooled from
+    (i.e. exactly the appearance stage's inputs/outputs);
+    ``source_gate_accepted``/``target_gate_accepted`` are the complement of
+    stage 3's changed-proposal flags (True where the clean-render gate
+    accepted, i.e. called the proposal statically unchanged).
+    """
+
+    same_place = config["same_place_pairing"]
+    decision = pair_and_classify_gate_features(
+        source,
+        target,
+        source_features,
+        target_features,
+        source_gate_accepted,
+        target_gate_accepted,
+        same_threshold=float(same_threshold),
+        different_margin=float(config["feature_thresholds"]["different_identity_margin"]),
+        minimum_spatial_iou=float(same_place["minimum_spatial_iou"]),
+        maximum_centroid_distance=float(same_place["maximum_normalized_centroid_distance"]),
+        area_ratio_bounds=tuple(same_place["area_ratio_bounds"]),
+    )
+    source_by_id = {_proposal_id(obj, index + 1): obj for index, obj in enumerate(source)}
+    target_by_id = {_proposal_id(obj, index + 1): obj for index, obj in enumerate(target)}
+
+    forward_attempts = tracker.track(
+        [np.asarray(source_by_id[pid].mask, bool) for pid in decision.guarded_source_ids],
+        source_image,
+        target_image,
+    )
+    reverse_attempts = tracker.track(
+        [np.asarray(target_by_id[pid].mask, bool) for pid in decision.guarded_target_ids],
+        target_image,
+        source_image,
+    )
+    forward_tracks = {
+        pid: (np.asarray(attempt.mask, bool) if attempt.accepted else None)
+        for pid, attempt in zip(decision.guarded_source_ids, forward_attempts, strict=True)
+    }
+    reverse_tracks = {
+        pid: (np.asarray(attempt.mask, bool) if attempt.accepted else None)
+        for pid, attempt in zip(decision.guarded_target_ids, reverse_attempts, strict=True)
+    }
+    guarded_objects, _ = ordinary_promoted_objects(
+        source_by_id,
+        target_by_id,
+        decision.guarded_source_ids,
+        decision.guarded_target_ids,
+        forward_tracks,
+        reverse_tracks,
+    )
+    changed_object_pipeline = config["changed_object_pipeline"]
+    guarded_labels, _ = merge_objects_with_parent(
+        baseline_labels,
+        guarded_objects,
+        coverage,
+        visibility_alpha=float(changed_object_pipeline["visibility_alpha"]),
+        minimum_mask_area=int(changed_object_pipeline["minimum_mask_area"]),
+        replacement_overlap_iou=float(changed_object_pipeline["replacement_overlap_iou"]),
+    )
+    replacement = direct_replacement_mask(
+        decision.pairs, source_by_id, target_by_id, np.asarray(baseline_labels).shape
+    )
+    direct_labels = apply_direct_semantics(guarded_labels, replacement, [])
+    return direct_labels, decision
