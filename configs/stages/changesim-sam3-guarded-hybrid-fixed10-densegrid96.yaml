@@ -1,0 +1,39 @@
+schema_version: 1
+experiment_id: sam3_guarded_hybrid_fixed10_densegrid96
+description: >
+  Point-grid density ablation of sam3_guarded_hybrid_fixed10 (2026-08-13):
+  guarded fusion rebuilt on the densegrid96 (points_per_side 96 instead of
+  64) SAM3-mask plus SAM2-tracker baseline, identity/location experiment,
+  and moved-association cache. Every field below is copied unchanged from
+  changesim-sam3-guarded-hybrid-fixed10.yaml except experiment_id,
+  parent_evaluation, identity_evaluation, proposal_cache_parent,
+  moved_track_cache_parent, and recommended_output.
+
+parent_evaluation: outputs/s03_sam2_tracking_v4/fixed10_grid96
+identity_evaluation: outputs/s04_sam3_features/fixed10
+proposal_cache_parent: outputs/s02_sam3_proposals/fixed10_grid96
+moved_track_cache_parent: outputs/s06_moved_association/fixed10
+manifest: data/changesim/manifest-table3.jsonl
+recommended_output: outputs/s07_guarded_hybrid/fixed10
+
+variants:
+  - replacement_only
+  - moved_verification
+  - combined_guarded_hybrid
+
+replacement:
+  eligible_parent_labels: [added, removed]
+  output_label: replaced
+
+moved_verification:
+  minimum_track_candidate_iou: 0.20
+  forward_unverified_fallback: removed
+  reverse_unverified_fallback: added
+  preserve_bidirectional_support: true
+  preserve_unowned_parent_moved_pixels: true
+
+protocol:
+  ground_truth_used_in_inference: false
+  predictions_frozen_before_ground_truth: true
+  tune_on_test: false
+  selection_role: development_ablation

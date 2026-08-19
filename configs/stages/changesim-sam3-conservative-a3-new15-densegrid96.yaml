@@ -1,0 +1,191 @@
+schema_version: 1
+experiment_id: sam3_conservative_a3_new15_densegrid96
+description: >
+  Point-grid density ablation of sam3_conservative_a3_new15 (2026-08-13):
+  replay the frozen replacement-only guarded-hybrid prediction as A0, then
+  apply the existing SAM3 guarded unchanged veto and direct replacement rule,
+  all rebuilt on the densegrid96 (points_per_side 96 instead of 64) SAM3-mask
+  plus SAM2-tracker baseline, on the same 15 held-out pairs. Every field
+  below is copied unchanged from changesim-sam3-conservative-a3-new15.yaml
+  except experiment_id, parent_evaluation, best_parent_evaluation,
+  identity_evaluation, proposal_cache_parent, moved_track_cache_parent,
+  promoted_tracking_cache_parent, recommended_output, and
+  pre_ground_truth_audit_expected (identical to the densegrid96 feature-veto-
+  gate new15 audit, recorded with --record-audit).
+
+parent_evaluation: outputs/s03_sam2_tracking_v4/new15_grid96
+best_parent_evaluation: outputs/s07_guarded_hybrid/new15
+a0_parent_variant: replacement_only
+identity_evaluation: outputs/s04_sam3_features/new15
+proposal_cache_parent: outputs/s02_sam3_proposals/new15_grid96
+moved_track_cache_parent: outputs/s06_moved_association/new15
+# promoted_tracking_cache_parent intentionally omitted: optional cache reuse from a sibling run not present in this repo; the script regenerates SAM2 tracks itself when absent.
+manifest: data/changesim/manifest-new15.jsonl
+recommended_output: outputs/s08_feature_veto_gate/new15
+
+selection:
+  source: parent_evaluation_successful_pairs
+  require_exact_parent_pair_order: true
+  expected_pair_count: 15
+  seed: 20260805
+
+variants:
+  - a0_baseline_replay
+  - a1_hard_feature_veto
+  - a2_guarded_feature_veto
+  - a3_guarded_direct_replacement
+  - a4_guarded_replacement_moved_reasoning
+
+sam3:
+  source: ${SAM3_SOURCE}
+  source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+  checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+  checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+  mixed_precision: bfloat16
+  feature_level: image_embedding
+  descriptor_pooling: soft_mask_mean
+  minimum_feature_cells: 4.0
+  reuse_identity_feature_cache: true
+
+clean_gate:
+  backend: sam2
+  prompt: exact_binary_mask
+  minimum_track_score: 0.0
+  minimum_track_iou: 0.20
+  track_area_ratio_bounds: [0.5, 2.0]
+  accepted_label: unchanged
+  feature_policy: veto_only
+  allow_feature_rescue_to_unchanged: false
+
+same_place_pairing:
+  minimum_spatial_iou: 0.30
+  maximum_normalized_centroid_distance: 0.10
+  centroid_normalization: per_axis_image_fraction_euclidean
+  area_ratio_bounds: [0.25, 4.0]
+  require_valid_descriptors: true
+  require_mutual_spatial_nearest: true
+  one_to_one: true
+  deterministic_tie_break:
+    - spatial_iou_descending
+    - source_proposal_id_ascending
+    - target_proposal_id_ascending
+
+feature_thresholds:
+  fallback_same_identity_cosine: 0.65
+  calibration_control_iou: 0.50
+  calibration_negative_iou: 0.05
+  calibration_maximum_negative_acceptance: 0.05
+  calibration_negative_quantile_method: higher
+  calibration_minimum_positive_acceptance: 0.70
+  calibration_minimum_positive_count: 4
+  calibration_minimum_negative_count: 12
+  invalid_calibration_policy: use_fallback
+  different_identity_margin: 0.10
+  similar_rule: cosine_greater_than_or_equal_to_same_threshold
+  hard_veto_rule: cosine_strictly_below_same_threshold
+  guarded_different_rule: cosine_less_than_or_equal_to_same_threshold_minus_margin
+  guarded_uncertain_rule: strictly_between_different_and_same_thresholds
+  invalid_or_missing_feature_policy: keep_original_gate_decision
+
+promotion:
+  atomic_source_target_pair: true
+  promote_only_accepted_members: true
+  preserve_existing_rejections: true
+  similar_pair_policy: keep_original_gate_decisions
+  uncertain_pair_policy: keep_original_gate_decisions
+  no_counterpart_policy: keep_original_gate_decision
+  nonreciprocal_pair_policy: keep_original_gate_decision
+
+changed_object_pipeline:
+  backend: sam2
+  backend_config: parent_sam2
+  prompt: exact_binary_mask
+  source_to_target:
+    input: render_0_to_1
+    output: image1
+    success_label: moved
+    failure_label: removed
+    apply_aligned_iou_area_gate: false
+  target_to_source:
+    input: image1
+    output: render_0_to_1
+    success_label: moved
+    failure_label: added
+    apply_aligned_iou_area_gate: false
+  visibility_alpha: 0.80
+  minimum_mask_area: 32
+  replacement_overlap_iou: 0.10
+  ssim_enabled: false
+  label_priority: [warped, moved, removed, added, unchanged]
+
+direct_replacement:
+  enabled_variants:
+    - a3_guarded_direct_replacement
+    - a4_guarded_replacement_moved_reasoning
+  feature_band: confidently_different
+  reserve_pair_before_moved_association: true
+  rasterization: source_target_intersection
+  restrict_to_guarded_changed_support: true
+  apply_after_normal_label_composition: true
+  output_label: replaced
+
+moved_reasoning:
+  enabled_variants:
+    - a4_guarded_replacement_moved_reasoning
+  require_at_least_one_changed_member: true
+  minimum_cosine: calibrated_same_identity_threshold
+  minimum_bidirectional_margin: 0.0
+  require_mutual_nearest: true
+  area_ratio_bounds: [0.25, 4.0]
+  association_same_location_bonus: 0.05
+  same_location_iou: 0.50
+  same_location_area_ratio_bounds: [0.5, 2.0]
+  orientation_anisotropy: 0.25
+  orientation_change_degrees: 20.0
+  restrict_to_guarded_changed_support: true
+  preserve_binary_support: true
+  direct_replacement_has_priority: true
+
+artifact_limits:
+  maximum_qualitative_pairs: 4
+  maximum_qualitative_variants_per_pair: 5
+  maximum_decision_records_per_pair: 4096
+  save_variant_label_pngs: true
+  save_pair_decisions: true
+  save_evidence_npz: true
+  save_recomputed_feature_maps: false
+  save_individual_track_mask_pngs: false
+  maximum_intermediate_images_per_pair: 0
+
+# Placeholder; must equal the recorded densegrid96 feature-veto-gate new15
+# audit before this config is run for real.
+pre_ground_truth_audit_expected:
+  reciprocal_same_place_pairs: 728
+  similar_pairs: 690
+  uncertain_pairs: 17
+  confidently_different_pairs: 21
+  hard_source_promotions: 32
+  hard_target_promotions: 29
+  guarded_source_promotions: 15
+  guarded_target_promotions: 15
+
+protocol:
+  ground_truth_used_in_inference: false
+  predictions_frozen_before_ground_truth: true
+  hash_predictions_before_loading_ground_truth: true
+  tune_on_test: false
+  threshold_sweep: false
+  report_all_variants: true
+  selection_role: retrospective_reused_validation_ablation
+  development_only: true
+  fresh_or_full_evaluation_required_for_model_selection: true
+  primary_variant: a3_guarded_direct_replacement
+  contextual_variants:
+    - a4_guarded_replacement_moved_reasoning
+  notes:
+    - The new15 results were inspected before this combination was proposed.
+    - This is retrospective development evidence, not a held-out validation.
+    - Thresholds and equality conventions are copied without a new sweep.
+    - A0 must exactly replay the immutable replacement-only parent raster.
+    - A3 and A4 must have binary support identical to A2 for every pair.
+    - A4 is reported for context and is not part of the proposed A3 method.

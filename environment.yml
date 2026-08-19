@@ -1,0 +1,13 @@
+name: ocmask
+channels:
+  - pytorch
+  - nvidia
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pip=24.2
+  - pytorch=2.4.1
+  - torchvision=0.19.1
+  - pytorch-cuda=12.4
+  - pip:
+      - -e .[dev]

@@ -1,0 +1,63 @@
+schema_version: 1
+experiment_id: sam3_masks_sam2_tracking_v4_no_splat
+adapter_revision: 4
+description: >
+  Revision-4 proposal ablation. Reuse the immutable SAM3 point-grid proposal
+  caches, but propagate those masks with the baseline SAM2 tracker. This is the
+  missing SAM3-proposal/SAM2-tracker cell of the two-by-two experiment.
+parent_evaluation: outputs/s01_reconstruction/fixed10
+recommended_output: outputs/s03_sam2_tracking_v4/fixed10_grid64
+manifest: data/changesim/manifest-table3.jsonl
+
+input_contract:
+  revision: raw_render_v1
+  source_render: render_0_to_1.png
+  clean_render: render_clean_to_1.png
+  target_image: "reconstruction.npz::images[1]"
+  forbid_sam_debug_inputs: true
+
+sam3_source: ${SAM3_SOURCE}
+sam3_source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+sam3_image_checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+sam3_image_checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+proposal_backend: sam3_point_grid
+# These caches were produced from the raw source render and raw target image;
+# they are independent of the invalid revision-3 clean-render tracking input.
+proposal_cache_parent: outputs/s02_sam3_proposals/fixed10_grid64
+tracking_backend: sam2
+proposals:
+  points_per_side: 64
+  points_per_batch: 32
+  pred_iou_threshold: 0.8
+  stability_threshold: 0.8
+  stability_offset: 1.0
+  crop_layers: 1
+  crop_downscale_factor: 2
+  box_nms_threshold: 0.7
+  crop_nms_threshold: 0.7
+  minimum_mask_area: 32
+  multimask_output: true
+  mask_to_mask_refinement: false
+tracking:
+  prompt: exact_binary_mask
+  backend_config: parent_sam2
+
+baseline_protocol:
+  classification_gate: iou_area
+  geometry:
+    splat_radius: 0
+    hole_fill_enabled: true
+    hole_fill_min_neighbors: 5
+    hole_fill_max_relative_depth: 0.02
+  tracking:
+    minimum_mask_area: 32
+    minimum_track_iou: 0.2
+    track_area_ratio_bounds: [0.5, 2.0]
+    visibility_alpha: 0.8
+    replacement_overlap_iou: 0.1
+  ssim_enabled: false
+
+inference:
+  mixed_precision: bfloat16
+  ground_truth_used: false
+  tune_on_test: false

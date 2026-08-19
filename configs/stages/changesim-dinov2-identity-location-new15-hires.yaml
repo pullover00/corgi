@@ -1,0 +1,59 @@
+schema_version: 1
+experiment_id: dinov2_identity_location_new15_hires
+description: >
+  Resolution ablation of dinov2_identity_location_new15 (held-out 15 pairs):
+  same 896x672/patch14 (64x48 = 3072 cell) dense grid as
+  changesim-dinov2-identity-location-no-splat-hires.yaml, 4x denser than the
+  original 448x336 setting. Every other field is unchanged from
+  changesim-dinov2-identity-location-new15.yaml.
+
+parent_evaluation: outputs/s03_sam2_tracking_v4/new15_grid64
+manifest: data/changesim/manifest-new15.jsonl
+proposal_cache_parent: outputs/s02_sam3_proposals/new15_grid64
+recommended_output: outputs/s05_dinov2_features/new15
+
+dinov2:
+  source: src/dinov2
+  source_commit: 7764ea0f912e53c92e82eb78a2a1631e92725fc8
+  checkpoint: checkpoints/dinov2_vitb14_reg4_pretrain.pth
+  checkpoint_sha256: 73182a088cf94833c94b1666d1c99e02fe87e2007bff57b564fb6206e25dba71
+  model: dinov2_vitb14_reg
+  mixed_precision: true
+  full_image_width: 896
+  full_image_height: 672
+  patch_size: 14
+  minimum_feature_cells: 4.0
+
+matching:
+  fallback_minimum_cosine: 0.65
+  minimum_bidirectional_margin: 0.0
+  require_mutual_nearest: true
+  area_ratio_bounds: [0.25, 4.0]
+  same_location_bonus: 0.05
+
+  calibration_control_iou: 0.50
+  calibration_negative_iou: 0.05
+  calibration_maximum_negative_acceptance: 0.05
+  calibration_minimum_positive_acceptance: 0.70
+  calibration_minimum_positive_count: 4
+  calibration_minimum_negative_count: 12
+
+classification:
+  unchanged_mask_iou: 0.50
+  unchanged_area_ratio_bounds: [0.5, 2.0]
+  orientation_anisotropy: 0.25
+  orientation_change_degrees: 20.0
+
+  replacement_minimum_iou: 0.30
+  replacement_maximum_centroid_distance: 0.10
+  replacement_identity_margin: 0.10
+  duplicate_suppression_iou: 0.80
+
+  visibility_alpha: 0.80
+  minimum_mask_area: 32
+  replacement_overlap_iou: 0.10
+
+inference:
+  ground_truth_used: false
+  tune_on_test: false
+  cache_features: true

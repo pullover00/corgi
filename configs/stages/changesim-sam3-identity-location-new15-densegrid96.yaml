@@ -1,0 +1,57 @@
+schema_version: 1
+experiment_id: sam3_identity_location_new15_densegrid96
+description: >
+  Point-grid density ablation of sam3_identity_location_new15 (2026-08-13):
+  identity-and-location ablation rebuilt on the densegrid96 (points_per_side
+  96 instead of 64) SAM3-mask plus SAM2-tracking baseline and proposal cache,
+  on the same 15 held-out pairs. Every field below is copied unchanged from
+  changesim-sam3-identity-location-new15.yaml except experiment_id,
+  parent_evaluation, proposal_cache_parent, and recommended_output.
+
+parent_evaluation: outputs/s03_sam2_tracking_v4/new15_grid96
+manifest: data/changesim/manifest-new15.jsonl
+proposal_cache_parent: outputs/s02_sam3_proposals/new15_grid96
+recommended_output: outputs/s04_sam3_features/new15
+
+sam3:
+  source: ${SAM3_SOURCE}
+  source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+  checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+  checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+  mixed_precision: bfloat16
+  feature_level: image_embedding
+  minimum_feature_cells: 4.0
+
+matching:
+  fallback_minimum_cosine: 0.65
+  minimum_bidirectional_margin: 0.0
+  require_mutual_nearest: true
+  area_ratio_bounds: [0.25, 4.0]
+  same_location_bonus: 0.05
+
+  calibration_control_iou: 0.50
+  calibration_negative_iou: 0.05
+  calibration_maximum_negative_acceptance: 0.05
+  calibration_minimum_positive_acceptance: 0.70
+  calibration_minimum_positive_count: 4
+  calibration_minimum_negative_count: 12
+
+classification:
+  unchanged_mask_iou: 0.50
+  unchanged_area_ratio_bounds: [0.5, 2.0]
+  orientation_anisotropy: 0.25
+  orientation_change_degrees: 20.0
+
+  replacement_minimum_iou: 0.30
+  replacement_maximum_centroid_distance: 0.10
+  replacement_identity_margin: 0.10
+  duplicate_suppression_iou: 0.80
+
+  visibility_alpha: 0.80
+  minimum_mask_area: 32
+  replacement_overlap_iou: 0.10
+
+inference:
+  ground_truth_used: false
+  tune_on_test: false
+  cache_features: true

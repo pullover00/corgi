@@ -1,0 +1,53 @@
+schema_version: 1
+experiment_id: sam3_masks_sam31_tracking_no_splat_densegrid96
+adapter_revision: 4
+description: >
+  Point-grid density ablation of sam3_masks_sam31_tracking_no_splat (2026-08-13):
+  regenerate the SAM3 point-grid proposal cache with points_per_side raised
+  from 64 to 96 for denser mask coverage, then use exact-mask-prompted SAM3.1
+  multiplex tracking for all four propagation calls. Every field below is
+  copied unchanged from the original no-splat config except adapter_revision
+  (bumped to satisfy the current script's validation, matching the -new15
+  sibling config), the added input_contract block, and proposals.points_per_side.
+recommended_output: outputs/s02_sam3_proposals/fixed10_grid96
+parent_evaluation: outputs/s01_reconstruction/fixed10
+manifest: data/changesim/manifest-table3.jsonl
+
+input_contract:
+  revision: raw_render_v1
+  source_render: render_0_to_1.png
+  clean_render: render_clean_to_1.png
+  target_image: "reconstruction.npz::images[1]"
+  forbid_sam_debug_inputs: true
+
+sam3_source: ${SAM3_SOURCE}
+sam3_source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+sam3_image_checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+sam3_image_checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+sam31_checkpoint: ${SAM31_CHECKPOINT}
+sam31_checkpoint_sha256: 0567debeec80ba4ac6369540c6c248025283cb3ff2b92827509e57e2b3541cb6
+proposal_backend: sam3_point_grid
+tracking_backend: sam3.1_multiplex
+proposals:
+  points_per_side: 96
+  points_per_batch: 32
+  pred_iou_threshold: 0.8
+  stability_threshold: 0.8
+  stability_offset: 1.0
+  crop_layers: 1
+  crop_downscale_factor: 2
+  box_nms_threshold: 0.7
+  crop_nms_threshold: 0.7
+  minimum_mask_area: 32
+  multimask_output: true
+  mask_to_mask_refinement: false
+tracking:
+  batch_size: 8
+  minimum_object_score: 0.0
+  use_flash_attention_3: false
+  use_real_rope: false
+  prompt: exact_binary_mask
+inference:
+  mixed_precision: bfloat16
+  ground_truth_used: false
+  tune_on_test: false

@@ -1,0 +1,42 @@
+schema_version: 1
+experiment_id: sam3_masks_sam2_moved_association_new15_densegrid96
+description: >
+  Point-grid density ablation of sam3_masks_sam2_moved_association_new15
+  (2026-08-13): moved-class ablation rebuilt on the densegrid96 (points_per_side
+  96 instead of 64) SAM3-mask plus SAM2-tracking baseline and proposal cache,
+  on the same 15 held-out pairs. Every field below is copied unchanged from
+  changesim-sam3-sam2-moved-association-new15.yaml except experiment_id,
+  parent_evaluation, proposal_cache_parent, and recommended_output.
+
+parent_evaluation: outputs/s03_sam2_tracking_v4/new15_grid96
+proposal_cache_parent: outputs/s02_sam3_proposals/new15_grid96
+manifest: data/changesim/manifest-new15.jsonl
+recommended_output: outputs/s06_moved_association/new15
+
+tracking_backend: sam2
+tracking_cache:
+  require_parent_scalar_replay: true
+
+association:
+  minimum_forward_iou: 0.2
+  minimum_backward_iou: 0.2
+  minimum_reciprocal_score: 0.2
+  maximum_static_iou: 0.5
+
+variants:
+  - reciprocal_mutual_overlap
+  - hungarian_one_to_one
+  - hungarian_motion_verified
+
+protocol_notes:
+  - Reciprocal identities and Hungarian assignment are unpublished ablations,
+    not claimed GOLDILOCS implementation details.
+  - Matched objects emit one target SAM3 proposal. The parent baseline instead
+    combines forward propagated masks with reverse-direction target proposals.
+  - The 0.5 static cutoff is reused from an inferred no-3D setting and may
+    suppress a real moved or replaced object when its aligned masks overlap.
+
+inference:
+  mixed_precision: bfloat16
+  ground_truth_used: false
+  tune_on_test: false

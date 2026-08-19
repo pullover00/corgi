@@ -1,0 +1,58 @@
+schema_version: 1
+experiment_id: real_image_association_resolver_new15_densegrid96
+description: >
+  Point-grid density ablation of real_image_association_resolver_new15
+  (2026-08-14): identical protocol, rebuilt on top of the densegrid96
+  (points_per_side 96 instead of 64) obvious-object-sentinel/conservative-A3
+  chain instead of the original 64-grid one. Every field below is copied
+  unchanged from changesim-real-image-association-resolver-new15.yaml except
+  experiment_id and the sentinel/tracking-cache references below. No prior
+  densegrid96 tracking cache exists yet, so tracking_cache_parents lists only
+  this run's own sentinel parent; unmatched pairs recompute SAM2 tracks fresh.
+
+sentinel_parent: outputs/s09_obvious_object_sentinel/new15
+sentinel_parent_config: configs/stages/changesim-obvious-object-sentinel-new15-densegrid96.yaml
+recommended_output: outputs/s10_association_resolver/new15
+tracking_cache_parents:
+  - outputs/s09_obvious_object_sentinel/new15
+
+variants:
+  - r0_conservative_a3
+  - r1_hard_collision_o3
+  - r2_association_endpoints
+  - r3_positive_joint_replacement
+  - r4_no_geometry_ablation
+
+association:
+  inventory: selected_large_real_image_instances
+  fallback_same_identity_cosine: 0.65
+  minimum_bidirectional_margin: 0.0
+  require_mutual_nearest: true
+  area_ratio_bounds: [0.25, 4.0]
+  geometry_in_identity_score: false
+
+endpoint_verification:
+  backend: sam2
+  prompt: exact_binary_mask
+  qualifying_outcome: object_absent
+  ambiguous_policy: abstain
+  geometry_visibility_alpha: 0.80
+  depth_epsilon: 0.001
+  surrounding_ring_radius_pixels: 8
+  surrounding_ring_minimum_pixels: 64
+  surrounding_ring_relative_depth_tolerance: 0.10
+  geometry_acceptance: object_interior_or_surrounding_static_ring
+
+replacement:
+  require_both_endpoints_verified_absent: true
+  require_confidently_different_identity: true
+  different_identity_margin: 0.10
+  require_bidirectional_location: true
+  minimum_directional_iou: 0.30
+  rasterization: source_projection_intersect_target_mask
+
+protocol:
+  ground_truth_used_in_inference: false
+  predictions_frozen_before_ground_truth: true
+  tune_on_test: false
+  selection_role: robustness_ablation

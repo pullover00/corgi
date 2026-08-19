@@ -1,0 +1,204 @@
+schema_version: 1
+experiment_id: object_consistent_masks_densegrid96
+description: >
+  Stage 11, the final method: edit the frozen R4 (r4_no_geometry_ablation)
+  raster by finding old objects whose identity disappears in the same aligned
+  slot, gating candidates on object plausibility, expanding to compatible
+  companions, resolving depth-authoritative ownership against REMOVED
+  components, cleaning up obsolete source footprints, arbitrating class
+  consensus across every coherent target object, and suppressing
+  floor-dominant ADDED components. See ocmask.stages.slot_inconsistency.
+  The ``reciprocal``, ``geometry``, ``identity``, and ``pose`` sections below
+  are vestigial: they configured an earlier reciprocal-matching/rigid-pose
+  diagnostic that never fed a shipped prediction and is not included in this
+  repository. Only ``consolidation`` and ``slot_inconsistency`` are read by
+  scripts/run_slot_inconsistency_replacement_experiment.py.
+
+recommended_output: outputs/s11_object_consistent_masks
+
+splits:
+  fixed10:
+    # Evidence/cache parent only. This is the SAM2 tracking-v4 experiment, not
+    # the final association-resolver R4 prediction used for raster scoring.
+    moved_tracking_root: outputs/s06_moved_association/fixed10
+    parent_evaluation: outputs/s03_sam2_tracking_v4/fixed10_grid96
+    raster_baseline_evaluation: outputs/s10_association_resolver/fixed10
+    raster_baseline_variant: r4_no_geometry_ablation
+    proposal_cache_parent: outputs/s02_sam3_proposals/fixed10_grid96
+    feature_cache_root: outputs/s04_sam3_features/fixed10
+    dino_feature_cache_root: outputs/s05_dinov2_features/fixed10
+    manifest: data/changesim/manifest-table3.jsonl
+  new15:
+    # Evidence/cache parent only. Final labels come from the resolver R4 below.
+    moved_tracking_root: outputs/s06_moved_association/new15
+    parent_evaluation: outputs/s03_sam2_tracking_v4/new15_grid96
+    raster_baseline_evaluation: outputs/s10_association_resolver/new15
+    raster_baseline_variant: r4_no_geometry_ablation
+    proposal_cache_parent: outputs/s02_sam3_proposals/new15_grid96
+    feature_cache_root: outputs/s04_sam3_features/new15
+    dino_feature_cache_root: outputs/s05_dinov2_features/new15
+    manifest: data/changesim/manifest-new15.jsonl
+
+consolidation:
+  minimum_iou: 0.45
+  minimum_containment: 0.82
+  maximum_centroid_distance_fraction: 0.08
+
+reciprocal:
+  minimum_forward_iou: 0.15
+  minimum_backward_iou: 0.15
+  minimum_cycle_score: 0.15
+
+geometry:
+  minimum_location_fraction: 0.20
+  minimum_pose_fraction: 0.50
+
+identity:
+  minimum_feature_cells: 2.0
+  minimum_cosine: 0.82
+
+pose:
+  # Chosen from the GT-blind fixed10 mutual-match distribution: 0.78 left
+  # every reciprocal edge below six correspondences, while 0.65 retains a
+  # conservative high-similarity subset on the strongest identity matches.
+  minimum_token_cosine: 0.65
+  maximum_tokens: 96
+  ransac_iterations: 256
+  inlier_threshold_m: 0.10
+  minimum_3d_matches: 6
+  minimum_inlier_ratio: 0.55
+  minimum_spatial_coverage: 0.12
+  minimum_rmse_improvement: 0.25
+  minimum_translation_m: 0.08
+  minimum_rotation_degrees: 8.0
+
+replacement:
+  minimum_same_location_iou: 0.20
+
+replacement_v2:
+  adjacency_pixels: 5
+  maximum_3d_centroid_distance_m: 0.30
+  maximum_motion_difference_fraction: 0.04
+  completion_minimum_containment: 0.20
+  completion_minimum_feature_cosine: 0.72
+  occupancy_radius_m: 0.10
+  minimum_mutual_occupancy: 0.35
+  context_ring_pixels: 12
+  minimum_context_occupancy: 0.25
+  minimum_visible_pixels: 24
+  sam_mismatch_maximum_cosine: 0.72
+  dino_mismatch_maximum_cosine: 0.58
+  color_mismatch_maximum_intersection: 0.35
+  minimum_mismatch_signals: 2
+
+occlusion_cleaning:
+  maximum_gap_pixels: 24
+  minimum_axis_overlap: 0.35
+  minimum_occluder_fraction: 0.25
+  foreground_depth_margin_m: 0.08
+  maximum_boundary_distance_m: 0.45
+  minimum_fragment_cosine: 0.65
+  maximum_motion_difference_fraction: 0.05
+  minimum_object_pixels: 48
+  envelope_radius_m: 0.08
+  maximum_cloud_removal_fraction: 0.35
+
+slot_inconsistency:
+  minimum_aligned_iou: 0.04
+  minimum_containment: 0.20
+  maximum_centroid_distance_fraction: 0.08
+  minimum_slot_score: 0.25
+  minimum_target_to_source_area_ratio: 0.25
+  maximum_target_to_source_area_ratio: 4.0
+  minimum_patch_cells: 4
+  same_patch_cosine: 0.68
+  minimum_lost_identity_fraction: 0.35
+  minimum_target_slot_coverage: 0.20
+  sam_mismatch_maximum: 0.72
+  dino_mismatch_maximum: 0.58
+  color_mismatch_maximum: 0.35
+  minimum_mismatch_signals: 2
+  minimum_cleanup_mismatch_signals: 3
+  minimum_cleanup_aligned_iou: 0.45
+  minimum_cleanup_containment: 0.60
+  minimum_cleanup_area_ratio: 0.65
+  maximum_cleanup_area_ratio: 1.50
+  minimum_cleanup_slot_score: 0.45
+  minimum_cleanup_added_removed_fraction: 0.50
+  fragmented_surface_maximum_compactness: 0.25
+  fragmented_surface_maximum_bbox_fill: 0.25
+  fragmented_surface_minimum_components: 5
+  thin_surface_minimum_aspect_ratio: 3.5
+  thin_surface_maximum_half_thickness: 5.0
+  thin_surface_maximum_compactness: 0.45
+  compact_cleanup_minimum_compactness: 0.80
+  compact_cleanup_minimum_bbox_fill: 0.70
+  compact_cleanup_maximum_aspect_ratio: 2.0
+  compact_cleanup_maximum_components: 2
+  # A replacement may be a smaller object wholly inside the obsolete old
+  # footprint. Strong containment then matters more than symmetric area/IoU.
+  asymmetric_cleanup_minimum_containment: 0.85
+  asymmetric_cleanup_maximum_area_ratio: 0.65
+  asymmetric_cleanup_minimum_slot_score: 0.45
+  asymmetric_cleanup_maximum_centroid_distance_fraction: 0.04
+  asymmetric_cleanup_minimum_largest_component_fraction: 0.80
+  # Two identity mismatches alone must not turn a fragmented shelf/background
+  # proposal into a replacement when R4 supplies no ADDED/REMOVED support.
+  weak_identity_maximum_target_components: 6
+  weak_identity_minimum_added_removed_fraction: 0.08
+  sam_rescue_minimum: 0.84
+  dino_rescue_minimum: 0.74
+  retained_identity_rescue_fraction: 0.62
+  confident_moved_track_iou_minimum: 0.70
+  confident_moved_color_minimum: 0.45
+  elsewhere_sam_minimum: 0.82
+  elsewhere_dino_minimum: 0.70
+  maximum_elsewhere_aligned_iou: 0.05
+  # Resolve overlaps by robust object depth. Exact depth ties preserve the
+  # existing final-R4 owner instead of relying on replacement paint order.
+  depth_ownership_tie_margin_m: 0.0
+  depth_ownership_minimum_pixels: 8
+  depth_ownership_minimum_fraction: 0.25
+  # A replacement is an object-level decision. Reject weak or incoherent
+  # target fragments before rasterization, then give an accepted SAM object
+  # one class instead of retaining R4 class stripes inside it.
+  plausible_object_minimum_compactness: 0.45
+  plausible_fragment_minimum_compactness: 0.33
+  plausible_fragment_minimum_aligned_iou: 0.45
+  plausible_object_minimum_slot_score: 0.33
+  # Expand a confirmed replacement only to an adjacent, same-depth target
+  # object that agrees independently in SAM, DINO, and color.
+  companion_maximum_gap_pixels: 6.0
+  companion_minimum_area_ratio: 0.50
+  companion_maximum_area_ratio: 2.0
+  companion_maximum_depth_difference_m: 0.08
+  companion_minimum_sam_cosine: 0.80
+  companion_minimum_dino_cosine: 0.80
+  companion_minimum_color_intersection: 0.50
+  # A rejected replacement may still expose an R4 object split into several
+  # colors. Unify only when changed coverage and one-class consensus are high.
+  consensus_minimum_changed_fraction: 0.50
+  consensus_minimum_dominant_fraction: 0.75
+  consensus_minimum_pixels: 32
+  # Dataset-wide target-object arbitration. This operates on every coherent
+  # target hypothesis, not a named failure case or only replacement matches.
+  # It never changes binary support.
+  arbitration_minimum_changed_fraction: 0.75
+  arbitration_minimum_pixels: 32
+  arbitration_minimum_compactness: 0.45
+  arbitration_minimum_bbox_fill: 0.35
+  arbitration_maximum_components: 6
+  arbitration_minimum_largest_component_fraction: 0.80
+  arbitration_minimum_dominant_fraction: 0.75
+  arbitration_minimum_added_removed_fraction: 0.08
+  arbitration_minimum_replaced_fraction_with_moved: 0.50
+  # Suppress an ADDED component only when the component itself lies mostly on
+  # the robust scene-floor plane. Incidental object/floor contact is retained.
+  floor_distance_tolerance_m: 0.05
+  floor_component_minimum_pixels: 32
+  floor_component_minimum_fraction: 0.70
+
+protocol:
+  ground_truth_after_inference_freeze: true
+  prediction_edits: false
+  tune_on_new15: false

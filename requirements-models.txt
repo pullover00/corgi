@@ -1,0 +1,16 @@
+# MASt3R is not a Python package. Run scripts/bootstrap_models.sh first; it
+# creates the pinned src/mast3r checkout consumed by the two includes below.
+-r src/mast3r/requirements.txt
+-r src/mast3r/dust3r/requirements.txt
+
+# SAM2 does provide Python packaging metadata and can be installed by pip.
+git+https://github.com/facebookresearch/sam2.git@2b90b9f5ceec907a1c18123530e92e794ad901a4
+
+# DINOv2 (checked out by bootstrap_models.sh into src/dinov2) is imported
+# directly from source by src/ocmask/adapters/dinov2.py and has no separate
+# packaging step here; install its own requirements file if you hit missing
+# imports:
+#   python -m pip install -r src/dinov2/requirements.txt
+
+# SAM3 and SAM3.1 are external dependencies not covered by this file -- see
+# README.md's "External SAM3/SAM3.1 dependency" section.

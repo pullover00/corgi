@@ -1,0 +1,62 @@
+schema_version: 1
+seed: 2026
+device: cuda
+mixed_precision: true
+image:
+  width: 640
+  height: 480
+geometry:
+  depth_epsilon: 0.001
+  z_buffer_epsilon: 0.0001
+  matching_confidence_threshold: 0.0
+  minimum_valid_depth: 0.000001
+  # No point splatting: each projected point updates only its nearest pixel.
+  # Conservative hole filling remains enabled as an independent renderer step.
+  splat_radius: 0
+  hole_fill_enabled: true
+  hole_fill_min_neighbors: 5
+  hole_fill_max_relative_depth: 0.02
+mast3r:
+  checkpoint: checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth
+  lr1: 0.07
+  niter1: 500
+  lr2: 0.014
+  niter2: 200
+  optim_level: coarse
+  matching_conf_thr: 0
+  shared_intrinsics: false
+  desc_conf: 3d
+  desc_conf_output_key: desc_conf
+  subsample: 8
+  scenegraph_type: complete
+  winsize: 1
+sam2:
+  checkpoint: checkpoints/sam2.1_hiera_large.pt
+  model_cfg: configs/sam2.1/sam2.1_hiera_l.yaml
+  mixed_precision: true
+  compile_image_encoder: true
+  vos_optimized: true
+  points_per_side: 64
+  pred_iou_thresh: 0.8
+  stability_score_thresh: 0.8
+  crop_n_layers: 1
+  crop_n_points_downscale_factor: 2
+  multimask_output: true
+  use_m2m: false
+tracking:
+  minimum_mask_area: 32
+  minimum_track_iou: 0.2
+  track_area_ratio_bounds: [0.5, 2.0]
+  minimum_track_score: 0.0
+  no3d_movement_iou: 0.5
+  visibility_alpha: 0.8
+  replacement_overlap_iou: 0.1
+ssim:
+  enabled: false
+  win_size: 7
+  gaussian_weights: true
+  sigma: 1.5
+  channel_axis: 2
+  threshold_stddevs: 1.0
+labels:
+  priority: [warped, moved, removed, added, unchanged]

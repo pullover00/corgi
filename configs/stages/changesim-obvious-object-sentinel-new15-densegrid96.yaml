@@ -1,0 +1,163 @@
+schema_version: 1
+experiment_id: obvious_object_sentinel_new15_densegrid96
+description: >
+  Point-grid density ablation of obvious_object_sentinel_new15 (2026-08-14):
+  identical protocol, rebuilt on top of the densegrid96 (points_per_side 96
+  instead of 64) SAM3-mask/SAM2-tracking conservative A3 baseline instead of
+  the original 64-grid one. Every field below is copied unchanged from
+  changesim-obvious-object-sentinel-new15.yaml except experiment_id, the five
+  parent/cache references below, and sam3.proposal_generation.points_per_side
+  (this experiment's own fresh real-I0 SAM3 pass must match the same density).
+
+conservative_parent: outputs/s08_feature_veto_gate/new15
+conservative_parent_variant: a3_guarded_direct_replacement
+gate_parent_evaluation: outputs/s03_sam2_tracking_v4/new15_grid96
+geometry_parent_evaluation: outputs/s01_reconstruction/new15
+proposal_cache_parent: outputs/s02_sam3_proposals/new15_grid96
+identity_feature_parent: outputs/s04_sam3_features/new15
+manifest: data/changesim/manifest-new15.jsonl
+selection: outputs/s08_feature_veto_gate/new15/selection.json
+recommended_output: outputs/s09_obvious_object_sentinel/new15
+
+variants:
+  - o0_conservative_a3
+  - o1_large_mask_only
+  - o2_identity_veto
+  - o3_verified_absence
+
+inputs:
+  inference_grid: [384, 512]
+  native_output_grid: [480, 640]
+  real_i0_rgb: reconstruction.npz:image0
+  real_i1_rgb: reconstruction.npz:image1
+  real_i0_cache:
+    scope: experiment_output
+    proposal_path: pairs/{pair_id}/real_i0_cache/proposals.npz
+    feature_path: pairs/{pair_id}/real_i0_cache/features.npz
+    metadata_path: pairs/{pair_id}/real_i0_cache/metadata.json
+    prohibit_render_0_to_1_as_input: true
+  real_i1_cache:
+    proposal_path: pairs/{pair_id}/proposal_cache/target.npz
+    proposal_root: outputs/s02_sam3_proposals/new15_grid96
+    feature_path: pairs/{pair_id}/sam3_features.npz
+    feature_array_key: target
+    feature_root: outputs/s04_sam3_features/new15
+
+sam3:
+  source: ${SAM3_SOURCE}
+  source_commit: 46957e47805eaa273f4aa7bbbd25a88bca9108ce
+  checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+  checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
+  mixed_precision: bfloat16
+  proposal_generation:
+    points_per_side: 96
+    points_per_batch: 32
+    pred_iou_threshold: 0.80
+    stability_threshold: 0.80
+    stability_offset: 1.0
+    crop_layers: 1
+    crop_downscale_factor: 2
+    box_nms_threshold: 0.70
+    crop_nms_threshold: 0.70
+    minimum_mask_area_pixels: 32
+    multimask_output: true
+    mask_to_mask_refinement: false
+  features:
+    level: image_embedding
+    pooling: soft_mask_mean
+    minimum_feature_cells: 4.0
+
+candidate_selection:
+  minimum_mask_area_fraction: 0.01
+  minimum_bbox_side_fraction: 0.02
+  minimum_predicted_iou: 0.80
+  minimum_stability_score: 0.80
+  frame_border_contact_policy: abstain
+  border_contact_definition: any_foreground_pixel_on_image_boundary
+  duplicate_suppression:
+    mask_iou: 0.80
+    containment_fraction: 0.80
+    deterministic_order:
+      - predicted_iou_descending
+      - stability_score_descending
+      - mask_area_descending
+      - proposal_id_ascending
+
+association:
+  descriptor_minimum_feature_cells: 4.0
+  area_ratio_bounds: [0.25, 4.0]
+  require_mutual_nearest: true
+  same_identity_threshold:
+    mode: frozen_pair_calibration
+    source: identity_feature_parent/pairs/{pair_id}/decisions.json
+    fallback_cosine: 0.65
+  different_identity_margin: 0.10
+  confidently_different_rule: cosine_less_than_or_equal_to_same_threshold_minus_margin
+  same_place:
+    minimum_projected_mask_iou: 0.30
+    maximum_normalized_centroid_distance: 0.10
+    require_both_tests: true
+    require_bidirectional_projection: true
+  matched_same_place_policy: unchanged_veto
+  matched_displaced_policy: moved_veto
+  same_place_different_identity_policy: replacement_veto
+  unmatched_source_policy: removed_candidate
+  unmatched_target_policy: added_candidate
+
+geometry_observability:
+  projection: deterministic_nearest_depth_z_buffer
+  splat_radius: 0
+  owner_aware_hole_filling: false
+  require_bidirectional_support: true
+  minimum_observable_fraction: 0.80
+  depth_epsilon: 0.001
+  minimum_valid_depth: 0.000001
+  occluded_or_out_of_frame_policy: abstain
+  invalid_or_inconsistent_depth_policy: abstain
+
+targeted_absence_verification:
+  enabled_for_variants: [o3_verified_absence]
+  required: true
+  backend: sam2
+  baseline_config_reference: gate_parent_evaluation/report.json:pairs[].parent_artifacts/config.json
+  checkpoint: checkpoints/sam2.1_hiera_large.pt
+  checkpoint_sha256: 2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318
+  model_cfg: configs/sam2.1/sam2.1_hiera_l.yaml
+  prompt: exact_binary_mask
+  source_candidate_direction: real_i0_to_real_i1
+  target_candidate_direction: real_i1_to_real_i0
+  minimum_track_score: 0.0
+  minimum_track_iou: 0.20
+  track_area_ratio_bounds: [0.5, 2.0]
+  qualifying_outcome: object_absent
+  object_present_policy: veto
+  ambiguous_or_rejected_policy: abstain
+
+composition:
+  parent_variant: a3_guarded_direct_replacement
+  writable_parent_labels: [unchanged]
+  preserve_all_parent_changed_pixels: true
+  removed_source_raster: source_mask_projected_to_target
+  added_target_raster: target_mask
+  replacement_collision_iou: 0.10
+  label_priority: [replaced, moved, removed, added, unchanged]
+  resize_to_native_once: nearest
+
+artifacts:
+  cache_real_i0_proposals: true
+  cache_real_i0_features: true
+  cache_targeted_tracks: true
+  save_candidate_ledger: true
+  save_variant_label_pngs: true
+  save_qualitative_pairs: 4
+
+protocol:
+  ground_truth_used_in_inference: false
+  predictions_frozen_before_ground_truth: true
+  hash_predictions_before_loading_ground_truth: true
+  tune_on_test: false
+  threshold_sweep: false
+  selection_role: retrospective_reused_validation_ablation
+  development_only: true
+  primary_variant: o3_verified_absence
+  report_all_variants: true

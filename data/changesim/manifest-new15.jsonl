@@ -1,0 +1,15 @@
+{"id": "Warehouse_8_Seq_1_763", "image0": "Warehouse_8/Seq_1/t0/rgb/763.png", "image1": "Warehouse_8/Seq_1/rgb/763.png", "target": "Warehouse_8/Seq_1/change_segmentation/763.png", "classes": [2, 3]}
+{"id": "Warehouse_9_Seq_1_994", "image0": "Warehouse_9/Seq_1/t0/rgb/994.png", "image1": "Warehouse_9/Seq_1/rgb/994.png", "target": "Warehouse_9/Seq_1/change_segmentation/994.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_7_Seq_1_320", "image0": "Warehouse_7/Seq_1/t0/rgb/320.png", "image1": "Warehouse_7/Seq_1/rgb/320.png", "target": "Warehouse_7/Seq_1/change_segmentation/320.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_7_Seq_0_427", "image0": "Warehouse_7/Seq_0/t0/rgb/427.png", "image1": "Warehouse_7/Seq_0/rgb/427.png", "target": "Warehouse_7/Seq_0/change_segmentation/427.png", "classes": [1, 2]}
+{"id": "Warehouse_8_Seq_0_435", "image0": "Warehouse_8/Seq_0/t0/rgb/435.png", "image1": "Warehouse_8/Seq_0/rgb/435.png", "target": "Warehouse_8/Seq_0/change_segmentation/435.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_9_Seq_0_1276", "image0": "Warehouse_9/Seq_0/t0/rgb/1276.png", "image1": "Warehouse_9/Seq_0/rgb/1276.png", "target": "Warehouse_9/Seq_0/change_segmentation/1276.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_9_Seq_1_1305", "image0": "Warehouse_9/Seq_1/t0/rgb/1305.png", "image1": "Warehouse_9/Seq_1/rgb/1305.png", "target": "Warehouse_9/Seq_1/change_segmentation/1305.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_6_Seq_1_52", "image0": "Warehouse_6/Seq_1/t0/rgb/52.png", "image1": "Warehouse_6/Seq_1/rgb/52.png", "target": "Warehouse_6/Seq_1/change_segmentation/52.png", "classes": [1, 2, 4]}
+{"id": "Warehouse_8_Seq_1_815", "image0": "Warehouse_8/Seq_1/t0/rgb/815.png", "image1": "Warehouse_8/Seq_1/rgb/815.png", "target": "Warehouse_8/Seq_1/change_segmentation/815.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_9_Seq_0_1530", "image0": "Warehouse_9/Seq_0/t0/rgb/1530.png", "image1": "Warehouse_9/Seq_0/rgb/1530.png", "target": "Warehouse_9/Seq_0/change_segmentation/1530.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_9_Seq_0_579", "image0": "Warehouse_9/Seq_0/t0/rgb/579.png", "image1": "Warehouse_9/Seq_0/rgb/579.png", "target": "Warehouse_9/Seq_0/change_segmentation/579.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_6_Seq_0_84", "image0": "Warehouse_6/Seq_0/t0/rgb/84.png", "image1": "Warehouse_6/Seq_0/rgb/84.png", "target": "Warehouse_6/Seq_0/change_segmentation/84.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_8_Seq_0_148", "image0": "Warehouse_8/Seq_0/t0/rgb/148.png", "image1": "Warehouse_8/Seq_0/rgb/148.png", "target": "Warehouse_8/Seq_0/change_segmentation/148.png", "classes": [1, 2, 3, 4]}
+{"id": "Warehouse_6_Seq_1_54", "image0": "Warehouse_6/Seq_1/t0/rgb/54.png", "image1": "Warehouse_6/Seq_1/rgb/54.png", "target": "Warehouse_6/Seq_1/change_segmentation/54.png", "classes": [1, 2, 4]}
+{"id": "Warehouse_6_Seq_0_134", "image0": "Warehouse_6/Seq_0/t0/rgb/134.png", "image1": "Warehouse_6/Seq_0/rgb/134.png", "target": "Warehouse_6/Seq_0/change_segmentation/134.png", "classes": [1, 2, 3, 4]}
