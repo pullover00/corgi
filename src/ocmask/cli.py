@@ -50,6 +50,21 @@ def build_parser() -> argparse.ArgumentParser:
             "saves lean reusable geometry; full saves all diagnostics"
         ),
     )
+    changesim.add_argument(
+        "--full-pipeline",
+        action="store_true",
+        help=(
+            "run the complete object-consistent-masks method (all 11 stages, "
+            "see ocmask.inference.run_pair) instead of the stage-1-only "
+            "reconstruction baseline --ablation selects between; requires "
+            "the SAM3/SAM3.1 environment described in README.md"
+        ),
+    )
+    changesim.add_argument(
+        "--pipeline-config",
+        default="configs/pipeline.yaml",
+        help="merged pipeline config for --full-pipeline (default: configs/pipeline.yaml)",
+    )
 
     visualize = subparsers.add_parser("visualize", help="recreate visual outputs for an artifact directory")
     visualize.add_argument("--artifacts", required=True)
@@ -90,6 +105,10 @@ def infer_command(args, config: dict) -> int:
 
 def evaluate_command(args, config: dict) -> int:
     """Evaluate a deterministic ChangeSim selection with resumable pair caches."""
+    if getattr(args, "full_pipeline", False):
+        from .config import load_config as _load_config
+
+        return evaluate_changesim_full_pipeline(args, _load_config(args.pipeline_config))
     output = Path(args.output)
     output.mkdir(parents=True, exist_ok=True)
     pairs = deterministic_subset(load_manifest(args.manifest), args.fraction, config["seed"])
@@ -200,6 +219,106 @@ def evaluate_command(args, config: dict) -> int:
     save_json(output / "report.json", report)
     print(json.dumps(report["metrics"], indent=2))
     return 0
+
+
+def evaluate_changesim_full_pipeline(args, pipeline_config: dict) -> int:
+    """Run the complete method (:func:`ocmask.inference.run_pair`) over a
+    ChangeSim manifest and report the paper's Table-3-style metrics.
+
+    Deliberately thin: no per-variant bookkeeping, no prediction-freeze
+    ledger, no cross-stage selection.json validation -- those existed to
+    keep a multi-script ablation study honest and have no purpose once
+    there is only one composition to run. Progress is still checkpointed
+    to a flat ``progress.jsonl`` (one line per completed pair) purely so a
+    long GPU run can resume after an interruption; delete it to start over.
+    """
+
+    from .inference import run_pair
+    from .model_paths import configure_mast3r_paths
+
+    configure_mast3r_paths()
+    output = Path(args.output)
+    output.mkdir(parents=True, exist_ok=True)
+    pairs = deterministic_subset(load_manifest(args.manifest), args.fraction, pipeline_config["reconstruction"]["seed"])
+    progress_path = output / "progress.jsonl"
+    completed: dict[str, dict] = {}
+    if progress_path.exists():
+        for line in progress_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                record = json.loads(line)
+                completed[record["id"]] = record
+
+    accumulator = MetricAccumulator()
+    failures: list[dict] = []
+    per_pair: list[dict] = []
+    started = time.perf_counter()
+    for index, pair in enumerate(pairs, 1):
+        previous = completed.get(pair.pair_id)
+        if previous and previous.get("status") == "success":
+            accumulator.add_confusion(previous["confusion"])
+            per_pair.append(previous)
+            print(f"[{index}/{len(pairs)}] {pair.pair_id} (cached)", flush=True)
+            continue
+        try:
+            target = normalize_target(pair.target)
+            result = run_pair(pair.image0, pair.image1, output / "pairs" / pair.pair_id, pipeline_config)
+            pair_accumulator = MetricAccumulator()
+            pair_accumulator.add(result.labels, target)
+            accumulator.add_confusion(pair_accumulator.confusion)
+            record = {
+                "id": pair.pair_id,
+                "status": "success",
+                "confusion": pair_accumulator.confusion.tolist(),
+                "timings": result.timings,
+            }
+            per_pair.append(record)
+        except Exception as exc:
+            record = {"id": pair.pair_id, "status": "failure", "type": type(exc).__name__, "message": str(exc)}
+            failures.append(record)
+            print(f"[{index}/{len(pairs)}] {pair.pair_id} FAILED: {exc}", flush=True)
+            if not args.continue_on_error:
+                with progress_path.open("a", encoding="utf-8") as stream:
+                    stream.write(json.dumps(record, separators=(",", ":")) + "\n")
+                raise
+        else:
+            print(f"[{index}/{len(pairs)}] {pair.pair_id}", flush=True)
+        with progress_path.open("a", encoding="utf-8") as stream:
+            stream.write(json.dumps(record, separators=(",", ":")) + "\n")
+
+    metrics = accumulator.compute()
+    table3_iou_percent = {
+        "binary": {
+            "changed": metrics["binary"]["changed"]["iou"] * 100,
+            "unchanged": metrics["binary"]["unchanged"]["iou"] * 100,
+            "miou": metrics["binary_miou"] * 100,
+        },
+        "multiclass": {
+            **{
+                name: metrics["multiclass"][name]["iou"] * 100
+                for name in ("added", "removed", "moved", "replaced", "unchanged")
+            },
+            "miou": metrics["multiclass_miou"] * 100,
+        },
+    }
+    report = {
+        "protocol": {
+            "dataset": "ChangeSim",
+            "method": "object_consistent_masks_full_pipeline",
+            "manifest": str(Path(args.manifest).resolve()),
+            "fraction": args.fraction,
+            "seed": pipeline_config["reconstruction"]["seed"],
+            "pairs_selected": len(pairs),
+            "pairs_succeeded": len(per_pair),
+        },
+        "metrics": metrics,
+        "table3_iou_percent": table3_iou_percent,
+        "elapsed_seconds": time.perf_counter() - started,
+        "failures": failures,
+        "pairs": per_pair,
+    }
+    save_json(output / "report.json", report)
+    print(json.dumps({"table3_iou_percent": table3_iou_percent, "pairs_succeeded": len(per_pair), "failures": len(failures)}, indent=2))
+    return 0 if not failures else 1
 
 
 def visualize_command(args) -> int:
