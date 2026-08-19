@@ -1,242 +1,261 @@
 # Rewrite plan: from benchmark harness to a single inference pipeline
 
-Status and exact next steps for turning this repo from "11 separate
-ChangeSim-benchmark experiment scripts" into "one `ocmask infer --before
---after --output` command that runs the winning method on any image pair."
-Written so this can be picked up in a fresh session without re-deriving the
-research already done here.
+Status of turning this repo from "11 separate ChangeSim-benchmark experiment
+scripts" into one `run_pair(image0, image1, output_dir, config)` call (and
+the `demo.py`/`ocmask evaluate changesim --full-pipeline` entrypoints built
+on it) that runs the winning method on any image pair. Written so this can
+be picked up in a fresh session without re-deriving the research already
+done here.
 
-## Why this exists
+## Status: the pipeline is wired end to end
 
-The repo originally reproduced the full research/benchmarking apparatus:
-per-stage manifest/split bookkeeping, `selection.json`/`report.json`
-cross-validation between stages, SHA-256 prediction-freeze-before-ground-
-truth ledgers, and *exposed* ablation variants (R0-R4, A0-A4, O0-O3,
-replacement_only/moved_verification/combined_guarded_hybrid) at every
-decision point. None of that belongs in a repo meant to run the winning
-method on new data and be linked from a paper. This plan replaces it with
-one pipeline that always computes only the winning composition.
+`src/ocmask/inference.py`'s `run_pair` now calls all 11 stages in one
+process and returns the final prediction. `demo.py` (single pair) and
+`ocmask evaluate changesim --full-pipeline` (ChangeSim manifests) both call
+it. See "What's validated" below for exactly how much of this has been
+confirmed by real execution versus careful reading only.
+
+## Naming note
+
+Earlier drafts of this pipeline (and the original research code it was
+extracted from) used internal ablation-tracking shorthand throughout --
+`R4`/`r4_no_geometry_ablation` for stage 10's composition, `A0`-`A4` for
+stage 8's ablation ladder, `O0`-`O3` for stage 9's, `replacement_only`/
+`moved_verification`/`combined_guarded_hybrid` for stage 7's three variants,
+`fixed10`/`densegrid96` for specific evaluation-split/grid-density
+configurations. None of that is meaningful to a reader who never saw the
+ablation study, so it has been renamed throughout the public-facing
+surface (function names, config keys, CLI, docs) to plain descriptive
+terms -- e.g. `resolve_r4` -> `resolve_real_image_associations`,
+`ResolverR4Settings` -> `AssociationResolverSettings`. A couple of these
+internal literal strings still exist purely as *arguments* one already-
+existing function (`sam3_guarded_hybrid.compose_guarded_variant`) accepts,
+never surfaced in any public name; see that module for why. Where a
+docstring cites the original ablation label for provenance/traceability
+back to the research (so a reader who *does* have the original scripts can
+find the exact corresponding code), that is a one-line footnote, not the
+primary name anything is known by.
 
 ## Environment note (read before running anything)
 
-Real GPU + real model weights **are** available on this machine, split
-across conda environments:
+Real GPU + real model weights are available on this machine, split across
+conda environments -- but by the end of this session, both paths below
+actually work, which was not true at the start:
 
-- `conda activate goldilocs` -- torch 2.5.1+cuda, MASt3R, SAM2, all working.
-  Checkpoints at `/home/tessa/goldilocs/checkpoints/`. This is what was used
-  to validate stage 1 for real (see below).
-- `conda activate sam3` -- has SAM3 source but is currently broken:
-  `import sam3` fails on a missing `pycocotools` dependency, and this
-  sandbox has no network access to `pip install` it. Whoever continues this
-  needs to fix that env (or use a different one) before SAM3-dependent
-  stages (2, 3's proposal reuse, 8, 9, 10) can be executed.
-- DINOv2/MASt3R source: symlink `src/mast3r` -> `/home/tessa/goldilocs/src/mast3r`
-  and `src/dinov2` -> `/home/tessa/goldilocs/src/dinov2` (both are gitignored;
-  recreate the symlinks locally, don't commit them).
-- Checkpoints: symlink `checkpoints/*.pth`/`*.pt` -> the goldilocs ones the
-  same way, or run `scripts/bootstrap_models.sh` + download fresh.
-- ChangeSim data for a real test pair: `/home/tessa/goldilocs/data/changesim/`.
+- `conda activate goldilocs` -- torch 2.5.1+cuda, MASt3R, SAM2, DINOv2, **and
+  a working `sam3` import** (an editable install pointing at `/home/tessa/sam3`)
+  all in one environment. This is what `run_pair` was smoke-tested with --
+  it is the only environment that has every model this pipeline needs at
+  once, so there was no need to span two environments in one run.
+- `conda activate sam3` -- previously broken (`import sam3` failed on a
+  missing `pycocotools`, and the sandbox appeared to have no network). Both
+  turned out to be transient: network access was available this session,
+  and `pip install pycocotools psutil scipy` in the `sam3` env fixed the
+  import. Not needed given `goldilocs` already works, but noted in case a
+  future session needs a second, isolated SAM3-only process.
+- MASt3R/DINOv2/checkpoint symlinks: `src/mast3r`, `src/dinov2`, and
+  `checkpoints/*.pth`/`*.pt` all point at the `goldilocs` repo's copies
+  (gitignored, recreated this session, do not commit them). ChangeSim
+  warehouse directories under `data/changesim/` are symlinked the same way.
+- SAM3 environment variables used this session:
+  `SAM3_SOURCE=/home/tessa/sam3`,
+  `SAM3_IMAGE_CHECKPOINT=/home/tessa/.cache/huggingface/hub/models--facebook--sam3/snapshots/<hash>/sam3.pt`
+  (sha256 verified to match `configs/pipeline.yaml`'s pinned
+  `sam3_image_checkpoint_sha256` exactly). `SAM31_CHECKPOINT` was located
+  (`/home/tessa/gaussian-grouping/sam3.1/sam3.1_multiplex.pt`, sha256 also
+  verified against the config) but is **not used by `run_pair`** -- see
+  "SAM3.1 is dead for the winning path" below.
 
-**Stage 1 has been validated for real** (`ocmask infer`, unmodified except
-for the config default fix already committed): ran MASt3R + SAM2 end to end
-on `Warehouse_7/Seq_1/259` with real GPU compute, produced a sane
-`labels.png` (2.5% changed pixels, correct value range). This is strong
-evidence the already-ported base-pipeline code (`pipeline.py`, `adapters/`,
-`cli.py`, `config.py`) is correct, not just import-clean.
+## What's validated, and how
 
-## What's done
+Real-execution-validated this session, on a real ChangeSim pair
+(`Warehouse_8/Seq_1/763`, using the `SAM3_SOURCE`/`SAM3_IMAGE_CHECKPOINT`
+above), running `run_pair` end to end in the `goldilocs` conda environment:
+stage 1 (already validated in an earlier session; re-confirmed as part of
+every `run_pair` attempt this session), and stages 2-11 in full (SAM3
+proposals, SAM2 re-tracking, SAM3 dense features + calibration, DINOv2
+dense features, moved-candidate tracking, evidence fusion, the
+feature-veto-gated direct-replacement pass, the real-image sentinel, the
+association resolver, and the object-consistent replacement refinement
+itself) all executed for real with no exceptions, end to end, producing a
+`labels.png` whose changed region (a tipped-over barrel disappearing, a
+new upright barrel appearing nearby) matches what actually differs between
+the two real photos by eye. This is the strongest evidence available that
+the full `run_pair` orchestration -- not just each stage in isolation -- is
+wired correctly.
 
-1. `configs/pipeline.yaml` -- all 11 stages' winning-path settings merged
-   into one file, namespaced per stage, with every manifest/split/variant
-   bookkeeping key dropped. Values copied verbatim from the validated
-   `*-fixed10-densegrid96.yaml` / A3 / R4 configs.
-2. `stages/real_image_association_resolver.py` gained `resolve_r4()` +
-   `ResolverR4Settings`: a complete, faithful single-pair extraction of
-   stage 10 (see "Stage 10" below for exactly what it needs as input).
-3. `stages/sam3_pairwise.py`'s `run_cached_pair()` (stage 3) now also
-   returns `source_changed_proposal_ids`/`target_changed_proposal_ids` in
-   its diagnostics dict, needed by stage 4 (see below) without re-running
-   SAM2 tracking a second time.
+Two real bugs were caught and fixed by this real execution (i.e. neither
+would have been caught by reading alone):
 
-## What's left, stage by stage
+1. `sam3_guarded_hybrid.moved_verification_evidence` expects its
+   `forward_tracks`/`reverse_tracks` dicts to use *membership* to mean
+   "accepted" (an entry present in the dict = accepted; a rejected
+   candidate is simply absent, never present with value `None`) --
+   `resolve_object_consistent_labels`'s `consolidate_hypotheses` call needs
+   the opposite shape (a full-length list, `None` for every rejection).
+   `inference.py`'s `_accepted_tracks_by_proposal_id` now builds the first
+   shape; `forward_track_masks` is built separately, by list comprehension
+   straight off the raw tracking attempts, for the second. Symptom before
+   the fix: `ValueError: forward track shape differs from proposal grid`
+   (a `None` was reaching `np.asarray(None, dtype=bool)`, producing a 0-d
+   array).
+2. `real_image_association_resolver.py` called `associate_identities`
+   without importing it -- a leftover from the earlier session that first
+   extracted `resolve_real_image_associations` (then `resolve_r4`) by
+   reading alone, without executing it. Fixed by adding the import. This is
+   the concrete reason "written carefully by reading, cross-checked against
+   the config" is not a substitute for actually running the code once a
+   working environment exists.
 
-For each stage: what it needs, what already exists as a clean reusable
-function, and what still needs to be written.
+Everything not mentioned above (which is nearly everything -- these were the
+only two defects real execution found across all 11 stages) matched its
+careful-reading-based extraction on the first successful run.
 
-### Stage 1 -- reconstruction + SAM2 baseline. DONE, validated for real.
+## Corrections to this plan found by reading (not in the original draft)
 
-Call exactly as today: `ocmask.pipeline.PairwisePipeline(config["reconstruction"], Mast3rAdapter(...), Sam2Adapter(...)).run(image0_path, image1_path, output_dir)`.
-Gives `reconstruction.npz`, `render_0_to_1.png` (=`inputs.source_render`),
-the real target image, and `config.json`. No extraction needed.
+An earlier draft of this plan (before this session) made two claims that
+turned out to be wrong once the actual downstream data dependencies were
+read carefully. Both are corrected in the code as it stands now; recorded
+here so nobody re-introduces the bug by trusting the old claim:
 
-### Stage 2 -- SAM3 proposals + SAM3.1 tracking. Simple, not yet extracted.
+1. **Stage 7's real "parent" baseline is not stage 3's raw raster.** The
+   original research config (`configs/experiments/changesim-sam3-feature-veto-gate-*.yaml`'s
+   `a0_parent_variant`, defaulted in
+   `scripts/run_sam3_feature_veto_gate_experiment.py` to
+   `combined_guarded_hybrid` and never overridden in the winning
+   `fixed10-densegrid96` config) shows stage 8's real base raster is stage
+   7's *combined* composition -- both the same-place replacement evidence
+   and the moved-object verification evidence applied together -- not the
+   replacement-only evidence an earlier draft of this plan assumed. That
+   means stage 6's raw tracks are load-bearing for stage 7 too (moved
+   verification needs forward *and* reverse tracks), not just for stage 11
+   as originally thought. `sam3_guarded_hybrid.refine_with_motion_and_replacement_evidence`
+   computes the combined composition; `run_pair` computes both tracking
+   directions in stage 6 accordingly.
+2. **Stage 4's `classify_identity_location` is not dead code.** An earlier
+   draft of this plan reasoned it only fed stage 4's own standalone label
+   raster (true) and concluded nothing downstream needed it. But stage 7's
+   `decisions.json` input (`match_records` in the code here) *is*
+   `classify_identity_location`'s `match_records` output -- confirmed by
+   reading `scripts/run_sam3_identity_location_experiment.py`'s own
+   `decisions.json` writer next to `scripts/run_sam3_guarded_hybrid_experiment.py`'s
+   reader of the same file. `sam3_identity_location.compute_appearance_features`
+   now calls it and returns `match_records` alongside the dense feature
+   maps and calibration; only `compose_identity_labels` (the standalone
+   raster itself) remains genuinely unused downstream.
 
-Needs a `Sam3AutomaticMaskGenerator(checkpoint, points_per_side=96, ...)`
-(`stages/sam3_proposals.py`) run over `source_render` and `target_image` via
-`.generate(image) -> list[Sam3Proposal]`, then `proposals_to_objects(...)`
-(`stages/sam3_pairwise.py`) to get `ObjectMask` lists. SAM3.1 tracking uses
-`Sam31MaskTracker` (`stages/sam31_backend.py`) the same way `Sam2MaskTracker`
-is used elsewhere. This is small enough to write directly in `inference.py`
-rather than extracting a wrapper -- no script-side entanglement to unwind.
+## SAM3.1 is dead for the winning path
 
-### Stage 3 -- SAM2 re-tracking of stage 2's proposals. Mostly done.
+Every downstream config's `proposal_cache_parent` points at stage 2's own
+output directory, but every downstream reader opens only that directory's
+`proposal_cache/{source,target}.npz` (the raw SAM3 automatic-mask-generator
+cache) -- never a tracking-result file from stage 2's own SAM3.1 pass.
+Nothing in the winning composition consumes SAM3.1's tracking output; every
+later stage that needs to move a mask between the two frames re-tracks
+stage 2's *proposals* with SAM2 instead (stage 3's baseline, stage 6/7/8/10's
+own passes). `run_pair` therefore never loads `Sam31MaskTracker` or the
+`SAM31_CHECKPOINT` model at all -- a real (if modest -- SAM3.1's checkpoint
+is ~3.5GB) engineering simplification versus what an earlier draft of this
+plan assumed stage 2 needed to do.
 
-`run_cached_pair()` in `stages/sam3_pairwise.py` (now returning the changed-
-proposal-ID lists too) already does this per-pair, cleanly. Call it directly:
-`run_cached_pair(artifact_dir, output_dir, tracker, source_proposals, target_proposals)`.
-This *is* the "parent" raster (labels.png) that stage 7/8 build on.
+## Stage-by-stage correspondence
 
-### Stage 4 -- SAM3 dense features + per-pair identity-threshold calibration.
+For each stage: the function(s) that implement it and the original research
+script it was extracted from. All are wired into `run_pair`.
 
-**Not yet extracted; this is the next thing to do.** Needs, per
-`scripts/run_sam3_identity_location_experiment.py` lines ~433-539:
+| # | Function(s) | Extracted from |
+|---|---|---|
+| 1 | `pipeline.PairwisePipeline.run` (pre-existing) | n/a -- already the production pipeline |
+| 2 | inline in `run_pair` (`Sam3AutomaticMaskGenerator.generate` + `sam3_pairwise.proposals_to_objects`) | `scripts/run_sam3_pairwise_experiment.py` |
+| 3 | `sam3_pairwise.run_cached_pair` (pre-existing) | `scripts/run_sam3_pairwise_experiment.py` |
+| 4 | `sam3_identity_location.compute_appearance_features` | `scripts/run_sam3_identity_location_experiment.py` |
+| 5 | inline in `run_pair` (`adapters.dinov2.Dinov2FeatureExtractor.feature_map`) | `scripts/run_dinov2_identity_location_experiment.py` |
+| 6 | inline in `run_pair` (`Sam2MaskTracker.track`, forward and backward) | `scripts/run_sam3_moved_association_experiment.py`'s cache-building step only (its own association-variant logic is not used, see below) |
+| 7 | `sam3_guarded_hybrid.refine_with_motion_and_replacement_evidence` | `scripts/run_sam3_guarded_hybrid_experiment.py` |
+| 8 | `sam3_feature_veto.apply_feature_veto_direct_replacement` | `scripts/run_sam3_feature_veto_gate_experiment.py` |
+| 9 | inline in `run_pair` (`Sam3AutomaticMaskGenerator.generate_with_feature_map`) | `scripts/run_obvious_object_sentinel_experiment.py` |
+| 10 | `real_image_association_resolver.resolve_real_image_associations` | `scripts/run_real_image_association_resolver.py` |
+| 11 | `object_consistent_replacement.resolve_object_consistent_labels` | `scripts/run_slot_inconsistency_replacement_experiment.py`'s `_inference_pair` |
 
-1. `Sam3FeatureExtractor(source_path, checkpoint)` (`stages/sam3_identity_location.py`)
-   `.feature_map(source_render)` and `.feature_map(target_image)` -> two
-   dense arrays.
-2. `mask_descriptors(feature_map, objects, minimum_feature_cells=...)` on
-   each side -> `FeatureDescriptorBatch`.
-3. `spatial_iou = pairwise_mask_iou(source_objects, target_objects)`.
-4. `source_static`/`target_static` boolean arrays: `True` where a proposal's
-   `automatic_proposal_id` is **not** in stage 3's
-   `source_changed_proposal_ids`/`target_changed_proposal_ids` (this is what
-   the new diagnostics field from this session's commit is for -- build the
-   boolean array by membership test, don't recompute tracking).
-5. `calibrate_identity_threshold(similarity, spatial_iou, source_static, target_static, source_descriptors.valid, target_descriptors.valid, fallback_threshold=..., control_iou=..., negative_iou=..., maximum_negative_acceptance=..., minimum_positive_acceptance=..., minimum_positive_count=..., minimum_negative_count=...)`
-   (`stages/sam3_identity_location.py`) -> `SimilarityCalibration`, whose
-   `.threshold` is exactly the `identity_threshold` stage 10's `resolve_r4()`
-   needs.
+Confirmed-dead code, not ported (still present in the original scripts for
+provenance, not called by anything in `src/ocmask`):
 
-`classify_identity_location`/`compose_identity_labels` (also in that module)
-are **not** needed downstream -- they build stage 4's own standalone label
-raster, which nothing else in the winning path consumes. Skip them; this
-stage's only outputs that matter downstream are `(source_map, target_map,
-calibration.threshold)`.
+- Stage 2's SAM3.1 tracking pass (see above).
+- Stage 6's own association-variant composition
+  (`sam3_moved_association.associate_moved_objects` and siblings) -- only
+  the raw forward/backward SAM2 propagation it would have cached is used.
+- Stage 7's `moved_verification`-only and `replacement_only`-only variants,
+  and stage 8's `a0`/`a1`/`a2`/`a4`-equivalent compositions (hard veto
+  without direct replacement, and the moved-reasoning variant) -- only the
+  one composition each stage's winning-path successor actually consumes is
+  computed.
+- Stage 9's `o0`-`o2`-equivalent sentinel compositions and its own
+  `targeted_absence_verification` config block -- stage 10 does its own
+  live SAM2 absence check via `resolve_real_image_associations`'s `tracker`
+  argument, not a precomputed sentinel raster.
+- Stage 10's geometry-gated added/removed and parent-replay variants (what
+  the original research code labeled `r0`-`r3`) -- only the
+  geometry-support-free composition (`r4`) is computed.
 
-Write this as a new function in `stages/sam3_identity_location.py`, e.g.
-`compute_features_and_calibration(...) -> tuple[np.ndarray, np.ndarray, SimilarityCalibration]`.
+## Known remaining gap
 
-### Stage 5 -- DINOv2 dense features. Simple, not yet extracted.
+None at the "does it run" level: all 11 stages, including stage 11
+(`object_consistent_replacement.resolve_object_consistent_labels`), have
+completed a real `run_pair` execution without exception (see "What's
+validated" above). What has *not* been done:
 
-Same shape as stage 4's feature extraction but via `adapters/dinov2.py`'s
-`Dinov2FeatureExtractor`/`DinoV2AppearanceAdapter` instead of SAM3. Per the
-README's "Two SAM3 grid densities" note, the original research config feeds
-this from the 64-point-grid proposal lineage rather than the 96 one used
-everywhere else; confirm whether that distinction still matters once
-everything runs in one process (it may not -- DINOv2 features are a
-function of raw pixels, not proposal masks, per that same README note) and
-document the decision either way. Nothing in the winning path is known to
-consume stage 5's output except stage 11 (`dino_feature_cache_root`), so
-verify against `stages/slot_inconsistency.py`'s actual usage before writing
-this.
+- Only one real pair has been run this way (`Warehouse_8/Seq_1/763`,
+  ChangeSim classes `[2, 3]` -- removed and moved/rotated). A single pair
+  cannot rule out an edge case (an empty changed-candidate list, a pair with
+  no valid identity-calibration controls, a pair where MASt3R reconstruction
+  is poor) that a wider ChangeSim run would exercise. Run
+  `ocmask evaluate changesim --full-pipeline` over a larger manifest
+  (`data/changesim/manifest-new15.jsonl` is a reasonable first target) as
+  the next real-execution milestone, and compare the resulting
+  `table3_iou_percent` against this README's `Result` table as a sanity
+  check (not an exact match -- different pairs, no frozen-seed guarantee
+  across the port).
+- Runtime is real but not fast: this one pair took ~230s end to end on an
+  RTX 4090 Laptop GPU, dominated by stage 1 (reconstruction, ~90s), stage 2
+  (dense SAM3 proposal generation over both images, ~65s), and stage 9 (a
+  second SAM3 proposal pass, ~40s) -- each `Sam2Adapter`/`Sam2MaskTracker`
+  construction also re-triggers `torch.compile` once (`compile_image_encoder:
+  true` in `configs/pipeline.yaml`), which is one-time-per-process, not
+  per-pair, but still adds latency to a single-pair `demo.py` run. Nothing
+  about this is incorrect, just worth knowing before assuming a ChangeSim
+  evaluation over thousands of pairs is a quick check.
 
-### Stage 6 -- moved-association raw tracking cache.
+## What's left
 
-Only the raw forward/backward SAM2 propagation is needed (for proposals
-stage 3 marked changed), not `stages/sam3_moved_association.py`'s
-`associate_moved_objects`/variant composition -- confirmed unused by the
-winning path in an earlier session. Small enough to write directly in
-`inference.py`: call `Sam2MaskTracker.track()` forward and backward on the
-changed-candidate masks (same ones identified via stage 3's
-`*_changed_proposal_ids`) and pass the raw mask lists straight to stage 11's
-`match_object_slots`/`consolidate_hypotheses` -- no need to replicate the
-original `tracks.npz` disk-cache format at all, since everything now runs in
-one process.
-
-### Stage 7 -- guarded hybrid (replacement_only variant).
-
-Not yet extracted. `stages/sam3_guarded_hybrid.py` has `compose_guarded_variant`
-already as a clean function -- read `scripts/run_sam3_guarded_hybrid_experiment.py`
-to see exactly which evidence sets get passed in for the `replacement_only`
-variant specifically (the script computes 3 variants; only one is needed).
-
-### Stage 8 -- feature-veto gate (A3 composition).
-
-Not yet extracted. Needs, per `scripts/run_sam3_feature_veto_gate_experiment.py`
-around lines 586-1435:
-
-1. `pair_and_classify_gate_features(...)` (`stages/sam3_feature_veto.py`) ->
-   a `decision` with `.guarded_source_ids`/`.guarded_target_ids` (and
-   `.hard_*_ids`, not needed for A3).
-2. A **second, separate** SAM2 tracking pass (own `Sam2MaskTracker` call) on
-   exactly the proposals `decision` flags, forward and backward -- this is
-   real computation, not cache bookkeeping; read `_tracking_cache`-equivalent
-   logic around line 1340 to see which proposal IDs get tracked.
-3. `ordinary_promoted_objects(...)` + `merge_objects_with_parent(...)` (both
-   in `stages/sam3_feature_veto.py`) using `decision.guarded_source_ids`/
-   `decision.guarded_target_ids` and stage 3's baseline raster ->
-   `guarded_labels`.
-4. `direct_replacement_mask(decision.pairs, ...)` + `apply_direct_semantics(guarded_labels, replacement, [])`
-   (both in `stages/sam3_feature_veto.py`) -> the A3 raster. This is what
-   stage 10's `resolve_r4()` calls `parent_labels`.
-
-A1/A2/A4 and `hard_labels`/`moved_masks`/`full_labels` are dead for the
-winning path -- don't compute them.
-
-### Stage 9 -- obvious-object sentinel (real-I0 generation only).
-
-Mostly trivial once you see through the disk-caching wrapper. What's
-actually needed:
-
-```python
-generator = Sam3AutomaticMaskGenerator(checkpoint, points_per_side=96, ...)
-proposals, feature = generator.generate_with_feature_map(image0)  # REAL, un-warped source image
-source_objects = proposals_to_objects(proposals)
-source_map = feature
-generator.release()
-```
-
-That's it -- `paths["parent_labels"]` in the original script is *not* a
-computed sentinel output, it's a direct file reference to stage 8's A3
-raster (confirmed by reading `scripts/run_obvious_object_sentinel_experiment.py`
-lines 329-360: `parent_labels = roots["conservative"] / parent_record[...]`).
-None of `compose_sentinel`/`o1`/`o2`/`o3_verified_absence` in that script is
-needed for the winning path -- stage 10 uses `compose_sentinel` itself
-directly (already wired into `resolve_r4()`), not a precomputed sentinel
-raster.
-
-### Stage 10 -- R4 resolver. DONE.
-
-`resolve_r4()` in `stages/real_image_association_resolver.py`. Call with:
-`reconstruction` (stage 1), `source_objects`/`source_map` (stage 9, real
-I0), `target_objects`/`target_map` (stage 2's proposals / stage 4's target
-features -- both real I1), `parent_labels` (stage 8's A3 raster),
-`identity_threshold` (stage 4's `calibration.threshold`), a live tracker,
-and `image0`/`image1` (real, un-warped RGB arrays).
-
-### Stage 11 -- object-consistent replacement. DONE, needs wiring only.
-
-Everything in `stages/slot_inconsistency.py` and `stages/branch_b2.py` is
-already clean and unit-tested. Feed it: stage 10's output as `baseline`,
-stage 2's proposals consolidated via `stages/branch_b2.consolidate_hypotheses`
-(sources from stage 6's forward tracks, targets from stage 2's target
-proposals), stage 4's `source_map`/`target_map` and stage 5's DINOv2 maps,
-and stage 1's reconstruction for `ground_contact`/floor suppression. Read
-`scripts/run_slot_inconsistency_replacement_experiment.py`'s `_inference_pair`
-(already ported, unmodified) for the exact call sequence -- it's already
-single-pair-shaped, just currently driven by a multi-pair loop reading from
-disk instead of the in-memory objects the new pipeline will have on hand.
-
-## After all 11 stages are wired
-
-1. Write `src/ocmask/inference.py`: one `run_pair(image0, image1, output_dir,
-   config) -> np.ndarray` calling the above in sequence, in one process.
-2. Add `ocmask infer` (or extend the existing one) to call it, plus a batch/
-   directory mode.
-3. Add a thin, optional `ocmask evaluate` for ChangeSim-format scoring: run
-   `run_pair` over a manifest, compare to provided labels, print metrics.
-   No variant bookkeeping, no prediction-freeze ledger.
-4. Delete: all 10 `scripts/run_*_experiment.py` files (superseded by
-   `inference.py`), `configs/stages/*.yaml` (superseded by
-   `configs/pipeline.yaml`), the `outputs/s01..s11` naming convention and
-   `scripts/run_pipeline.py` orchestrator, `data/changesim/manifest-*.jsonl`
-   unless the thin eval mode still wants them, `tests/test_slot_inconsistency.py`'s
-   import of `scripts.run_slot_inconsistency_replacement_experiment` (rewire
-   to import from `inference.py`/`stages/` instead once that script is gone).
-5. Rewrite README.md: usage becomes `ocmask infer --before A.png --after
-   B.png --output out/`, no more manifest/split language as the primary
-   interface (eval mode can still mention it).
-6. Verify: reuse this session's real stage-1 validation approach (the
-   `goldilocs` conda env has working MASt3R/SAM2/DINOv2) to smoke-test as
-   much as possible; SAM3-dependent stages need the `sam3` conda env fixed
-   first (see "Environment note").
+1. `scripts/run_*_experiment.py` (10 files), `configs/stages/*.yaml`, and
+   `scripts/run_pipeline.py` are now fully superseded by `run_pair` +
+   `configs/pipeline.yaml` and can be deleted -- not done yet this session
+   (kept as a faithful, executable reference for the stage-by-stage
+   correspondence table above; deleting them is straightforward once
+   nobody needs to cross-check against them anymore).
+2. `tests/test_slot_inconsistency.py` still imports
+   `scripts.run_slot_inconsistency_replacement_experiment` for a few tests
+   of that script's own disk-artifact conventions (including literal
+   `r4_no_geometry_ablation` path-selection strings, which are that
+   script's actual on-disk format and were deliberately left alone rather
+   than renamed out from under it). Once that script is deleted per (1),
+   those tests need to either move to test
+   `object_consistent_replacement.py` directly or be retired if they were
+   only ever testing the script's own bookkeeping.
+3. `configs/stages/*.yaml` and the original per-stage `scripts/*.py` still
+   contain the internal ablation-code naming described above (`r0`-`r4`,
+   `a0`-`a4`, `o0`-`o3`, `densegrid96`, `fixed10`, etc. -- extensively, as
+   they are the untouched original research artifacts). They were
+   deliberately not renamed this session: they are not part of the public
+   API surface (`run_pair`/`demo.py`/`ocmask evaluate changesim
+   --full-pipeline` never read them), and are already slated for deletion
+   per (1) rather than being a document worth cleaning up in place. If (1)
+   is deferred indefinitely for some reason, revisit this.
+4. `stages/obvious_change_sentinel.py`'s `evaluate_endpoint_candidates`/
+   `EndpointSentinelResult` (local variables/fields named `o1`/`o2`/`o3`)
+   are dead code for the winning path -- confirmed by grep, nothing in
+   `src/ocmask` calls either name -- and were left as-is for the same
+   reason as (3): not on the public surface, not worth the risk of editing
+   an otherwise-untouched function with no test coverage of its own for a
+   purely cosmetic change. `compose_sentinel` (the function this pipeline
+   actually calls) does not use that naming at all.
