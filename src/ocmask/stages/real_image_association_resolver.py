@@ -10,18 +10,20 @@ as a replacement.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Sequence
+from typing import Any, Sequence
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.ndimage import binary_dilation
 
-from ..types import Label, ObjectMask
-from .obvious_change_sentinel import mask_iou
-from .sam3_identity_location import (
-    FeatureDescriptorBatch,
-    associate_identities,
+from ..types import Label, ObjectMask, Reconstruction
+from .obvious_change_sentinel import (
+    compose_sentinel,
+    mask_iou,
+    project_masks_with_zbuffer,
+    select_large_candidates,
 )
+from .sam3_identity_location import FeatureDescriptorBatch, cosine_similarity_matrix, mask_descriptors
 
 
 @dataclass(frozen=True)
@@ -337,3 +339,205 @@ def paint_joint_replacements(
         "joint_replacement_pairs": len(pairs),
         "joint_replacement_pixels": int(changed.sum()),
     }
+
+
+def _copy_endpoint(obj: ObjectMask, mask: np.ndarray, label: Label) -> ObjectMask:
+    metadata = dict(obj.metadata)
+    metadata["sentinel_proposal_id"] = int(metadata["automatic_proposal_id"])
+    metadata["corrected_resolver"] = True
+    return ObjectMask(
+        mask=np.asarray(mask, bool).copy(),
+        score=float(obj.score),
+        label=label,
+        source=f"real_image_association_{label.name.lower()}",
+        metadata=metadata,
+    )
+
+
+def _attempt_presence(attempt: Any) -> bool | None:
+    """Convert one targeted SAM2 attempt into conservative tri-state evidence."""
+
+    reasons = tuple(str(value) for value in attempt.rejection_reasons)
+    if bool(attempt.accepted):
+        if "object_absent" in reasons:
+            raise RuntimeError("targeted track is accepted and object_absent")
+        return True
+    # Other rejection reasons never prove absence, but SAM2's explicit
+    # object-presence logit does even if the resulting mask is also tiny.
+    return False if "object_absent" in reasons else None
+
+
+@dataclass(frozen=True)
+class ResolverR4Settings:
+    """The r4_no_geometry_ablation composition's thresholds.
+
+    r0-r3 (parent replay, hard-collision, geometry-gated added/removed,
+    geometry-gated replacement) are not represented here: they fed sibling
+    ablation outputs this pipeline never uses. r4 skips geometry-support
+    gating of endpoint absence entirely (hence "no_geometry_ablation") and
+    relies only on the targeted SAM2 absence check plus same-place pairing.
+    """
+
+    minimum_valid_depth: float
+    minimum_bidirectional_margin: float
+    area_ratio_bounds: tuple[float, float]
+    require_mutual_nearest: bool
+    minimum_directional_iou: float
+    different_identity_margin: float
+    minimum_feature_cells: float
+    minimum_mask_area_fraction: float
+    minimum_bbox_side_fraction: float
+    minimum_mask_area: int
+    minimum_predicted_iou: float
+    minimum_stability_score: float
+    duplicate_iou: float
+    duplicate_containment: float
+    reject_frame_border: bool = True
+
+
+class Sam2LikeTracker:
+    """Structural type for the tracker resolve_r4 needs: see adapters/sam2.py."""
+
+    def track(
+        self, masks: Sequence[np.ndarray], source_image: np.ndarray, target_image: np.ndarray
+    ) -> list[Any]:  # pragma: no cover - protocol only
+        raise NotImplementedError
+
+
+def resolve_r4(
+    reconstruction: Reconstruction,
+    source_objects: Sequence[ObjectMask],
+    target_objects: Sequence[ObjectMask],
+    source_map: np.ndarray,
+    target_map: np.ndarray,
+    parent_labels: np.ndarray,
+    identity_threshold: float,
+    tracker: Sam2LikeTracker,
+    image0: np.ndarray,
+    image1: np.ndarray,
+    *,
+    settings: ResolverR4Settings,
+) -> tuple[np.ndarray, dict[str, Any]]:
+    """Refine ``parent_labels`` (stage 8's A3 raster) with real-image identity.
+
+    ``source_objects``/``source_map`` are the *real*, un-warped T0 SAM3
+    proposals/features (stage 9's generation); ``target_objects``/
+    ``target_map`` are T1's (already real -- reused directly from stages
+    2/4, no separate generation needed). This is a from-scratch extraction
+    of the ``r4_no_geometry_ablation`` branch of
+    ``scripts/run_real_image_association_resolver.py``'s per-pair
+    computation: geometry-gated added/removed (r2/r3) and the parent/o3
+    replay variants (r0/r1) are intentionally not computed at all.
+    """
+
+    shape = tuple(int(value) for value in image0.shape[:2])
+    source_features = mask_descriptors(
+        source_map, source_objects, minimum_feature_cells=settings.minimum_feature_cells
+    )
+    target_features = mask_descriptors(
+        target_map, target_objects, minimum_feature_cells=settings.minimum_feature_cells
+    )
+    selection_kwargs = dict(
+        minimum_area_fraction=settings.minimum_mask_area_fraction,
+        minimum_bbox_side_fraction=settings.minimum_bbox_side_fraction,
+        minimum_mask_area=settings.minimum_mask_area,
+        minimum_predicted_iou=settings.minimum_predicted_iou,
+        minimum_stability_score=settings.minimum_stability_score,
+        duplicate_iou=settings.duplicate_iou,
+        duplicate_containment=settings.duplicate_containment,
+        reject_frame_border=settings.reject_frame_border,
+    )
+    source_selection = select_large_candidates(source_objects, source_features, shape, **selection_kwargs)
+    target_selection = select_large_candidates(target_objects, target_features, shape, **selection_kwargs)
+
+    # Only the source->target projection is needed: it supplies the painted
+    # mask for a verified-REMOVED endpoint. added_no_geometry paints target
+    # objects directly in their own (already target-aligned) pixel grid, and
+    # r4 never consults target->source geometry at all.
+    source_to_target = project_masks_with_zbuffer(
+        reconstruction.points[0],
+        [obj.mask for obj in source_objects],
+        reconstruction.intrinsics[1],
+        reconstruction.world_to_camera[1],
+        shape,
+        minimum_depth=settings.minimum_valid_depth,
+    )
+
+    matches, _ = associate_real_image_instances(
+        source_objects,
+        target_objects,
+        source_features,
+        target_features,
+        source_selection.selected_indices,
+        target_selection.selected_indices,
+        minimum_cosine=identity_threshold,
+        minimum_margin=settings.minimum_bidirectional_margin,
+        area_ratio_bounds=settings.area_ratio_bounds,
+        require_mutual_nearest=settings.require_mutual_nearest,
+    )
+    unmatched_source, unmatched_target = unmatched_inventory_indices(
+        source_selection.selected_indices, target_selection.selected_indices, matches
+    )
+    source_ids = [int(source_objects[index].metadata["automatic_proposal_id"]) for index in unmatched_source]
+    target_ids = [int(target_objects[index].metadata["automatic_proposal_id"]) for index in unmatched_target]
+    source_masks = [np.asarray(source_objects[index].mask, bool) for index in unmatched_source]
+    target_masks = [np.asarray(target_objects[index].mask, bool) for index in unmatched_target]
+
+    source_attempts = tracker.track(source_masks, image0, image1)
+    target_attempts = tracker.track(target_masks, image1, image0)
+    source_presence = {
+        pid: _attempt_presence(attempt) for pid, attempt in zip(source_ids, source_attempts, strict=True)
+    }
+    target_presence = {
+        pid: _attempt_presence(attempt) for pid, attempt in zip(target_ids, target_attempts, strict=True)
+    }
+    source_absent = [
+        index for index, pid in zip(unmatched_source, source_ids, strict=True)
+        if source_presence.get(pid) is False
+    ]
+    target_absent = [
+        index for index, pid in zip(unmatched_target, target_ids, strict=True)
+        if target_presence.get(pid) is False
+    ]
+
+    removed_no_geometry = [
+        _copy_endpoint(source_objects[index], source_to_target.masks[index], Label.REMOVED)
+        for index in source_absent
+    ]
+    added_no_geometry = [
+        _copy_endpoint(target_objects[index], target_objects[index].mask, Label.ADDED)
+        for index in target_absent
+    ]
+
+    similarity = cosine_similarity_matrix(source_features, target_features)
+    replacement_limit = identity_threshold - settings.different_identity_margin
+    raw_source_masks = [np.asarray(obj.mask, bool) for obj in source_objects]
+    raw_target_masks = [np.asarray(obj.mask, bool) for obj in target_objects]
+    no_geometry_pairs = pair_joint_replacements(
+        source_objects,
+        target_objects,
+        source_absent,
+        target_absent,
+        raw_source_masks,
+        raw_target_masks,
+        minimum_iou=settings.minimum_directional_iou,
+        identity_similarity=similarity,
+        maximum_identity_cosine=replacement_limit,
+    )
+
+    labels, diagnostics = compose_sentinel(parent_labels, added_no_geometry, removed_no_geometry)
+    labels, replacement_diagnostics = paint_joint_replacements(
+        labels, parent_labels, no_geometry_pairs, raw_source_masks, target_objects
+    )
+    diagnostics.update(replacement_diagnostics)
+    diagnostics.update(
+        {
+            "identity_matches": len(matches),
+            "unmatched_source": len(unmatched_source),
+            "unmatched_target": len(unmatched_target),
+            "verified_absent_source": len(source_absent),
+            "verified_absent_target": len(target_absent),
+            "joint_replacements": len(no_geometry_pairs),
+        }
+    )
+    return labels, diagnostics

@@ -757,6 +757,16 @@ def run_cached_pair(
         "removed": len(removed),
         "moved": len(moved),
     }
+    # Exposed (in addition to the composed raster) so later stages -- e.g.
+    # calibrating an identity threshold against "static" controls -- can
+    # tell which source/target proposals this stage treated as changed,
+    # without re-running SAM2 tracking a second time.
+    source_changed_ids = tuple(
+        int(item.metadata["automatic_proposal_id"]) for item in source_changed
+    )
+    target_changed_ids = tuple(
+        int(item.metadata["automatic_proposal_id"]) for item in target_changed
+    )
     labels, final_objects = _finish_labels(
         artifact_dir,
         added,
@@ -804,6 +814,8 @@ def run_cached_pair(
         "final_object_counts": {
             name: len(objects) for name, objects in final_objects.items()
         },
+        "source_changed_proposal_ids": source_changed_ids,
+        "target_changed_proposal_ids": target_changed_ids,
     }
     tracking_attempts = {
         "input_provenance": inputs.input_provenance,
