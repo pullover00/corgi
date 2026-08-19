@@ -17,5 +17,5 @@ data/changesim/*
 checkpoints/*.pth
 checkpoints/*.pt
 
-src/mast3r/
-src/dinov2/
+src/mast3r
+src/dinov2
