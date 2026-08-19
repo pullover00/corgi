@@ -4,15 +4,17 @@ The full method is all 11 pipeline stages (see README.md's architecture
 table); this page documents the last one in detail. This is the decision
 procedure implemented in `src/ocmask/stages/slot_inconsistency.py` and run
 by `scripts/run_slot_inconsistency_replacement_experiment.py` (stage 11). It
-refines the prediction produced by stages 1-10 of this same pipeline
-("R4", `r4_no_geometry_ablation`) rather than predicting from scratch --
-stages 1-10 are this repository's own base pipeline, not a third-party or
-externally supplied baseline.
+refines the prediction produced by stages 1-10 of this same pipeline (the
+base pipeline's real-image association resolver, see
+`resolve_real_image_associations` in
+`src/ocmask/stages/real_image_association_resolver.py`) rather than
+predicting from scratch -- stages 1-10 are this repository's own base
+pipeline, not a third-party or externally supplied baseline.
 
 ## Procedure
 
 ```text
-R4 prediction + old source hypotheses + target SAM inventory
+base-pipeline prediction + old source hypotheses + target SAM inventory
                          │
                          ▼
               match the old and target slots

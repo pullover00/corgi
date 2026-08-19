@@ -35,8 +35,9 @@ def same_place(
     maximum_normalized_centroid_distance: float,
 ) -> bool:
     """Whether two masks on the same pixel grid occupy essentially the same
-    location -- the same test `same_place_pairing` applies elsewhere in the
-    A3 ladder, reused here to decide MOVED vs UNCHANGED after tracking."""
+    location -- the same test `same_place_pairing` applies elsewhere (the
+    feature-veto gate's same-place pairing rule), reused here to decide
+    MOVED vs UNCHANGED after tracking."""
     if mask_iou(a, b) < minimum_spatial_iou:
         return False
     return centroid_distance(a, b) <= maximum_normalized_centroid_distance

@@ -10,7 +10,7 @@ as a replacement.
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass
-from typing import Any, Sequence
+from typing import Any, Mapping, Sequence
 
 import numpy as np
 from scipy.optimize import linear_sum_assignment
@@ -23,7 +23,12 @@ from .obvious_change_sentinel import (
     project_masks_with_zbuffer,
     select_large_candidates,
 )
-from .sam3_identity_location import FeatureDescriptorBatch, cosine_similarity_matrix, mask_descriptors
+from .sam3_identity_location import (
+    FeatureDescriptorBatch,
+    associate_identities,
+    cosine_similarity_matrix,
+    mask_descriptors,
+)
 
 
 @dataclass(frozen=True)
@@ -368,14 +373,15 @@ def _attempt_presence(attempt: Any) -> bool | None:
 
 
 @dataclass(frozen=True)
-class ResolverR4Settings:
-    """The r4_no_geometry_ablation composition's thresholds.
+class AssociationResolverSettings:
+    """Thresholds for the final real-image association/replacement resolver.
 
-    r0-r3 (parent replay, hard-collision, geometry-gated added/removed,
-    geometry-gated replacement) are not represented here: they fed sibling
-    ablation outputs this pipeline never uses. r4 skips geometry-support
-    gating of endpoint absence entirely (hence "no_geometry_ablation") and
-    relies only on the targeted SAM2 absence check plus same-place pairing.
+    This resolver skips geometry-support gating of endpoint absence
+    entirely and relies only on a targeted SAM2 absence check plus
+    same-place pairing (in the original research code's own internal
+    ablation ladder, this composition was labeled "r4_no_geometry_ablation";
+    its geometry-gated and parent-replay siblings fed comparison outputs
+    this pipeline never uses and are not represented here).
     """
 
     minimum_valid_depth: float
@@ -396,7 +402,7 @@ class ResolverR4Settings:
 
 
 class Sam2LikeTracker:
-    """Structural type for the tracker resolve_r4 needs: see adapters/sam2.py."""
+    """Structural type for the tracker this resolver needs: see adapters/sam2.py."""
 
     def track(
         self, masks: Sequence[np.ndarray], source_image: np.ndarray, target_image: np.ndarray
@@ -404,7 +410,7 @@ class Sam2LikeTracker:
         raise NotImplementedError
 
 
-def resolve_r4(
+def resolve_real_image_associations(
     reconstruction: Reconstruction,
     source_objects: Sequence[ObjectMask],
     target_objects: Sequence[ObjectMask],
@@ -416,18 +422,20 @@ def resolve_r4(
     image0: np.ndarray,
     image1: np.ndarray,
     *,
-    settings: ResolverR4Settings,
+    settings: AssociationResolverSettings,
 ) -> tuple[np.ndarray, dict[str, Any]]:
-    """Refine ``parent_labels`` (stage 8's A3 raster) with real-image identity.
+    """Refine ``parent_labels`` (the feature-veto-gated direct-replacement
+    raster) with identity/location reasoning over the two real images.
 
     ``source_objects``/``source_map`` are the *real*, un-warped T0 SAM3
     proposals/features (stage 9's generation); ``target_objects``/
     ``target_map`` are T1's (already real -- reused directly from stages
     2/4, no separate generation needed). This is a from-scratch extraction
-    of the ``r4_no_geometry_ablation`` branch of
+    of the composition the original research code labeled
+    "r4_no_geometry_ablation" in
     ``scripts/run_real_image_association_resolver.py``'s per-pair
-    computation: geometry-gated added/removed (r2/r3) and the parent/o3
-    replay variants (r0/r1) are intentionally not computed at all.
+    computation: its geometry-gated added/removed and parent-replay
+    siblings are intentionally not computed at all.
     """
 
     shape = tuple(int(value) for value in image0.shape[:2])
@@ -453,7 +461,7 @@ def resolve_r4(
     # Only the source->target projection is needed: it supplies the painted
     # mask for a verified-REMOVED endpoint. added_no_geometry paints target
     # objects directly in their own (already target-aligned) pixel grid, and
-    # r4 never consults target->source geometry at all.
+    # this resolver never consults target->source geometry at all.
     source_to_target = project_masks_with_zbuffer(
         reconstruction.points[0],
         [obj.mask for obj in source_objects],
@@ -541,3 +549,44 @@ def resolve_r4(
         }
     )
     return labels, diagnostics
+
+
+def resolver_settings_from_config(config: Mapping[str, Any]) -> AssociationResolverSettings:
+    """Build :class:`AssociationResolverSettings` from the merged pipeline config.
+
+    ``config`` is the full ``pipeline.yaml`` mapping. This resolver reuses
+    two sibling stages' settings verbatim rather than declaring its own
+    copies: the large/high-quality endpoint candidate rule is stage 9's
+    (``obvious_object_sentinel.candidate_selection``, the same rule that
+    built its own real-I0 candidates) and the depth/feature floors are also
+    stage 9's (``obvious_object_sentinel.geometry_observability.minimum_valid_depth``,
+    ``...sam3.features.minimum_feature_cells``,
+    ``...sam3.proposal_generation.minimum_mask_area_pixels``) -- matching
+    ``scripts/run_real_image_association_resolver.py``'s original
+    ``_selection_kwargs``, which reads its candidate-selection and depth
+    settings from exactly that parent stage's config, not its own.
+    """
+
+    resolver = config["association_resolver"]
+    sentinel = config["obvious_object_sentinel"]
+    association = resolver["association"]
+    replacement = resolver["replacement"]
+    candidate_selection = sentinel["candidate_selection"]
+    duplicate = candidate_selection["duplicate_suppression"]
+    return AssociationResolverSettings(
+        minimum_valid_depth=float(sentinel["geometry_observability"]["minimum_valid_depth"]),
+        minimum_bidirectional_margin=float(association["minimum_bidirectional_margin"]),
+        area_ratio_bounds=tuple(float(value) for value in association["area_ratio_bounds"]),
+        require_mutual_nearest=bool(association["require_mutual_nearest"]),
+        minimum_directional_iou=float(replacement["minimum_directional_iou"]),
+        different_identity_margin=float(replacement["different_identity_margin"]),
+        minimum_feature_cells=float(sentinel["sam3"]["features"]["minimum_feature_cells"]),
+        minimum_mask_area_fraction=float(candidate_selection["minimum_mask_area_fraction"]),
+        minimum_bbox_side_fraction=float(candidate_selection["minimum_bbox_side_fraction"]),
+        minimum_mask_area=int(sentinel["sam3"]["proposal_generation"]["minimum_mask_area_pixels"]),
+        minimum_predicted_iou=float(candidate_selection["minimum_predicted_iou"]),
+        minimum_stability_score=float(candidate_selection["minimum_stability_score"]),
+        duplicate_iou=float(duplicate["mask_iou"]),
+        duplicate_containment=float(duplicate["containment_fraction"]),
+        reject_frame_border=candidate_selection["frame_border_contact_policy"] == "abstain",
+    )

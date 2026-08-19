@@ -484,8 +484,9 @@ class PairwisePipeline:
                 "artifact_level must be 'metrics', 'minimal', 'cache', or 'full'"
             )
         save_debug = artifact_level == "full"
-        # ``cache`` retains exactly the geometry products required by the A3
-        # experiment chain, without the numerous PNG/PLY debug visualizations.
+        # ``cache`` retains exactly the geometry products required by the
+        # downstream SAM3/SAM2 stages (``ocmask.inference.run_pair``),
+        # without the numerous PNG/PLY debug visualizations.
         save_cache = artifact_level in {"cache", "full"}
         save_files = artifact_level != "metrics"
         timings: dict[str, float] = {}

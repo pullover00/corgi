@@ -415,7 +415,7 @@ def dominant_changed_class_consensus(
     minimum_dominant_fraction: float = 0.75,
     minimum_pixels: int = 32,
 ) -> tuple[np.ndarray, np.ndarray, dict[str, Any]]:
-    """Fold small R4 class fragments into a strong per-object class vote.
+    """Fold small base-pipeline class fragments into a strong per-object class vote.
 
     This is used only for object hypotheses that failed replacement
     plausibility. It cannot invent a changed object: at least half of the SAM
@@ -738,7 +738,8 @@ def frontmost_replacement_ownership(
     Target proposals use their robust median target-camera depth. Existing
     REMOVED components use source geometry rendered into the target camera;
     other changed components use target depth. Exact/near ties preserve the
-    existing R4 owner. Unknown depth also preserves an existing owner.
+    existing base-pipeline owner. Unknown depth also preserves an existing
+    owner.
     """
 
     labels = np.asarray(baseline, np.uint8)
@@ -1047,8 +1048,8 @@ def replacement_cleanup_evidence(
 
     Once a target has independently passed replacement plausibility, erasing
     the matched old REMOVED footprint needs strong identity and geometric
-    correspondence.  It must not depend on how R4 happened to label the new
-    target mask: that semantic mixture is the artifact this stage is meant to
+    correspondence.  It must not depend on how the base pipeline happened
+    to label the new target mask: that semantic mixture is the artifact this stage is meant to
     repair.  The stricter ``eligible`` result is retained for allowing a full
     target-mask write and for overriding target-shape plausibility.
     """
