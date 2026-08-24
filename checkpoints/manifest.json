@@ -6,14 +6,14 @@
       "upstream": "naver/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric",
       "path": "checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth",
       "license": "CC BY-NC-SA 4.0",
-      "sha256": null
+      "sha256": "e28f91b488554653e2b46ddae9c78c1143e0bcb2e27d3e26cdb0b717f1568eb2"
     },
     "sam2": {
       "code_commit": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
       "upstream": "facebook/sam2.1-hiera-large",
       "path": "checkpoints/sam2.1_hiera_large.pt",
       "license": "Apache-2.0",
-      "sha256": null
+      "sha256": "2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318"
     },
     "dinov2_vitb14_reg": {
       "code_commit": "7764ea0f912e53c92e82eb78a2a1631e92725fc8",
@@ -23,5 +23,5 @@
       "sha256": "73182a088cf94833c94b1666d1c99e02fe87e2007bff57b564fb6206e25dba71"
     }
   },
-  "note": "Fill sha256 after downloading; scripts/verify_checkpoints.py records and verifies local hashes. SAM3/SAM3.1 checkpoints are not listed here: they are supplied externally via SAM3_IMAGE_CHECKPOINT/SAM31_CHECKPOINT, see README.md."
+  "note": "scripts/verify_checkpoints.py verifies the validated local hashes. SAM3 is supplied externally via SAM3_IMAGE_CHECKPOINT and pinned in configs/pipeline.yaml; the retained SAM3.1 keys are unused by the production run_pair path. See README.md."
 }
