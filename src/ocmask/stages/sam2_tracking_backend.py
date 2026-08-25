@@ -7,8 +7,6 @@ varied independently without changing GOLDILOCS classification code.
 
 from __future__ import annotations
 
-import gc
-
 import numpy as np
 
 from ..adapters.sam2 import Sam2Adapter
@@ -80,12 +78,4 @@ class Sam2MaskTracker:
     def release(self) -> None:
         """Drop SAM2 image/video models and release cached CUDA allocations."""
 
-        import torch
-
-        self._adapter._generator = None
-        self._adapter._video_predictor = None
-        self._adapter._image_model = None
-        self._adapter._feature_maps.clear()
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+        self._adapter.release()

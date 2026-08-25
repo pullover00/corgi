@@ -1,3 +1,10 @@
+# Demo-only variant of pipeline.yaml with a coarser SAM3 proposal grid
+# (points_per_side 96 -> 32), for faster/fewer object masks with demo.py.
+#
+# Do NOT use this for ChangeSIM evaluation -- configs/pipeline.yaml is the
+# config the reported results and tests are pinned to; this file is a copy
+# for interactive demo.py runs only.
+#
 # Object-Consistent Masks -- single merged pipeline configuration.
 #
 # One section per stage (see README.md's architecture table), containing
@@ -108,7 +115,7 @@ sam3_proposals:
   sam31_checkpoint: ${SAM31_CHECKPOINT}
   sam31_checkpoint_sha256: 0567debeec80ba4ac6369540c6c248025283cb3ff2b92827509e57e2b3541cb6
   proposals:
-    points_per_side: 96
+    points_per_side: 32
     points_per_batch: 32
     pred_iou_threshold: 0.8
     stability_threshold: 0.8
@@ -345,7 +352,7 @@ obvious_object_sentinel:
     checkpoint_sha256: 9999e2341ceef5e136daa386eecb55cb414446a00ac2b55eb2dfd2f7c3cf8c9e
     mixed_precision: bfloat16
     proposal_generation:
-      points_per_side: 96
+      points_per_side: 32
       points_per_batch: 32
       pred_iou_threshold: 0.8
       stability_threshold: 0.8

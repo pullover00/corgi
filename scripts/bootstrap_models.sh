@@ -12,7 +12,8 @@ mast3r_root="${repo_root}/src/mast3r"
 mast3r_commit="f5209afc300cec36239a7ac992263f36847bbba0"
 
 if [[ ! -d "${mast3r_root}/.git" ]]; then
-  git clone --recursive https://github.com/naver/mast3r.git "${mast3r_root}"
+  git clone --no-checkout https://github.com/naver/mast3r.git "${mast3r_root}"
+  git -C "${mast3r_root}" checkout --detach "${mast3r_commit}"
 fi
 
 actual_commit="$(git -C "${mast3r_root}" rev-parse HEAD)"
@@ -28,7 +29,8 @@ dinov2_root="${repo_root}/src/dinov2"
 dinov2_commit="7764ea0f912e53c92e82eb78a2a1631e92725fc8"
 
 if [[ ! -d "${dinov2_root}/.git" ]]; then
-  git clone https://github.com/facebookresearch/dinov2.git "${dinov2_root}"
+  git clone --no-checkout https://github.com/facebookresearch/dinov2.git "${dinov2_root}"
+  git -C "${dinov2_root}" checkout --detach "${dinov2_commit}"
 fi
 
 actual_dinov2_commit="$(git -C "${dinov2_root}" rev-parse HEAD)"
@@ -56,18 +58,18 @@ cat <<'MSG'
 MASt3R, its DUSt3R/CroCo submodules, and DINOv2 are checked out under src/.
 SAM2 is installed as a Python package.
 
-SAM3 and SAM3.1 are NOT handled by this script: at the time this pipeline was
-built they were obtained outside any public, scriptable install path. You
-must supply your own checkout and checkpoints, then point the pipeline at
-them with three environment variables (configs/stages/*.yaml reference these
-via ${SAM3_SOURCE}-style placeholders, expanded by ocmask.config.load_config):
+SAM3 is NOT handled by this script: at the time this pipeline was built it was
+obtained outside any public, scriptable install path. You must supply your own
+checkout and checkpoint, then point the production pipeline at them with two
+environment variables (expanded by ocmask.config.load_config):
 
   export SAM3_SOURCE=/path/to/your/sam3/checkout
   export SAM3_IMAGE_CHECKPOINT=/path/to/sam3.pt
-  export SAM31_CHECKPOINT=/path/to/sam3.1_multiplex.pt
 
-Stages 2, 3, 7 (via stage 3), 8, 9, and 10 all load SAM3 or SAM3.1 through
-these three variables. See README.md's "External SAM3/SAM3.1 dependency"
-section before running the pipeline.
+The production run_pair path uses SAM3 in stages 2, 4, 8, 9, and 10. It does
+not load SAM3.1; the unused SAM3.1 keys retained in pipeline.yaml exist only
+for historical-config compatibility. Some archived configs/stages/*.yaml and
+research scripts still require SAM31_CHECKPOINT when run directly. See
+README.md's "External SAM3 dependency" section before running the pipeline.
 
 MSG

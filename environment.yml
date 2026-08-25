@@ -6,8 +6,12 @@ channels:
 dependencies:
   - python=3.11
   - pip=24.2
-  - pytorch=2.4.1
-  - torchvision=0.19.1
+  # The headline caches were generated after the original environment was
+  # upgraded on 2026-07-28. These are the measured core versions; the old
+  # in-place environment contained inconsistent duplicate package metadata and
+  # is not claimed to be exactly reproducible by a clean solve.
+  - pytorch=2.5.1
+  - torchvision=0.20.1
   - pytorch-cuda=12.4
   - pip:
       - -e .[dev]

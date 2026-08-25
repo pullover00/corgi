@@ -92,26 +92,40 @@ class Mast3rAdapter(ReconstructionAdapter):
             )
             cache_path = str(Path(temporary) / "cache")
             Path(cache_path).mkdir()
-            # Do not wrap sparse_global_alignment in CUDA autocast. MASt3R's
+            # Force CUDA autocast off around sparse_global_alignment. MASt3R's
             # reciprocal-NN implementation allocates FP32 distance buffers and
-            # assigns descriptor-derived values into them; autocast changes the
-            # latter to FP16 and causes an upstream dtype-mismatch failure.
-            scene = sparse_global_alignment(
-                [str(path) for path in paths],
-                pairs,
-                cache_path,
-                self._model,
-                lr1=cfg["lr1"],
-                niter1=cfg["niter1"],
-                lr2=cfg["lr2"],
-                niter2=cfg["niter2"],
-                device=device,
-                opt_depth="depth" in cfg["optim_level"],
-                shared_intrinsics=cfg["shared_intrinsics"],
-                matching_conf_thr=cfg["matching_conf_thr"],
-                desc_conf=self._desc_conf_output_key(cfg),
-                subsample=cfg["subsample"],
-            )
+            # assigns descriptor-derived values into them; under BF16 autocast
+            # that assignment becomes an index_put_ between a bf16 source and
+            # fp32 destination, which PyTorch refuses.
+            #
+            # This isn't about anything *this* function does: SAM3's own
+            # predictor classes (sam3_multiplex_base.py and friends, in the
+            # installed sam3 package) call `torch.autocast(...).__enter__()`
+            # at construction time with no matching __exit__ -- "keep using
+            # for the entire model process" per their own comment -- which
+            # leaves BF16 autocast enabled process-wide, ambiently, for every
+            # later CUDA op for the rest of the run once any SAM3 predictor
+            # has been built (e.g. by an earlier pair's proposal/sentinel
+            # stage). A plain unwrapped call silently inherits that leaked
+            # state; only an explicit enabled=False forces it off here
+            # regardless of what a prior stage or pair left behind.
+            with torch.autocast("cuda", dtype=torch.bfloat16, enabled=False):
+                scene = sparse_global_alignment(
+                    [str(path) for path in paths],
+                    pairs,
+                    cache_path,
+                    self._model,
+                    lr1=cfg["lr1"],
+                    niter1=cfg["niter1"],
+                    lr2=cfg["lr2"],
+                    niter2=cfg["niter2"],
+                    device=device,
+                    opt_depth="depth" in cfg["optim_level"],
+                    shared_intrinsics=cfg["shared_intrinsics"],
+                    matching_conf_thr=cfg["matching_conf_thr"],
+                    desc_conf=self._desc_conf_output_key(cfg),
+                    subsample=cfg["subsample"],
+                )
             # Deliberately disable upstream depth cleaning. The stride here must
             # equal sparse_global_alignment's stride: optimized depthmaps contain
             # one anchor per stride-sized block. MASt3R still returns a point for

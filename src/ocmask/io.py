@@ -48,11 +48,13 @@ def save_json(path: str | Path, value: Any) -> None:
 
 
 def pair_key(path0: str | Path, path1: str | Path, config: dict[str, Any]) -> str:
-    """Create a stable cache key from input identity, file state, and config."""
+    """Create a content-addressed cache key from inputs and configuration."""
     digest = hashlib.sha256()
     for path in (Path(path0), Path(path1)):
-        digest.update(str(path.resolve()).encode())
-        stat = path.stat()
-        digest.update(f"{stat.st_size}:{stat.st_mtime_ns}".encode())
+        resolved = path.resolve()
+        digest.update(str(resolved).encode())
+        with resolved.open("rb") as stream:
+            for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                digest.update(chunk)
     digest.update(json.dumps(config, sort_keys=True).encode())
     return digest.hexdigest()[:20]

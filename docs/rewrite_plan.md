@@ -200,30 +200,28 @@ provenance, not called by anything in `src/ocmask`):
 ## Known remaining gap
 
 None at the "does it run" level: all 11 stages, including stage 11
-(`object_consistent_replacement.resolve_object_consistent_labels`), have
-completed a real `run_pair` execution without exception (see "What's
-validated" above). What has *not* been done:
+(`object_consistent_replacement.resolve_object_consistent_labels`), have now
+completed multiple real GPU executions. In addition to the original
+`Warehouse_8/Seq_1/763` run, the clean-worker evaluator completed an uncached
+`Warehouse_9_Seq_0_70` run and an all-four-stage-cache
+`Warehouse_6_Seq_0_2` run. The latter also completed an immutable-resume replay
+without launching inference. See `docs/reproduction_report.md` and
+`docs/cache_audit.md` for hashes, timings, metrics, and exact scope.
 
-- Only one real pair has been run this way (`Warehouse_8/Seq_1/763`,
-  ChangeSim classes `[2, 3]` -- removed and moved/rotated). A single pair
-  cannot rule out an edge case (an empty changed-candidate list, a pair with
-  no valid identity-calibration controls, a pair where MASt3R reconstruction
-  is poor) that a wider ChangeSim run would exercise. Run
-  `ocmask evaluate changesim --full-pipeline` over a larger manifest
-  (`data/changesim/manifest-new15.jsonl` is a reasonable first target) as
-  the next real-execution milestone, and compare the resulting
-  `table3_iou_percent` against this README's `Result` table as a sanity
-  check (not an exact match -- different pairs, no frozen-seed guarantee
-  across the port).
-- Runtime is real but not fast: this one pair took ~230s end to end on an
-  RTX 4090 Laptop GPU, dominated by stage 1 (reconstruction, ~90s), stage 2
-  (dense SAM3 proposal generation over both images, ~65s), and stage 9 (a
-  second SAM3 proposal pass, ~40s) -- each `Sam2Adapter`/`Sam2MaskTracker`
-  construction also re-triggers `torch.compile` once (`compile_image_encoder:
-  true` in `configs/pipeline.yaml`), which is one-time-per-process, not
-  per-pair, but still adds latency to a single-pair `demo.py` run. Nothing
-  about this is incorrect, just worth knowing before assuming a ChangeSim
-  evaluation over thousands of pairs is a quick check.
+What has *not* been done is a final-source, cache-free run over all 25
+development pairs, followed by the 8,212-pair manifest. A one- or two-pair
+smoke cannot rule out an edge case such as an empty candidate list, no valid
+identity-calibration controls, or poor MASt3R reconstruction. Run the clean
+25-pair command in the README before making a new raw-pipeline reproduction
+claim. That score is still a development compatibility check, not a held-out
+generalization estimate.
+
+Runtime is real but not fast: uncached clean-worker observations are about
+230-258 seconds per pair on the RTX 4090 Laptop GPU. The validated all-four-
+stage cache pair took 117 seconds. Process isolation deliberately pays model
+startup/compile cost to prevent numerical-state and retained-graph leakage
+between pairs. At the uncached rate, a serial 8,212-pair run is roughly 24.5
+GPU-days.
 
 ## What's left
 
@@ -259,3 +257,20 @@ validated" above). What has *not* been done:
    an otherwise-untouched function with no test coverage of its own for a
    purely cosmetic change. `compose_sentinel` (the function this pipeline
    actually calls) does not use that naming at all.
+
+## Addendum: optional cache reuse for a ChangeSim evaluation run
+
+`run_pair` gained optional `pair_id`/`cache` parameters
+(`src/ocmask/weekend_cache.ChangesimWeekendCache`) so
+`ocmask evaluate changesim --full-pipeline --cache-dir <path>` can skip
+stages 1-4 for pairs a prior, independent `a3_overnight.py` job already
+computed with an identical configuration. Strictly opt-in, validated at
+the point of use, never silently stale. See `docs/cache_audit.md` for the
+full audit (per-shard completeness, config/format compatibility checks
+against real cached artifacts, one real incompatibility found and fixed)
+and this feature's design rationale. Unlike everything else in this
+document, legacy stages 1-3 do not carry complete generation-time model/source
+provenance. The live cache path itself has now been validated end to end on a
+real pair, including stage-4 reuse versus live stage-4 recomputation with
+byte-identical final masks. See `docs/cache_audit.md` for the exact evidence
+and the still-missing cache-free same-pair control.

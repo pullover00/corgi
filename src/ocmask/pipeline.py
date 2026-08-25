@@ -29,6 +29,7 @@ from .masks import (
     reject_inconsistent_tracks,
     same_place,
 )
+from .numerics import apply_post_reconstruction_numerics
 from .ssim import colorize_ssim, compute_ssim_dissimilarity, heatmap_overlay
 from .types import Label, ObjectMask, PairResult
 from .visualization import colorize, instance_overlay, overlay
@@ -515,6 +516,11 @@ class PairwisePipeline:
                 save_reconstruction(reconstruction_path, reconstruction)
             reconstruction_cache_hit = False
         self.reconstruction_adapter.release()
+        # Loading MASt3R/CroCo in a fresh run establishes the historical
+        # true/high CUDA-matmul policy before SAM2. A partial retry that finds
+        # reconstruction.npz skips that import side effect, so make the stage
+        # boundary explicit on both paths before any legacy SAM2 work begins.
+        apply_post_reconstruction_numerics()
         timings["reconstruction"] = time.perf_counter() - start
 
         start = time.perf_counter()
@@ -828,6 +834,11 @@ class PairwisePipeline:
         # moved sets. Overlap composition later makes duplicate pixels benign.
         moved.extend(moved_from_source)
         timings["segmentation_and_tracking"] = time.perf_counter() - start
+        # This is segmentation_adapter's last use in run(). A fresh instance
+        # is built per pair (see ocmask.inference.run_pair), so -- exactly
+        # like reconstruction_adapter above -- it must be released here or
+        # its GPU memory accumulates pair over pair across a long eval run.
+        self.segmentation_adapter.release()
         if save_debug:
             save_json(sam_debug_path / "index.json", sam_debug_records)
 

@@ -19,3 +19,4 @@ checkpoints/*.pt
 
 src/mast3r
 src/dinov2
+out/

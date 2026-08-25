@@ -10,14 +10,14 @@ the code and config); ``--after`` is a photo of the same place, from
 approximately the same viewpoint, at a later time ("target"/"image1") --
 the pixel grid the output change map is aligned to. The method needs GPU
 compute and the model checkpoints/environment variables described in
-README.md's "Setup" section (MASt3R, SAM2, DINOv2, and an external SAM3/
-SAM3.1 checkout); run ``ocmask doctor`` first if you are not sure your
+README.md's "Setup" section (MASt3R, SAM2, DINOv2, and an external SAM3
+checkout); run the full-pipeline readiness check described there if you are not sure your
 environment is ready.
 
 Writes, under ``--output``:
 
-  labels.png              the headline result: the object-consistent
-                           full-mask prediction (one of Label's IDs per
+  labels.png              the current object-consistent full-mask prediction
+                           (one of Label's IDs per
                            pixel: 0 unchanged, 1 added, 2 removed, 3 moved,
                            5 replaced -- 4/warped never appears in a final
                            prediction)
@@ -59,7 +59,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--before", required=True, metavar="IMAGE", help="earlier-time photo ('source'/image0)")
     parser.add_argument("--after", required=True, metavar="IMAGE", help="later-time photo ('target'/image1); output is aligned to this image")
     parser.add_argument("--output", required=True, metavar="DIR", help="directory to write predictions and diagnostics into")
-    parser.add_argument("--config", default=str(REPOSITORY / "configs/pipeline.yaml"), help="pipeline config (default: configs/pipeline.yaml)")
+    parser.add_argument("--config", default=str(REPOSITORY / "configs/demo.yaml"), help="pipeline config (default: configs/demo.yaml, a demo-only copy of pipeline.yaml with a coarser SAM3 proposal grid)")
     return parser
 
 

@@ -471,7 +471,7 @@ def resolve_real_image_associations(
         minimum_depth=settings.minimum_valid_depth,
     )
 
-    matches, _ = associate_real_image_instances(
+    matches, matches_similarity = associate_real_image_instances(
         source_objects,
         target_objects,
         source_features,
@@ -546,6 +546,27 @@ def resolve_real_image_associations(
             "verified_absent_source": len(source_absent),
             "verified_absent_target": len(target_absent),
             "joint_replacements": len(no_geometry_pairs),
+            # Everything below is audit detail, added for ablation/failure
+            # analysis; none of it feeds back into `labels` above.
+            "identity_threshold": float(identity_threshold),
+            "replacement_identity_limit": float(replacement_limit),
+            "identity_matches_detail": [match.to_dict() for match in matches],
+            "joint_replacement_pairs_detail": [pair.to_dict() for pair in no_geometry_pairs],
+            "source_selection": source_selection.to_dict(),
+            "target_selection": target_selection.to_dict(),
+            "source_presence": {str(pid): value for pid, value in source_presence.items()},
+            "target_presence": {str(pid): value for pid, value in target_presence.items()},
+            "unmatched_source_ids": [_proposal_id(source_objects[index]) for index in unmatched_source],
+            "unmatched_target_ids": [_proposal_id(target_objects[index]) for index in unmatched_target],
+            "verified_absent_source_ids": [_proposal_id(source_objects[index]) for index in source_absent],
+            "verified_absent_target_ids": [_proposal_id(target_objects[index]) for index in target_absent],
+            # Full identity-cosine matrix (all real-source x real-target
+            # candidates the joint-replacement gate scored) and the smaller
+            # matrix `associate_real_image_instances` matched over (the
+            # selected/large-candidate subset only, its own pre-assignment
+            # cost matrix).
+            "similarity_matrix": similarity,
+            "matches_similarity_matrix": matches_similarity,
         }
     )
     return labels, diagnostics

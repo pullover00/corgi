@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
-"""Run the full 11-stage Object-Consistent Masks pipeline end to end.
+"""Run the legacy multi-script research DAG (not the production pipeline).
 
-This sequences the stage scripts in this directory in dependency order for
-one or both ChangeSim splits (fixed10, new15), using the exact configs and
-output layout documented in README.md. It is a thin subprocess orchestrator:
-all it does is call each stage script with the right --config/--output, in
-the right order; every stage remains independently runnable and resumable
-(each stage script caches its own completed pairs).
+This historical audit tool sequences the original stage scripts in dependency
+order for fixed10/new15. It has different cache/resume/numerical semantics,
+loads an unused SAM3.1 branch, and must not be used for a new result. Use
+``ocmask evaluate changesim --full-pipeline`` or
+``scripts/run_eval_resilient.sh`` for the fused production method.
+
+The explicit ``--allow-legacy-research-dag`` acknowledgement is required to
+make an accidental launch fail before any GPU work or output mutation.
 
 Stage 2/3 run twice per split: once at points_per_side=96 ("grid96", the
 main path used by every downstream stage) and once at the original
@@ -121,6 +123,11 @@ def run_split(split: str, *, skip_html: bool) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument(
+        "--allow-legacy-research-dag",
+        action="store_true",
+        help="Acknowledge that this is the superseded research DAG, not production evaluation.",
+    )
     parser.add_argument("--splits", default="fixed10,new15")
     parser.add_argument(
         "--with-html", action="store_true",
@@ -131,6 +138,12 @@ def main() -> None:
         help="Skip stages 1-10 and run only the final method over already-computed caches.",
     )
     args = parser.parse_args()
+    if not args.allow_legacy_research_dag:
+        raise SystemExit(
+            "scripts/run_pipeline.py is a superseded research DAG and is blocked "
+            "by default. Use scripts/run_eval_resilient.sh for production, or pass "
+            "--allow-legacy-research-dag only for an intentional historical audit."
+        )
     splits = [item.strip() for item in args.splits.split(",") if item.strip()]
     for split in splits:
         if split not in MANIFEST:

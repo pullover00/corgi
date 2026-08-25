@@ -17,7 +17,7 @@ def sha256(path: Path) -> str:
 
 
 def main() -> int:
-    """Record trusted local hashes or verify files against recorded values."""
+    """Fill missing hashes or verify files against recorded trusted values."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--manifest", default="checkpoints/manifest.json")
     parser.add_argument("--record", action="store_true")
@@ -32,9 +32,17 @@ def main() -> int:
             failed = True
             continue
         actual = sha256(checkpoint)
-        if args.record:
+        if args.record and record.get("sha256") is None:
             record["sha256"] = actual
-            print(f"RECORDED {name}: {actual}")
+            print(f"RECORDED previously-unset {name}: {actual}")
+        elif args.record and record.get("sha256") != actual:
+            print(
+                f"REFUSED {name}: --record cannot replace trusted hash "
+                f"{record.get('sha256')} with {actual}"
+            )
+            failed = True
+        elif args.record:
+            print(f"OK already recorded {name}: {actual}")
         elif record["sha256"] != actual:
             print(f"MISMATCH {name}: expected {record['sha256']}, got {actual}")
             failed = True

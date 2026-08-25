@@ -116,6 +116,7 @@ class Sam2Adapter(SegmentationAdapter):
     def __init__(self, config: dict):
         self.config = config
         self._image_model = None
+        self._generator = None
         self._video_predictor = None
         self._last_track_attempts: list[ObjectMask | None] = []
         # Feature maps live on the CPU and are bounded by an LRU cache.  Three
@@ -235,6 +236,10 @@ class Sam2Adapter(SegmentationAdapter):
         with tempfile.TemporaryDirectory(prefix="ocmask-sam2-") as temporary:
             _save_video_frame(source_image, Path(temporary) / "00000.jpg")
             _save_video_frame(target_image, Path(temporary) / "00001.jpg")
+            # SAM3's ambient autocast context is closed before SAM2 is loaded
+            # (see ocmask.numerics and the SAM3 adapters). With that global
+            # leak removed, use SAM2's original scoped BF16 policy; this is the
+            # numerical path used by the frozen Goldilocs tracking artifacts.
             with torch.inference_mode(), self._inference_context():
                 state = self._video_predictor.init_state(video_path=temporary)
                 self._video_predictor.reset_state(state)
@@ -376,3 +381,29 @@ class Sam2Adapter(SegmentationAdapter):
             finally:
                 predictor.reset_predictor()
         return self._remember_feature_map(rgb, feature_map)
+
+    def release(self) -> None:
+        """Drop SAM2's image/video models and release cached CUDA allocations.
+
+        Every caller (``PairwisePipeline`` for stage 1's clean-plate render,
+        ``Sam2MaskTracker`` for stages 3/6/8/10) constructs a fresh
+        ``Sam2Adapter`` per pair. Without an explicit release, PyTorch/CUDA
+        can hold each instance's multi-GB image encoder and video predictor
+        alive past the point Python's own refcounting would otherwise
+        reclaim them -- torch.compile's cache (``compile_image_encoder`` and
+        ``vos_optimized`` are both on by default) in particular keeps
+        strong references to compiled graphs keyed by the specific model
+        instance, so a long run that builds a new instance every pair leaks
+        GPU memory pair over pair until it OOMs.
+        """
+        import gc
+
+        import torch
+
+        self._generator = None
+        self._video_predictor = None
+        self._image_model = None
+        self._feature_maps.clear()
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()

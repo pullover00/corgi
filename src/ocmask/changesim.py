@@ -35,11 +35,16 @@ def decode_target_array(target: np.ndarray) -> np.ndarray:
     """Decode either official RGB palette labels or pre-decoded scalar labels."""
     target = np.asarray(target)
     if target.ndim == 2:
-        raw = target.astype(np.uint8, copy=False)
-        unknown = np.setdiff1d(np.unique(raw), np.arange(5))
+        if not np.issubdtype(target.dtype, np.integer):
+            raise ValueError(
+                f"Scalar ChangeSim labels must have an integer dtype, got {target.dtype}"
+            )
+        # Validate before narrowing to uint8: otherwise 256 wraps to 0 and a
+        # negative value wraps into the valid-looking byte range.
+        unknown = np.setdiff1d(np.unique(target), np.arange(5))
         if len(unknown):
             raise ValueError(f"Unknown scalar ChangeSim labels: {unknown.tolist()}")
-        return raw
+        return target.astype(np.uint8, copy=False)
     if target.ndim != 3 or target.shape[2] < 3:
         raise ValueError(f"Expected an HW or HWC ChangeSim target, got {target.shape}")
 
@@ -53,8 +58,10 @@ def decode_target_array(target: np.ndarray) -> np.ndarray:
     return raw
 
 
-def load_manifest(path: str | Path) -> list[ChangeSimPair]:
-    """Load explicit image pairs and derive class-presence strata if omitted."""
+def load_manifest(
+    path: str | Path, *, require_declared_classes: bool = False
+) -> list[ChangeSimPair]:
+    """Load explicit pairs, optionally forbidding GT reads for missing strata."""
     base = Path(path).resolve().parent
     pairs = []
     for line_number, line in enumerate(Path(path).read_text(encoding="utf-8").splitlines(), 1):
@@ -69,6 +76,11 @@ def load_manifest(path: str | Path) -> list[ChangeSimPair]:
             if "classes" in row:
                 stratum = tuple(sorted(int(value) for value in row["classes"] if int(value) != 0))
             else:
+                if require_declared_classes:
+                    raise ValueError(
+                        f"Manifest line {line_number} has no precomputed classes; "
+                        "refusing to open ground truth before prediction freeze"
+                    )
                 raw = decode_target_array(np.asarray(Image.open(target)))
                 stratum = tuple(int(value) for value in np.unique(raw) if int(value) != 0)
             pairs.append(ChangeSimPair(row["id"], resolve(row["image0"]), resolve(row["image1"]), target, stratum))
@@ -138,16 +150,27 @@ class MetricAccumulator:
         self.count = 0
 
     def add(self, prediction: np.ndarray, target: np.ndarray) -> None:
-        """Add one prediction, resizing discrete ground truth when necessary."""
+        """Add one prediction whose shape exactly matches the ground truth."""
+        prediction = np.asarray(prediction)
+        target = np.asarray(target)
         if prediction.shape != target.shape:
-            target = np.asarray(
-                Image.fromarray(target).resize(prediction.shape[::-1], Image.Resampling.NEAREST)
+            raise ValueError(
+                "Prediction and target shapes must match exactly: "
+                f"prediction={prediction.shape}, target={target.shape}"
             )
-        prediction = np.asarray(prediction, dtype=np.uint8)
-        target = np.asarray(target, dtype=np.uint8)
-        valid = (prediction < 6) & (target < 6)
+        for name, values in (("prediction", prediction), ("target", target)):
+            if not np.issubdtype(values.dtype, np.integer):
+                raise ValueError(f"{name} labels must have an integer dtype, got {values.dtype}")
+            invalid = np.unique(values[(values < 0) | (values >= 6)])
+            if len(invalid):
+                raise ValueError(
+                    f"{name} contains labels outside the canonical 0..5 range: "
+                    f"{invalid.tolist()}"
+                )
+        prediction = prediction.astype(np.uint8, copy=False)
+        target = target.astype(np.uint8, copy=False)
         self.confusion += np.bincount(
-            target[valid].astype(np.int64) * 6 + prediction[valid],
+            (target.astype(np.int64) * 6 + prediction).ravel(),
             minlength=36,
         ).reshape(6, 6)
         self.count += 1

@@ -1,0 +1,167 @@
+{
+  "ground_truth_used": false,
+  "splits": {
+    "fixed10": {
+      "baseline_evaluation": "/home/tessa/goldilocs/outputs/experiment-real-image-association-resolver-fixed10-densegrid96",
+      "baseline_variant": "r4_no_geometry_ablation",
+      "pairs": [
+        {
+          "baseline_file_sha256": "2ff015ad95672f1954d388e4d81a886daa91075886060a15a6064ca8fd8aa092",
+          "full_prediction_sha256": "0b027789732ed5ce0d38754d2fd38bfbc1d8018713f30202e54696444015cf1e",
+          "guarded_prediction_sha256": "0b027789732ed5ce0d38754d2fd38bfbc1d8018713f30202e54696444015cf1e",
+          "id": "Warehouse_9_Seq_0_944"
+        },
+        {
+          "baseline_file_sha256": "b741b1a282cc2b199f997e1ad3de9aed7fb50e70b852e72feda3e16462ff3aea",
+          "full_prediction_sha256": "3488693f292e1b9377c8f8072f8d4198db630a3009c9055b5b6acfc9f9ad31c5",
+          "guarded_prediction_sha256": "3488693f292e1b9377c8f8072f8d4198db630a3009c9055b5b6acfc9f9ad31c5",
+          "id": "Warehouse_6_Seq_0_2"
+        },
+        {
+          "baseline_file_sha256": "81e5f25df15f4c05493629d49a8216410bdc3bab687ab59a2624926f79edcbb6",
+          "full_prediction_sha256": "8d80db7941b106f08c0ab1f402c79ae0c7df20af758b9e46445ed9b6ac65cca2",
+          "guarded_prediction_sha256": "8d80db7941b106f08c0ab1f402c79ae0c7df20af758b9e46445ed9b6ac65cca2",
+          "id": "Warehouse_9_Seq_0_1119"
+        },
+        {
+          "baseline_file_sha256": "75e6435a7505e8e84e88585cb298e15cb7254f5c5219f1c23f4f9dcd43a8ba57",
+          "full_prediction_sha256": "6fdf563ab19fcf3b92d6a9f92b0200d80b8fb17d3e4dcb650c86ed91f74e12a7",
+          "guarded_prediction_sha256": "6fdf563ab19fcf3b92d6a9f92b0200d80b8fb17d3e4dcb650c86ed91f74e12a7",
+          "id": "Warehouse_9_Seq_1_917"
+        },
+        {
+          "baseline_file_sha256": "4ac795e484773d3575c3d04ba2d84f8bc33d764b9e37751b482f6203a7f566b4",
+          "full_prediction_sha256": "6038d9f72a06970ac95a0dd7c1b8749ca24c7ab226fb79d3e9c346ad54f40fc5",
+          "guarded_prediction_sha256": "6038d9f72a06970ac95a0dd7c1b8749ca24c7ab226fb79d3e9c346ad54f40fc5",
+          "id": "Warehouse_7_Seq_0_220"
+        },
+        {
+          "baseline_file_sha256": "d32bf3f3a7d8be7e2bdd12bf1a1bff4cf01a14f832da9ee1f0d81a8c515c2c4c",
+          "full_prediction_sha256": "1f959678b3148189cf2471fae0ea03c9f25989cb572bbe39e6db9cd27d5cfe09",
+          "guarded_prediction_sha256": "1f959678b3148189cf2471fae0ea03c9f25989cb572bbe39e6db9cd27d5cfe09",
+          "id": "Warehouse_9_Seq_0_269"
+        },
+        {
+          "baseline_file_sha256": "5edf9fa5ced9a6f346c9befc92019f584b0409ccbda10aeb2266f9a7d3eb6548",
+          "full_prediction_sha256": "0082dc8a1886276d2889b7e2b087913ccc6d673cf6d4de1897ce2547c8714484",
+          "guarded_prediction_sha256": "0082dc8a1886276d2889b7e2b087913ccc6d673cf6d4de1897ce2547c8714484",
+          "id": "Warehouse_9_Seq_1_280"
+        },
+        {
+          "baseline_file_sha256": "37a0cac31db165ab60c29baaa142f3241980bf1129cac315155fdb363e9a0cc8",
+          "full_prediction_sha256": "76a32267385fb67ce8604286d82acd1b1a5b60b272f9684553211631ad5e8ec7",
+          "guarded_prediction_sha256": "76a32267385fb67ce8604286d82acd1b1a5b60b272f9684553211631ad5e8ec7",
+          "id": "Warehouse_9_Seq_0_70"
+        },
+        {
+          "baseline_file_sha256": "48c7d5dc899e1afdd33e8bb6efd3ee27e5195b151659299771c6bf90576bda3c",
+          "full_prediction_sha256": "f8662827901026a91a0fc9a5a85e0a31649184f8c24a3c43e16ea73b6a2066cb",
+          "guarded_prediction_sha256": "f8662827901026a91a0fc9a5a85e0a31649184f8c24a3c43e16ea73b6a2066cb",
+          "id": "Warehouse_9_Seq_0_667"
+        },
+        {
+          "baseline_file_sha256": "3f9640438fadc4292e1fde6bcd210b93b9de3db768b32f6f03e76cd68f7e9dd0",
+          "full_prediction_sha256": "aedd75ae4ee541a3aa43c35c9db0fadc834cc0ed4ce68546b6ae2f083b37b8b7",
+          "guarded_prediction_sha256": "aedd75ae4ee541a3aa43c35c9db0fadc834cc0ed4ce68546b6ae2f083b37b8b7",
+          "id": "Warehouse_8_Seq_1_348"
+        }
+      ]
+    },
+    "new15": {
+      "baseline_evaluation": "/home/tessa/goldilocs/outputs/experiment-real-image-association-resolver-new15-densegrid96",
+      "baseline_variant": "r4_no_geometry_ablation",
+      "pairs": [
+        {
+          "baseline_file_sha256": "5182833f041fde2241de8c67826624f324a05c85ee61298f77a4b1c486780b0e",
+          "full_prediction_sha256": "f2d93ff46944f26c958dcc63b5f8a81ccd608025eb636a8a17099973a33a221c",
+          "guarded_prediction_sha256": "f2d93ff46944f26c958dcc63b5f8a81ccd608025eb636a8a17099973a33a221c",
+          "id": "Warehouse_6_Seq_1_52"
+        },
+        {
+          "baseline_file_sha256": "8a9ba57f4b46103d23fa4e9dceaecb52f035095617dc16729923ef041319dc7b",
+          "full_prediction_sha256": "2c3bb4cd1d96ae6bff906f5d7d0403fa9e855b0b603389fb1116db1ec7e4dde6",
+          "guarded_prediction_sha256": "2c3bb4cd1d96ae6bff906f5d7d0403fa9e855b0b603389fb1116db1ec7e4dde6",
+          "id": "Warehouse_6_Seq_0_134"
+        },
+        {
+          "baseline_file_sha256": "8c9f987445d2fbae72a0a1e15aadf51a267825e48b6feba56d664c79ee581c9a",
+          "full_prediction_sha256": "9af8bf91f0df949aad94e73d885643c9c58ed3b50df868e10b819fea6de43605",
+          "guarded_prediction_sha256": "3c1313f210c2bb3b3840337525f4b07d5355c14e7a5ccd7c95af54da7ea8f0ee",
+          "id": "Warehouse_9_Seq_1_1305"
+        },
+        {
+          "baseline_file_sha256": "d1af348a9f49aab7759011492c6087e6cd587aae832e02306ca31eded2d8b177",
+          "full_prediction_sha256": "c01003eaa316a60364e608afd4e4ce6e9dbe95feb4eeff32e5caa3b91dee125f",
+          "guarded_prediction_sha256": "c01003eaa316a60364e608afd4e4ce6e9dbe95feb4eeff32e5caa3b91dee125f",
+          "id": "Warehouse_9_Seq_0_1530"
+        },
+        {
+          "baseline_file_sha256": "636c13c0ff7f95557fa4fbe038f1403e82870239efa363c65ce35254ea047995",
+          "full_prediction_sha256": "93a71f93830dd7bfa9a99aa438b280eebdf5a26fa5b5b0dd718b8f5f02c936cb",
+          "guarded_prediction_sha256": "93a71f93830dd7bfa9a99aa438b280eebdf5a26fa5b5b0dd718b8f5f02c936cb",
+          "id": "Warehouse_8_Seq_1_763"
+        },
+        {
+          "baseline_file_sha256": "bd0137151dca8f16d0ee7710f08eaee0ef97a99f4e07e68e5092b5c19bec633e",
+          "full_prediction_sha256": "d99d463a7fa995cf0ef60aeafdd966cce57ba68ac44880a35f840f58cc3c7de7",
+          "guarded_prediction_sha256": "d99d463a7fa995cf0ef60aeafdd966cce57ba68ac44880a35f840f58cc3c7de7",
+          "id": "Warehouse_8_Seq_0_148"
+        },
+        {
+          "baseline_file_sha256": "c45a9e17aeb0492ce16ee203a035affb62449a420281efc994b21df79eed9adb",
+          "full_prediction_sha256": "e15ccd825c6eefa316d5acd596ea557a79b619f25cbf2965f1bd4cd1f8c2b790",
+          "guarded_prediction_sha256": "e15ccd825c6eefa316d5acd596ea557a79b619f25cbf2965f1bd4cd1f8c2b790",
+          "id": "Warehouse_6_Seq_1_54"
+        },
+        {
+          "baseline_file_sha256": "69624430dc7a83e602cf90a0f7a2651414b667f85b4017afdc93dda0ff582abe",
+          "full_prediction_sha256": "aafe480d533ae1ec9d8cb6b8aace160417a33dd9b3a8062db4307c80c07f2a16",
+          "guarded_prediction_sha256": "3b91a2f10dc89dacf3f40ab10504437fc0c8550a3137678200bd4b9b1b092007",
+          "id": "Warehouse_9_Seq_0_579"
+        },
+        {
+          "baseline_file_sha256": "e080abea7df0849c3668574fb8e7538f5153f6c2ab12e873bce7be80dc6020a9",
+          "full_prediction_sha256": "126c2d3bb5cc47c38242938280074d97a70d6fd188a24c01947faf007144fb06",
+          "guarded_prediction_sha256": "126c2d3bb5cc47c38242938280074d97a70d6fd188a24c01947faf007144fb06",
+          "id": "Warehouse_8_Seq_1_815"
+        },
+        {
+          "baseline_file_sha256": "b6eb6e305e85069c089d65b48b60167d57b93be0182f7ca00f420272592a1bd7",
+          "full_prediction_sha256": "e63132dc1add165e1c4f645b5a4f21b0a9d1d45d180aca9789a9264b7cab9917",
+          "guarded_prediction_sha256": "e63132dc1add165e1c4f645b5a4f21b0a9d1d45d180aca9789a9264b7cab9917",
+          "id": "Warehouse_9_Seq_0_1276"
+        },
+        {
+          "baseline_file_sha256": "3531a389d46b2876dba5f221e8ee84bf34f47ea928b3647f84796e75bf606971",
+          "full_prediction_sha256": "644f35664e0a4fd57f42c50d917c7ad6abf8d1f8c02efe567fd99297ce73e33d",
+          "guarded_prediction_sha256": "bccadfe2cff9b5d78ed8db8e3b282ffd66fb78a5f13f564fec7e56e3864cb438",
+          "id": "Warehouse_7_Seq_1_320"
+        },
+        {
+          "baseline_file_sha256": "69557311cf6a703a3a903c6b89e4d2cf39b23c83dbbb56d3ad936c0551ce8c21",
+          "full_prediction_sha256": "a047144312a29260ee73d1a28db10de6af53e683a56e45c97e92fa0a7918fba2",
+          "guarded_prediction_sha256": "305d1884f049cb74b8c7e2f1adf72515d0af6142ac61cb90e9f897f12538f1a4",
+          "id": "Warehouse_9_Seq_1_994"
+        },
+        {
+          "baseline_file_sha256": "b940b83e6e9124f5ae9170c0eb7161a3e6f309aa0d5d08f9b437aded3e332204",
+          "full_prediction_sha256": "935b4330592eb4179f74d8f35483e0dc10f08bbddecfb50a22a88815d8f47d7d",
+          "guarded_prediction_sha256": "935b4330592eb4179f74d8f35483e0dc10f08bbddecfb50a22a88815d8f47d7d",
+          "id": "Warehouse_6_Seq_0_84"
+        },
+        {
+          "baseline_file_sha256": "8ae0ed706bc5d60b87a55ba868b38b37a606c44110343f32ccd947440075f007",
+          "full_prediction_sha256": "2e4eed38c3d66cc24a04b9b278da72ed52b6f237cb50e2940428e92f6db0509b",
+          "guarded_prediction_sha256": "2e4eed38c3d66cc24a04b9b278da72ed52b6f237cb50e2940428e92f6db0509b",
+          "id": "Warehouse_7_Seq_0_427"
+        },
+        {
+          "baseline_file_sha256": "759901e89e23362a19d40af234a3ad819cc9e13a97730c293140032cd08597ae",
+          "full_prediction_sha256": "9c691f7acd152b69234ab65b0b9b8700361060c16c0300c415ee4b8731df841a",
+          "guarded_prediction_sha256": "feabaad15acb74d3393ca7580dc6df44c60e31bd3c51b170de17e0a1ae1ab6a7",
+          "id": "Warehouse_8_Seq_0_435"
+        }
+      ]
+    }
+  }
+}

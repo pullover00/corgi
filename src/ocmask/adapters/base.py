@@ -47,3 +47,7 @@ class SegmentationAdapter(ABC):
         normal GOLDILOCS segmentation/tracking interface.
         """
         return None
+
+    def release(self) -> None:
+        """Release heavyweight model state once this adapter is done."""
+        return None

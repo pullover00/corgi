@@ -28,6 +28,11 @@ from PIL import Image
 from scipy.optimize import linear_sum_assignment
 
 from ..masks import compose_labels, filter_visible, mark_replacements
+from ..numerics import (
+    capture_torch_numerical_state,
+    enable_sam3_numerics,
+    exit_sam3_numerical_scope,
+)
 from ..types import Label, ObjectMask
 
 
@@ -93,29 +98,66 @@ class Sam3FeatureExtractor:
         self._model = None
         self._predictor = None
         self._processor = None
+        self._numerical_state = None
 
     def load(self) -> None:
         if self._model is not None:
             return
         if not (self.source / "sam3").is_dir():
             raise FileNotFoundError(f"SAM3 source is unavailable: {self.source}")
-        sys.path.insert(0, str(self.source))
+        import torch
+
+        state = capture_torch_numerical_state(torch)
+        self._numerical_state = state
+        source_entry = str(self.source)
+        sys.path.insert(0, source_entry)
         try:
             from sam3.model.sam3_image_processor import Sam3Processor
             from sam3.model_builder import build_sam3_image_model
+
+            import sam3
+
+            loaded_source = Path(sam3.__file__).resolve().parent.parent
+            if loaded_source != self.source:
+                raise RuntimeError(
+                    "SAM3 was imported from an unexpected checkout: "
+                    f"configured={self.source}, loaded={loaded_source}. "
+                    "Run full-pipeline inference in a clean pair worker."
+                )
+            enable_sam3_numerics(torch)
+            self._model = build_sam3_image_model(
+                checkpoint_path=self.checkpoint,
+                load_from_HF=False,
+                device="cuda",
+                eval_mode=True,
+                enable_segmentation=False,
+                enable_inst_interactivity=True,
+                compile=False,
+            )
+            self._predictor = self._model.inst_interactive_predictor
+            self._processor = Sam3Processor(self._model)
+        except BaseException as load_error:
+            predictor = self._predictor
+            self._processor = None
+            self._predictor = None
+            self._model = None
+            self._numerical_state = None
+            try:
+                exit_sam3_numerical_scope(predictor, state, torch)
+            except BaseException as cleanup_error:
+                # Keep the model/import failure as the primary exception while
+                # retaining evidence that its cleanup also encountered a fault.
+                raise load_error from cleanup_error
+            raise
         finally:
-            sys.path.pop(0)
-        self._model = build_sam3_image_model(
-            checkpoint_path=self.checkpoint,
-            load_from_HF=False,
-            device="cuda",
-            eval_mode=True,
-            enable_segmentation=False,
-            enable_inst_interactivity=True,
-            compile=False,
-        )
-        self._predictor = self._model.inst_interactive_predictor
-        self._processor = Sam3Processor(self._model)
+            if sys.path and sys.path[0] == source_entry:
+                sys.path.pop(0)
+            else:
+                # Defensive fallback for import hooks that edit sys.path.
+                try:
+                    sys.path.remove(source_entry)
+                except ValueError:
+                    pass
 
     def feature_map(self, image: np.ndarray) -> np.ndarray:
         """Return a channel-normalized CxHf xWf SAM3 image embedding."""
@@ -150,16 +192,37 @@ class Sam3FeatureExtractor:
         return output
 
     def release(self) -> None:
-        if self._model is None:
+        if self._model is None and self._numerical_state is None:
             return
         import torch
 
+        predictor = self._predictor
+        state = self._numerical_state
+        # Detach owned resources before running fallible cleanup. A retry after
+        # an exception is therefore a no-op instead of closing/restoring twice.
         self._processor = None
         self._predictor = None
         self._model = None
-        gc.collect()
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
+        self._numerical_state = None
+
+        cleanup_error: BaseException | None = None
+        try:
+            exit_sam3_numerical_scope(predictor, state, torch)
+        except BaseException as exc:
+            cleanup_error = exc
+        try:
+            gc.collect()
+        except BaseException as exc:
+            if cleanup_error is None:
+                cleanup_error = exc
+        try:
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+        except BaseException as exc:
+            if cleanup_error is None:
+                cleanup_error = exc
+        if cleanup_error is not None:
+            raise cleanup_error
 
 
 def mask_descriptors(
