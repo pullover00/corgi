@@ -1,0 +1,10 @@
+out/
+__pycache__/
+*.pyc
+.DS_Store
+
+# Machine-local symlinks to large checkpoints / vendored sources -- see
+# README.md's setup section for how to recreate them.
+/checkpoints/*.pt
+/checkpoints/*.pth
+/src/dinov2

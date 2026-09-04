@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "models": {
+    "sam2": {
+      "upstream": "facebook/sam2.1-hiera-large",
+      "path": "checkpoints/sam2.1_hiera_large.pt",
+      "license": "Apache-2.0",
+      "sha256": "2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318"
+    },
+    "dinov2_vitb14_reg": {
+      "upstream": "facebookresearch/dinov2_vitb14_reg4_pretrain",
+      "path": "checkpoints/dinov2_vitb14_reg4_pretrain.pth",
+      "license": "Apache-2.0",
+      "sha256": "73182a088cf94833c94b1666d1c99e02fe87e2007bff57b564fb6206e25dba71"
+    }
+  },
+  "note": "SAM3 is supplied externally via SAM3_IMAGE_CHECKPOINT (see README.md). VGGT-Omega and DI2FIX/Difix checkpoints are managed by their own repos (vggt_omega_root / DI2FIX's huggingface cache), not tracked here."
+}
