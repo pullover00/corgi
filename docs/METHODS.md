@@ -122,9 +122,7 @@ between its two masks. When a direct match fails — typically because
 widen the render/photo appearance gap enough to break a direct feature
 comparison — a track-only candidate pair can still be validated by checking
 both endpoints' identity inside the shared `clean_render` feature domain
-instead, using it as a bridge. Two masks that occupy the same location across
-frames but whose features confidently disagree are classified replaced
-rather than moved.
+instead, using it as a bridge.
 
 ### Recovering proposal-generation misses
 
@@ -149,8 +147,30 @@ and false additions (Section "Results").
 Everything still unmatched after recovery is genuinely removed (present
 only in `render_t0`) or added (present only in `image_t1`). The final
 per-pixel label map is rasterized aligned to `image_t1`, in priority order
-added > removed > moved > replaced where object masks overlap (added is the
-weakest explanation and yields to any more specific one).
+added > removed > moved where object masks overlap (added is the weakest
+explanation and yields to any more specific one).
+
+An earlier version also classified same-location, confidently-different-
+identity pairs as a fifth `replaced` class. It was removed: a "replacement"
+is not a distinct physical event from the pipeline's own evidence -- it is
+just a removed object and an added object that happen to occupy the same
+mask slot -- and treating it specially added a class with no clear
+downstream use and no PASLCD/SceneDiff ground-truth analogue. Such pairs now
+simply fall through to independent removed/added decisions.
+
+A `replaced` class (`Label.REPLACED`) was reintroduced later, deliberately,
+for a different mechanism and a different reason: a dense chromaticity-
+residual pass over `render_t0`/`image_t1` directly (see
+`color_residual.py`), catching same-footprint color swaps that never get
+segmented as their own object in either frame at all (e.g. a red block
+replaced by a blue one, absorbed into a much larger surface's SAM3 proposal
+in both frames) -- there is no removed/added *pair* here for it to fall
+through to, since no per-object comparison ever ran on the region in the
+first place. The "no clear downstream use" objection above no longer
+applies for the same reason binary evaluation never cared about the label
+value: PASLCD's own metric only asks changed-vs-unchanged, so this class
+exists purely for internal diagnostics and visualization, same as `moved`
+vs. `added`/`removed` already did.
 
 ## Data preparation note
 
@@ -166,7 +186,11 @@ unless `CAP_PROP_ORIENTATION_AUTO` is set explicitly.
 
 ## Results (development pair, `kitchen_2_kitchen_3`)
 
-Ablated on one SceneDiff pair, each row cumulative on the previous:
+Ablated on one SceneDiff pair, each row cumulative on the previous. Recorded
+when the pipeline still had the `replaced` class (since removed, see
+above) and the border-touching proposal filter (since removed, see PASLCD
+notes) -- kept here as the historical record of that run, not as current
+behavior.
 
 | Configuration | unchanged | moved | replaced | removed | added | changed px fraction |
 |---|---|---|---|---|---|---|

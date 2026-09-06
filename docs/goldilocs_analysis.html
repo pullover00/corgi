@@ -1,0 +1,379 @@
+<title>Render-and-Compare, Revisited</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    --bg: #f5f4ef;
+    --surface: #ffffff;
+    --surface-2: #ececE5;
+    --border: #dcdad0;
+    --text: #1b1e24;
+    --text-dim: #5b5d5a;
+    --text-faint: #8a8c86;
+    --accent: #0f7d84;
+    --accent-ink: #075258;
+    --accent-dim: #e2f0ef;
+    --help: #2f8a4e;
+    --help-dim: #e7f3ea;
+    --hurt: #b34a34;
+    --hurt-dim: #fbeae6;
+    --serif: 'Source Serif 4', Georgia, serif;
+    --sans: 'IBM Plex Sans', system-ui, sans-serif;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --shadow: 0 1px 2px rgba(30,25,15,.05), 0 6px 20px rgba(30,25,15,.06);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #16181c; --surface: #1d2024; --surface-2: #24272b; --border: #34383d;
+      --text: #e9e8e2; --text-dim: #a8a9a3; --text-faint: #75766f;
+      --accent: #4fc3c9; --accent-ink: #bdeceF; --accent-dim: #16302f;
+      --help: #5cba7c; --help-dim: #16281c; --hurt: #e0836c; --hurt-dim: #2e1a16;
+      --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.4);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #16181c; --surface: #1d2024; --surface-2: #24272b; --border: #34383d;
+    --text: #e9e8e2; --text-dim: #a8a9a3; --text-faint: #75766f;
+    --accent: #4fc3c9; --accent-ink: #bdeceF; --accent-dim: #16302f;
+    --help: #5cba7c; --help-dim: #16281c; --hurt: #e0836c; --hurt-dim: #2e1a16;
+    --shadow: 0 1px 2px rgba(0,0,0,.35), 0 8px 24px rgba(0,0,0,.4);
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); margin: 0; line-height: 1.6; }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 40px 28px 100px; }
+  ::selection { background: var(--accent-dim); }
+
+  h1, h2, h3 { font-family: var(--serif); font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; }
+  p, li { max-width: 74ch; }
+  code { font-family: var(--mono); font-size: 0.9em; background: var(--surface-2); padding: 1px 6px; border-radius: 4px; }
+  a { color: var(--accent-ink); }
+
+  header.top { margin-bottom: 6px; }
+  header.top .eyebrow { font-family: var(--mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--accent); font-weight: 600; }
+  header.top h1 { font-size: 34px; margin: 8px 0 10px; }
+  header.top .dek { font-size: 16px; color: var(--text-dim); max-width: 62ch; margin: 0; }
+  header.top .meta { font-family: var(--mono); font-size: 12px; color: var(--text-faint); margin-top: 16px; }
+
+  nav.toc {
+    position: sticky; top: 0; z-index: 5; display: flex; gap: 4px; overflow-x: auto;
+    background: var(--bg); padding: 16px 0; margin: 24px 0 44px; border-bottom: 1px solid var(--border);
+  }
+  nav.toc a {
+    font-family: var(--mono); font-size: 11.5px; color: var(--text-dim); text-decoration: none;
+    background: var(--surface); border: 1px solid var(--border); padding: 6px 11px; border-radius: 999px; white-space: nowrap;
+  }
+  nav.toc a:hover { color: var(--accent-ink); border-color: var(--accent); }
+
+  section { margin: 56px 0; scroll-margin-top: 68px; }
+  section > .kicker { font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .09em; color: var(--text-faint); margin-bottom: 6px; }
+  section > h2 { font-size: 24px; margin: 0 0 14px; }
+  section > .lede { font-size: 15px; color: var(--text-dim); margin: 0 0 24px; }
+
+  .callout {
+    background: var(--accent-dim); border: 1px solid color-mix(in srgb, var(--accent) 35%, var(--border));
+    border-radius: 12px; padding: 18px 22px; margin: 0 0 28px;
+  }
+  .callout p { margin: 0; color: var(--text); max-width: none; }
+  .callout p + p { margin-top: 10px; }
+
+  /* paper cards */
+  .paper-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .paper-card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px 24px;
+    box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 10px;
+  }
+  .paper-card .venue { font-family: var(--mono); font-size: 11px; color: var(--accent-ink); text-transform: uppercase; letter-spacing: .08em; }
+  .paper-card h3 { font-size: 18px; margin: 0; }
+  .paper-card .authors { font-size: 12.5px; color: var(--text-faint); }
+  .paper-card blockquote { margin: 4px 0; padding-left: 12px; border-left: 3px solid var(--accent); font-size: 13.5px; color: var(--text-dim); font-style: italic; }
+  .paper-card .facts { list-style: none; margin: 4px 0 0; padding: 0; font-size: 13.5px; }
+  .paper-card .facts li { margin-bottom: 6px; padding-left: 16px; position: relative; }
+  .paper-card .facts li::before { content: '→'; position: absolute; left: 0; color: var(--accent); }
+
+  /* architecture diagram */
+  .arch-compare { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .arch-col { padding: 20px 22px; }
+  .arch-col:first-child { border-right: 1px solid var(--border); background: var(--surface); }
+  .arch-col:last-child { background: var(--surface); }
+  .arch-col h4 { font-family: var(--mono); font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--text-faint); margin: 0 0 14px; }
+  .arch-step { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--border); font-size: 13.5px; }
+  .arch-step:last-child { border-bottom: none; }
+  .arch-step .n { font-family: var(--mono); color: var(--accent); font-weight: 600; flex: none; width: 18px; }
+  .arch-step .diff { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 1px 6px; border-radius: 4px; margin-left: 6px; vertical-align: 1px; }
+  .diff.hurt { background: var(--hurt-dim); color: var(--hurt); }
+  .diff.help { background: var(--help-dim); color: var(--help); }
+  .diff.neutral { background: var(--surface-2); color: var(--text-faint); }
+
+  /* funnel */
+  .funnel { display: flex; flex-direction: column; gap: 8px; margin: 18px 0; }
+  .funnel-row { display: grid; grid-template-columns: 190px 1fr 120px; gap: 12px; align-items: center; }
+  .funnel-label { font-size: 12.5px; font-weight: 600; }
+  .funnel-track { background: var(--surface-2); border-radius: 6px; height: 20px; overflow: hidden; border: 1px solid var(--border); }
+  .funnel-fill { height: 100%; background: linear-gradient(90deg, var(--help), var(--accent)); }
+  .funnel-fill.loss { background: linear-gradient(90deg, var(--accent), var(--hurt)); }
+  .funnel-pct { font-family: var(--mono); font-size: 12.5px; text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* ledger */
+  .ledger { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+  .ledger-col h3 { font-size: 15px; display: flex; align-items: center; gap: 8px; margin: 0 0 12px; }
+  .ledger-col h3 .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .ledger-col.help h3 .dot { background: var(--help); }
+  .ledger-col.hurt h3 .dot { background: var(--hurt); }
+  .ledger-item {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 13px 16px; margin-bottom: 10px;
+    box-shadow: var(--shadow); font-size: 13.5px;
+  }
+  .ledger-item b { display: block; font-size: 13.5px; margin-bottom: 4px; }
+  .ledger-item .ev { font-family: var(--mono); font-size: 11px; color: var(--text-faint); margin-top: 6px; }
+  .ledger-col.help .ledger-item { border-left: 3px solid var(--help); }
+  .ledger-col.hurt .ledger-item { border-left: 3px solid var(--hurt); }
+
+  /* proposal diagram */
+  .flow-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px; box-shadow: var(--shadow); overflow-x: auto; }
+  .flow-row { display: flex; align-items: stretch; gap: 10px; min-width: 760px; }
+  .flow-box {
+    flex: 1; border: 1.5px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 12.5px;
+    background: var(--surface-2); display: flex; flex-direction: column; gap: 4px; justify-content: center;
+  }
+  .flow-box.accent { border-color: var(--accent); background: var(--accent-dim); }
+  .flow-box .t { font-weight: 600; font-size: 12.5px; }
+  .flow-box .s { color: var(--text-dim); font-size: 11.5px; }
+  .flow-arrow { display: flex; align-items: center; color: var(--text-faint); font-size: 18px; }
+
+  pre.code-block {
+    background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+    overflow-x: auto; font-family: var(--mono); font-size: 12.5px; line-height: 1.55; margin: 16px 0;
+  }
+
+  table.data { border-collapse: collapse; width: 100%; font-size: 13px; margin: 14px 0; }
+  table.data th, table.data td { border: 1px solid var(--border); padding: 7px 10px; text-align: left; }
+  table.data th { background: var(--surface-2); font-family: var(--mono); font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--text-dim); }
+  table.data td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; }
+  table.data tr.hl td { background: var(--accent-dim); font-weight: 600; }
+
+  /* roadmap */
+  .roadmap { display: flex; flex-direction: column; gap: 0; border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: var(--shadow); }
+  .road-item { display: grid; grid-template-columns: 40px 1fr 90px; gap: 14px; padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--surface); align-items: start; }
+  .road-item:last-child { border-bottom: none; }
+  .road-item .num { font-family: var(--serif); font-size: 22px; color: var(--accent); font-weight: 600; }
+  .road-item h4 { margin: 0 0 4px; font-size: 14.5px; font-family: var(--sans); font-weight: 600; }
+  .road-item p { margin: 0; font-size: 13px; color: var(--text-dim); }
+  .road-item .effort { font-family: var(--mono); font-size: 10.5px; text-transform: uppercase; letter-spacing: .05em; padding: 3px 8px; border-radius: 5px; height: fit-content; text-align: center; }
+  .effort.low { background: var(--help-dim); color: var(--help); }
+  .effort.med { background: var(--accent-dim); color: var(--accent-ink); }
+  .effort.high { background: var(--hurt-dim); color: var(--hurt); }
+
+  footer { margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 11.5px; color: var(--text-faint); }
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">Method analysis &amp; redesign proposal</div>
+    <h1>Render-and-Compare, Revisited</h1>
+    <p class="dek">Our PASLCD pipeline descends directly from <b>GOLDILOCS</b> (Friedlander, Shamir &amp; Fried, ICLR 2026) — hence the <code>goldilocs</code> conda env we've used all session. This document traces exactly where our implementation diverged from that design, backs each divergence with our own measured evidence, and proposes a point-cloud-native redesign informed by <b>SceneDiff</b> (arXiv 2512.16908), which already demonstrates 3D-centroid-based change output driving a real robot arm.</p>
+    <div class="meta">Based on: 41 completed PASLCD queries (18 scenes) · pixel-loss funnel analysis · 192-point threshold sweep · GOLDILOCS ICLR 2026 paper · SceneDiff arXiv 2512.16908v2</div>
+  </header>
+
+  <nav class="toc">
+    <a href="#papers">The two papers</a>
+    <a href="#architecture">Architecture diff</a>
+    <a href="#ledger">What helps / hurts</a>
+    <a href="#pointcloud">Point-cloud redesign</a>
+    <a href="#roadmap">Roadmap</a>
+  </nav>
+
+  <div class="callout">
+    <p><b>In one sentence:</b> our pipeline added a mandatory 2D-appearance identity gate (SAM3+DINOv2 cosine similarity) on top of GOLDILOCS's original track-centric design, and that single addition is responsible for the majority of our measured failures on PASLCD — a dataset GOLDILOCS itself was never evaluated on.</p>
+    <p>The fix isn't just re-tuning that gate's thresholds (we tried — it recovers ~8% relative F1, not the 10-40x gap to GOLDILOCS's own reported numbers). It's replacing 2D appearance matching with the 3D geometric matching both source papers actually rely on for the hard cases — which also happens to be exactly the representation a robot arm needs.</p>
+  </div>
+
+  <section id="papers">
+    <div class="kicker">Section 1</div>
+    <h2>The two papers</h2>
+    <p class="lede">One gave us our architecture; the other gives us the missing piece.</p>
+    <div class="paper-grid">
+      <div class="paper-card">
+        <div class="venue">ICLR 2026</div>
+        <h3>GOLDILOCS: General Object-Level Detection and Labeling of Changes in Scenes</h3>
+        <div class="authors">Friedlander, Shamir, Fried — Reichman University</div>
+        <blockquote>"SCD can be reformulated as a 3D reconstruction problem over time, where geometric inconsistencies naturally indicate change."</blockquote>
+        <ul class="facts">
+          <li>MASt3R stereo reconstruction → reverse-depth-conflict filtering → canonical clean pointmap <code>P*</code> (this is our <code>reverse_depth_filter</code>, verbatim)</li>
+          <li>Single segmentation/tracking model throughout: SAM2 proposes <em>and</em> tracks — no separate identity-feature model</li>
+          <li>Change decided purely by <b>tracking success/failure</b> against the clean render, then moved-vs-removed by a second track into the real photo — no mandatory appearance-similarity gate</li>
+          <li>Five classes: Added, Removed, Moved (full/partial), <b>Warped</b> (non-rigid, via SSIM) — we have four, and dropped Warped</li>
+          <li>Never evaluated on PASLCD — its benchmark suite is ChangeSim, VL-CMU-CD, RC-3D, NeRFCD, 3DGS-CD, 3RScan</li>
+          <li>Cross-view voting (multi-image <code>T1</code>) is its dominant precision mechanism — Table 11: without it, precision on 3DGS-CD scenes crashes to 59-80% at ~100% recall; with it, 95-98%</li>
+        </ul>
+      </div>
+      <div class="paper-card">
+        <div class="venue">arXiv 2512.16908v2</div>
+        <h3>SceneDiff: A Benchmark and Method for Multiview Object Change Detection</h3>
+        <div class="authors">Wu et al. — also the source of the PASLCD-adjacent evaluation protocol and SAM region-generation pipeline we reproduced earlier this session</div>
+        <blockquote>"A region is considered another view of an existing object if their features <b>and 3D points</b> are similar" — matched via feature cosine similarity <em>and</em> geometric point-cloud proximity, threshold σ<sub>geo</sub>=0.02.</blockquote>
+        <ul class="facts">
+          <li>Represents each candidate object as its own 3D point cloud (masked region lifted via depth), not just a 2D crop</li>
+          <li>Object identity across frames = joint 3D-proximity + appearance test, not appearance alone</li>
+          <li>"Directional visibility mask" (non-negative depth differences + FOV reasoning) separates real change from viewpoint occlusion — same spirit as GOLDILOCS's depth-conflict test, different derivation</li>
+          <li><b>Demonstrates a closed-loop robot-tidying application</b>: computes the 3D centroid of each changed object as the grasp point, feeds it to inverse kinematics on a 7-DOF arm</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section id="architecture">
+    <div class="kicker">Section 2</div>
+    <h2>Where our pipeline diverged from GOLDILOCS</h2>
+    <p class="lede">Same backbone (3D reconstruction → depth-conflict cleaning → render-and-compare), different identity-matching core.</p>
+    <div class="arch-compare">
+      <div class="arch-col">
+        <h4>GOLDILOCS (original)</h4>
+        <div class="arch-step"><span class="n">1</span> MASt3R pairwise stereo reconstruction<span class="diff neutral">1 model</span></div>
+        <div class="arch-step"><span class="n">2</span> Reverse depth-conflict filtering → clean pointmap <code>P*</code></div>
+        <div class="arch-step"><span class="n">3</span> SAM2 automatic masks on <code>R<sub>0,1</sub></code> and <code>I1</code><span class="diff neutral">1 model, both roles</span></div>
+        <div class="arch-step"><span class="n">4</span> Track mask <code>R<sub>0,1</sub>→R*<sub>,1</sub></code>: fails to track ⇒ candidate-changed</div>
+        <div class="arch-step"><span class="n">5</span> Candidate-changed, tracked into real <code>I1</code> ⇒ moved; not found ⇒ removed <span class="diff help">no appearance gate</span></div>
+        <div class="arch-step"><span class="n">6</span> Symmetric pass on <code>I1</code> ⇒ added</div>
+        <div class="arch-step"><span class="n">7</span> SSIM heatmap on static masks ⇒ <b>warped</b> class</div>
+        <div class="arch-step"><span class="n">8</span> Multi-view only: cross-view majority vote per 3D segment <span class="diff help">needs multiple T1 views</span></div>
+      </div>
+      <div class="arch-col">
+        <h4>Our pipeline (this session)</h4>
+        <div class="arch-step"><span class="n">1</span> VGGT-Omega joint multi-view reconstruction<span class="diff help">multi-view T0, better coverage</span></div>
+        <div class="arch-step"><span class="n">2</span> Same reverse-depth-conflict filter, adapted for N frames <span class="diff neutral">faithful port</span></div>
+        <div class="arch-step"><span class="n">3</span> SAM3 proposals (3 frames) + separate DINOv2 features + separate SAM2 tracker <span class="diff hurt">3 models</span></div>
+        <div class="arch-step"><span class="n">4</span> <code>identity = sam≥0.65 & dino≥0.60</code> — <b>mandatory</b>, checked on every candidate pair regardless of tracking <span class="diff hurt">not in original</span></div>
+        <div class="arch-step"><span class="n">5</span> <code>feasible = identity & (tracked | reciprocal)</code> — track only <em>corroborates</em>, never decides alone <span class="diff hurt">inverts GOLDILOCS's logic</span></div>
+        <div class="arch-step"><span class="n">6</span> <code>_suppress_feature_matched_parts</code>: geometric adjacency <em>alone</em> can suppress an object, no feature check required <span class="diff hurt">inconsistent w/ step 4</span></div>
+        <div class="arch-step"><span class="n">7</span> No non-rigid / warped detection <span class="diff hurt">capability gap</span></div>
+        <div class="arch-step"><span class="n">8</span> PASLCD gives 1 query image per test ⇒ cross-view voting structurally unavailable <span class="diff hurt">dataset-imposed, not a bug</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="ledger">
+    <div class="kicker">Section 3 — evidence, not opinion</div>
+    <h2>What helps, what hurts</h2>
+    <p class="lede">Every item below is backed by either our own measured pixel-loss/threshold-sweep data or a number GOLDILOCS reports in its own ablations.</p>
+
+    <h3 style="font-size:15px; margin-bottom:10px;">The pixel-loss funnel that grounds this (one real query, 8,923 GT-changed pixels)</h3>
+    <div class="funnel">
+      <div class="funnel-row"><div class="funnel-label">Raw SAM3 proposals</div><div class="funnel-track"><div class="funnel-fill" style="width:99.4%"></div></div><div class="funnel-pct">99.4%</div></div>
+      <div class="funnel-row"><div class="funnel-label">Post size/dedup filter</div><div class="funnel-track"><div class="funnel-fill" style="width:98.9%"></div></div><div class="funnel-pct">98.9%</div></div>
+      <div class="funnel-row"><div class="funnel-label">Post part-suppression <span style="color:var(--hurt)">(step 6)</span></div><div class="funnel-track"><div class="funnel-fill loss" style="width:84.1%"></div></div><div class="funnel-pct">84.1%</div></div>
+      <div class="funnel-row"><div class="funnel-label">Final decision <span style="color:var(--hurt)">(step 4-5)</span></div><div class="funnel-track"><div class="funnel-fill loss" style="width:49.7%"></div></div><div class="funnel-pct">49.7%</div></div>
+    </div>
+    <p style="font-size:13px; color:var(--text-dim)">The identity/tracking stage alone drops 34 points of GT coverage — more than every earlier stage combined (16 points) — and 90% of that (2,806 of 3,111 lost pixels) is attributed to the mandatory <code>direct_identity</code> feature gate specifically, not to tracking.</p>
+
+    <div class="ledger" style="margin-top:28px">
+      <div class="ledger-col help">
+        <h3><span class="dot"></span>Helps</h3>
+        <div class="ledger-item"><b>3D reconstruction + depth-conflict filtering itself</b>Removing it costs GOLDILOCS &minus;9.2 mIoU (&minus;27.5% relative) on ChangeSim — the geometric backbone is genuinely load-bearing, not decorative.<div class="ev">GOLDILOCS Table 10</div></div>
+        <div class="ledger-item"><b>Removing the border-touching proposal filter</b>Unconditionally rejected any mask touching any frame edge; on PASLCD this destroyed real edge-adjacent objects far more than it removed background.<div class="ev">Our fix: IoU 0.0 → 0.085 on the first validated query</div></div>
+        <div class="ledger-item"><b>Tracking-recovery pass</b>Reusing an already-computed SAM2 track to rescue objects SAM3 only proposed in one frame — a real proposal-generation-miss problem, not evidence of actual change.<div class="ev">23.3% → 14.3% changed-pixel-fraction on the SceneDiff dev pair</div></div>
+        <div class="ledger-item"><b>Multi-view joint reconstruction (VGGT-Omega) over pairwise MASt3R</b>Denser T0 coverage from 24 reference photos vs. GOLDILOCS's single best-matching pair.<div class="ev">Architectural improvement, not yet isolated in an ablation</div></div>
+      </div>
+      <div class="ledger-col hurt">
+        <h3><span class="dot"></span>Hurts</h3>
+        <div class="ledger-item"><b>Mandatory dual-feature cosine gate</b>GOLDILOCS decides change from tracking outcome alone; we additionally require SAM3 <em>and</em> DINOv2 cosine similarity to agree on <em>every</em> pair, tracked or not. This is the dominant loss mechanism we can point to.<div class="ev">90% of stage-4 pixel loss (2,806/3,111 px), one query</div></div>
+        <div class="ledger-item"><b>Geometry-only suppression without feature check</b><code>_suppress_feature_matched_parts</code>'s adjacency-alone path drops a small object sitting inside a larger one's box with zero appearance evidence required — inconsistent with the mandatory gate one step later.<div class="ev">Second-largest loss: 14.8 points of GT coverage, one query</div></div>
+        <div class="ledger-item"><b>Three independent models instead of one</b>SAM3 (proposals+features) + DINOv2 (features) + SAM2 (tracking) vs. GOLDILOCS's single SAM2 doing both roles — more failure surface, ~150-260s/query vs. GOLDILOCS's reported 10.6 min for a full multi-image scene.<div class="ev">GOLDILOCS Table 5; our own detect-stage timings</div></div>
+        <div class="ledger-item"><b>No non-rigid (Warped) detection</b>Any GT-changed pixel from a deformed-but-not-displaced object is an unconditional false negative for us — a capability GOLDILOCS has via SSIM and we never ported.<div class="ev">Capability gap, not yet quantified on PASLCD</div></div>
+        <div class="ledger-item"><b>Cross-view voting is unavailable, structurally</b>GOLDILOCS's single largest measured precision fix requires multiple <code>T1</code> views; PASLCD gives exactly one query photo per test case. Not a mistake in our port — a real gap the dataset imposes that needs a different fix.<div class="ev">GOLDILOCS Table 11: 59-80% → 95-98% precision, voting on/off</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pointcloud">
+    <div class="kicker">Section 4 — the proposal</div>
+    <h2>Point-cloud-native identity matching</h2>
+    <p class="lede">Keep render-and-compare. Replace the part that's actually failing: how we decide two proposals are "the same object."</p>
+
+    <div class="callout">
+      <p>Every object proposal we already produce sits on top of a rendered frame whose <b>per-pixel 3D world points are already computed</b> — <code>ReconstructionResult.input_points</code> / the reference scene's <code>world_points</code> array. Masking that array by a 2D proposal gives its 3D point cloud for free; no new reconstruction, no new model. We are one array-index away from SceneDiff's actual mechanism.</p>
+    </div>
+
+    <div class="flow-diagram">
+      <div class="flow-row">
+        <div class="flow-box"><div class="t">2D proposal mask</div><div class="s">SAM3, unchanged</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent"><div class="t">Mask × world_points</div><div class="s">object's own 3D point cloud, already computed</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box"><div class="t">Centroid + spread</div><div class="s">3D position, not a 2D crop</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box accent"><div class="t">Geometric identity test</div><div class="s">centroid distance + point-set overlap</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-box"><div class="t">Appearance, as tiebreak only</div><div class="s">SAM3/DINOv2 demoted from gate to scorer</div></div>
+      </div>
+    </div>
+
+    <h3 style="font-size:16px; margin-top:28px">Why this specifically fixes our failure mode</h3>
+    <ul>
+      <li><b>Render/photo appearance gap, gone structurally.</b> Our dominant failure (<code>direct_identity</code>) is a 2D-appearance mismatch between a synthetic render and a real photo — lighting, splat artifacts, JPEG compression all live in RGB space. Two point clouds of the same physical object agree in world-metric space regardless of how either frame was rendered.</li>
+      <li><b>Matches what both source papers actually do for the hard cases.</b> GOLDILOCS's real decision variable is 3D-consistent tracking through the clean pointmap; SceneDiff explicitly requires 3D proximity (σ<sub>geo</sub>=0.02) alongside appearance, not appearance alone. Our appearance-only-or-track-only OR-gate is the outlier, not the norm.</li>
+      <li><b>No structural dependency on multiple query views.</b> Centroid/point-set proximity is evaluated per-object against the single query photo we do have — it doesn't need GOLDILOCS's cross-view vote to get its precision, so it's a genuine alternative to the one mechanism PASLCD's protocol denies us (Section 3).</li>
+      <li><b>Directly produces what a robot needs.</b> SceneDiff's own robot-tidying demo consumes exactly this: a changed object's 3D centroid as a grasp point, before/after centroids for a moved object. If identity is decided in 3D in the first place, the manipulation-ready output falls out for free instead of needing a separate 2D-to-3D lifting step afterward.</li>
+    </ul>
+
+    <h3 style="font-size:16px; margin-top:24px">Sketch of the replacement test</h3>
+    <pre class="code-block">def geometric_identity(source_points_3d, target_points_3d,
+                        centroid_thr=0.05, overlap_thr=0.3):
+    """Replaces the mandatory (sam &gt;= 0.65) &amp; (dino &gt;= 0.60) gate.
+    Both point sets already sit in the SAME world frame -- no render/photo
+    appearance gap to bridge, unlike 2D cosine similarity on rendered RGB."""
+    source_centroid = source_points_3d.mean(axis=0)
+    target_centroid = target_points_3d.mean(axis=0)
+    centroid_ok = np.linalg.norm(source_centroid - target_centroid) &lt;= centroid_thr
+
+    # cheap point-set overlap: fraction of source points within a target
+    # KD-tree query, symmetrized -- a coarse Chamfer / IoU stand-in
+    overlap = point_set_overlap(source_points_3d, target_points_3d)
+    overlap_ok = overlap &gt;= overlap_thr
+
+    return centroid_ok and overlap_ok  # geometry decides; SAM3/DINOv2 scores rank ties only</pre>
+    <p style="font-size:13px; color:var(--text-dim)">This is additive, not a rewrite: keep <code>identity</code>/<code>reciprocal</code>/<code>tracked</code> exactly as implemented, add <code>geometric</code> alongside as a fourth signal, and change the gate from <code>identity & (tracked | reciprocal)</code> to <code>geometric & (identity | tracked | reciprocal)</code> — demoting 2D appearance from mandatory to corroborating, matching how tracking already behaves today.</p>
+  </section>
+
+  <section id="roadmap">
+    <div class="kicker">Section 5</div>
+    <h2>Suggested order of work</h2>
+    <p class="lede">Cheapest, best-evidenced fixes first; the point-cloud redesign is the one structural change, everything else is validation and closing gaps.</p>
+    <div class="roadmap">
+      <div class="road-item">
+        <div class="num">1</div>
+        <div><h4>Validate the tuned thresholds on a full run</h4><p>sam≥0.55 / dino≥0.40 / track≥0.50 / spatial≥0.30 beat defaults on all 48 sampled queries (F1 0.106 vs 0.100) but only replay the <code>direct_identity</code> path — confirm on a real end-to-end run before committing.</p></div>
+        <div class="effort low">Low effort</div>
+      </div>
+      <div class="road-item">
+        <div class="num">2</div>
+        <div><h4>Implement the geometric-identity test</h4><p>Mask <code>world_points</code> by each proposal, add centroid+overlap as a fourth signal alongside <code>identity</code>/<code>tracked</code>/<code>reciprocal</code>, demote appearance to a tiebreak. Directly targets the 90%-of-loss <code>direct_identity</code> failure mode.</p></div>
+        <div class="effort med">Medium effort</div>
+      </div>
+      <div class="road-item">
+        <div class="num">3</div>
+        <div><h4>Fix <code>_suppress_feature_matched_parts</code>'s geometry-only suppression</h4><p>Require the new 3D-geometric test (not just 2D bounding-box adjacency) before a small object can be suppressed as a "part" of a larger one — the second-largest measured loss point.</p></div>
+        <div class="effort med">Medium effort</div>
+      </div>
+      <div class="road-item">
+        <div class="num">4</div>
+        <div><h4>Replace the removed border filter with GOLDILOCS's coverage-fraction filter</h4><p>Their α-parameter discards masks mostly supported by occluded/out-of-view pixels, using actual reconstruction coverage rather than "touches the frame edge." We already compute <code>render_t0_coverage_fraction</code> — just not for this purpose yet.</p></div>
+        <div class="effort low">Low effort</div>
+      </div>
+      <div class="road-item">
+        <div class="num">5</div>
+        <div><h4>Port SSIM-based Warped detection</h4><p>Closes a real capability gap on any PASLCD object that deformed without moving. Needs an SSIM heatmap over each static mask, standard-deviation threshold — no new model.</p></div>
+        <div class="effort low">Low effort</div>
+      </div>
+      <div class="road-item">
+        <div class="num">6</div>
+        <div><h4>Design a PASLCD-specific precision safeguard</h4><p>Cross-view voting needs multiple <code>T1</code> views we don't have. Investigate an analogue using the <em>reference</em> side's redundancy instead: does a candidate change hold up when checked against several of the 24 reference views independently, not just the one used for rendering?</p></div>
+        <div class="effort high">Open research question</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    Sources: GOLDILOCS (Friedlander, Shamir, Fried — ICLR 2026, uploaded PDF) · SceneDiff arXiv:2512.16908v2 · this session's pixel-loss analysis (Meeting_room_Instance_1/Inst_1_test_IMG_1862) and 192-combination threshold sweep (48 PASLCD queries, 18 scenes)
+  </footer>
+</div>

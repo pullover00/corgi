@@ -12,7 +12,7 @@ COLORS = {
     Label.REMOVED: (230, 40, 40),
     Label.MOVED: (40, 120, 240),
     Label.WARPED: (230, 180, 20),
-    Label.REPLACED: (180, 60, 220),
+    Label.REPLACED: (230, 30, 200),
 }
 
 

@@ -183,7 +183,8 @@ def render_points(
     fill_holes: bool = False,
     hole_fill_min_neighbors: int = 5,
     hole_fill_max_relative_depth: float = 0.02,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    point_confidence: np.ndarray | None = None,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """Render colored points with a deterministic nearest-depth z-buffer.
 
     ``splat_radius`` expands every projected sample to a square footprint. Each
@@ -191,6 +192,18 @@ def render_points(
     correctly occlude background splats. Optional hole filling is deliberately
     conservative: it fills only one-pixel holes surrounded by enough rendered
     neighbors whose depths describe the same local surface.
+
+    Returns ``(image, depth, coverage, world_positions, confidence)``:
+    ``world_positions`` is the (H, W, 3) world-space coordinate of whichever
+    input point won the z-buffer test at each pixel (NaN where uncovered),
+    for callers that need to know *where in 3D* a rendered pixel actually
+    came from -- e.g. masking it by a 2D object proposal to get that
+    object's own 3D point cloud. ``confidence`` is that winning point's own
+    ``point_confidence`` value (NaN where uncovered, or wherever
+    ``point_confidence`` was not supplied) -- e.g. the upstream multi-view
+    reconstruction model's own per-point depth confidence, for a continuous
+    alternative to ``coverage``'s binary rendered/not-rendered signal (see
+    change_detection's visibility filter).
     """
     if splat_radius < 0:
         raise ValueError("splat_radius must be non-negative")
@@ -202,13 +215,16 @@ def render_points(
     height, width = image_shape
     flat_points = points.reshape(-1, 3)
     flat_colors = colors.reshape(-1, 3)
+    flat_confidence = point_confidence.reshape(-1) if point_confidence is not None else None
     projection = project_points(flat_points, intrinsics, world_to_camera, image_shape)
     valid_idx = np.flatnonzero(projection.valid & np.isfinite(flat_colors).all(axis=1))
     image = np.full((height, width, 3), background, dtype=np.uint8)
     depth = np.full((height, width), np.inf, dtype=np.float32)
     coverage = np.zeros((height, width), dtype=bool)
+    world_positions = np.full((height, width, 3), np.nan, dtype=np.float32)
+    confidence = np.full((height, width), np.nan, dtype=np.float32)
     if not len(valid_idx):
-        return image, depth, coverage
+        return image, depth, coverage, world_positions, confidence
 
     uv = projection.uv[valid_idx]
     z = projection.depth[valid_idx]
@@ -251,6 +267,9 @@ def render_points(
     image[win_uv[:, 1], win_uv[:, 0]] = np.clip(flat_colors[winners], 0, 255).astype(np.uint8)
     depth[win_uv[:, 1], win_uv[:, 0]] = win_z
     coverage[win_uv[:, 1], win_uv[:, 0]] = True
+    world_positions[win_uv[:, 1], win_uv[:, 0]] = flat_points[winners]
+    if flat_confidence is not None:
+        confidence[win_uv[:, 1], win_uv[:, 0]] = flat_confidence[winners]
 
     if fill_holes:
         image, depth, coverage = fill_small_render_holes(
@@ -261,7 +280,12 @@ def render_points(
             maximum_relative_depth_range=hole_fill_max_relative_depth,
             depth_epsilon=z_epsilon,
         )
-    return image, depth, coverage
+        # Hole-filled pixels get no world position or confidence: they were
+        # never actually observed, only interpolated for a visually-complete
+        # render, and a fabricated value would be actively misleading for
+        # geometric identity matching (change_detection._geometric_matrix)
+        # or the visibility filter (change_detection._visible_fraction).
+    return image, depth, coverage, world_positions, confidence
 
 
 def fill_small_render_holes(

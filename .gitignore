@@ -4,7 +4,17 @@ __pycache__/
 .DS_Store
 
 # Machine-local symlinks to large checkpoints / vendored sources -- see
-# README.md's setup section for how to recreate them.
+# SETUP.md for how to recreate them (scripts/fetch_assets.sh automates most
+# of it).
 /checkpoints/*.pt
 /checkpoints/*.pth
 /src/dinov2
+/external/
+
+# Dataset and generated output -- large (data/ ~20GB, results/ ~9GB, rc3d/
+# ~170MB on the machine this was authored on) and either reproducible from
+# scripts or not this repo's to redistribute. See SETUP.md for how to obtain
+# data/PASLCD.
+/data/
+/results/
+/rc3d/

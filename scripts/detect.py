@@ -24,6 +24,28 @@ def main() -> int:
     parser.add_argument("--image-t1", type=Path, required=True)
     parser.add_argument("--config", type=Path, default=REPO / "configs/pipeline.yaml")
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument(
+        "--render-t0-positions", type=Path, default=None,
+        help="optional render_t0_positions.npy (world-position buffer) written by run_paslcd_pair.py; "
+             "supply all three *-positions flags plus --scene-scale-path to activate the geometric-identity test",
+    )
+    parser.add_argument("--clean-render-positions", type=Path, default=None)
+    parser.add_argument("--image-t1-positions", type=Path, default=None)
+    parser.add_argument("--scene-scale-path", type=Path, default=None, help="optional scene_scale.json written by run_paslcd_pair.py")
+    parser.add_argument(
+        "--render-t0-coverage", type=Path, default=None,
+        help="optional render_t0_coverage.npy written by run_paslcd_pair.py, to activate the binary visibility filter",
+    )
+    parser.add_argument(
+        "--render-t0-confidence", type=Path, default=None,
+        help="optional render_t0_confidence.npy written by run_paslcd_pair.py, to activate the confidence-weighted "
+             "visibility filter (needs use_confidence_weighted_visibility: true in config too)",
+    )
+    parser.add_argument(
+        "--render-t0-corroboration", type=Path, default=None,
+        help="optional render_t0_corroboration.npy written by run_paslcd_pair.py, to activate the cross-reference-"
+             "view corroboration filter (needs enable_reference_corroboration: true in config too)",
+    )
     args = parser.parse_args()
 
     import numpy as np
@@ -37,7 +59,20 @@ def main() -> int:
     clean_render = np.asarray(Image.open(args.clean_render).convert("RGB"))
     image_t1 = np.asarray(Image.open(args.image_t1).convert("RGB"))
 
-    result = run_object_state_resolution(render_t0, clean_render, image_t1, args.output_dir, config)
+    geometry_kwargs = {}
+    if args.render_t0_positions is not None:
+        geometry_kwargs["render_t0_positions"] = np.load(args.render_t0_positions)
+        geometry_kwargs["clean_render_positions"] = np.load(args.clean_render_positions)
+        geometry_kwargs["image_t1_positions"] = np.load(args.image_t1_positions)
+        geometry_kwargs["scene_scale"] = json.loads(args.scene_scale_path.read_text())["scene_scale"]
+    if args.render_t0_coverage is not None:
+        geometry_kwargs["render_t0_coverage"] = np.load(args.render_t0_coverage)
+    if args.render_t0_confidence is not None:
+        geometry_kwargs["render_t0_confidence"] = np.load(args.render_t0_confidence)
+    if args.render_t0_corroboration is not None:
+        geometry_kwargs["render_t0_corroboration"] = np.load(args.render_t0_corroboration)
+
+    result = run_object_state_resolution(render_t0, clean_render, image_t1, args.output_dir, config, **geometry_kwargs)
     print(
         json.dumps(
             {

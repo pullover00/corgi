@@ -14,6 +14,12 @@ class Label(IntEnum):
     REMOVED = 2
     MOVED = 3
     WARPED = 4
+    # Same-footprint object replacement (e.g. a red block swapped for a blue
+    # one) -- found by a dense color-residual pass, not by identity matching
+    # between two proposals, since the old/new object is often never
+    # segmented as its own SAM3 proposal in the first place (it gets
+    # absorbed into a larger surrounding surface's mask). See
+    # change_detection.find_color_replacement_regions.
     REPLACED = 5
 
 
