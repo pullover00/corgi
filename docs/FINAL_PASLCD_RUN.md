@@ -8,8 +8,13 @@ computed nor consulted). DI²FIX refinement is on (`refine.enabled: true`).
 
 ## 1. Install / update the code
 
+The shipped solution lives on the `v10_final` branch of
+https://github.com/pullover00/corgi (its `master` carries an older, unrelated
+history of the evaluator and was left untouched).
+
 ```bash
-git clone <repo-url> change_pipeline && cd change_pipeline   # or: git pull
+git clone -b v10_final https://github.com/pullover00/corgi.git change_pipeline && cd change_pipeline
+# or, in an existing clone:  git fetch origin v10_final && git checkout v10_final
 ```
 
 Then follow `SETUP.md` once per machine for the three conda envs
