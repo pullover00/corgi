@@ -88,9 +88,19 @@ def _bbox(mask: np.ndarray) -> tuple[int, int, int, int]:
 
 
 def pairwise_mask_iou(
-    source: Sequence[ObjectMask], target: Sequence[ObjectMask]
+    source: Sequence[ObjectMask], target: Sequence[ObjectMask], validity: np.ndarray | None = None
 ) -> np.ndarray:
-    """Compute exact mask IoUs while skipping non-overlapping bounding boxes."""
+    """Compute exact mask IoUs while skipping non-overlapping bounding boxes.
+
+    ``validity`` (optional, same grid as the masks), if given, restricts
+    every mask to its True pixels before anything else is computed -- both
+    sides, since a shared aligned grid means a coordinate's validity (e.g.
+    ``render_t0_coverage``) describes the scene location, not just one
+    image. Use this so pixels neither side has trustworthy geometry for
+    don't count as an artificial mismatch when one mask is fragmented by
+    reconstruction holes the other doesn't have -- see
+    change_detection.ThreeImageSettings.same_location_coverage_aware.
+    """
 
     output = np.zeros((len(source), len(target)), dtype=np.float32)
     if not source or not target:
@@ -100,6 +110,12 @@ def pairwise_mask_iou(
     shape = source_masks[0].shape
     if any(mask.shape != shape for mask in source_masks + target_masks):
         raise ValueError("all association masks must share one aligned grid")
+    if validity is not None:
+        validity = np.asarray(validity, dtype=bool)
+        if validity.shape != shape:
+            raise ValueError("validity must share the masks' aligned grid")
+        source_masks = [mask & validity for mask in source_masks]
+        target_masks = [mask & validity for mask in target_masks]
     source_boxes = [_bbox(mask) for mask in source_masks]
     target_boxes = [_bbox(mask) for mask in target_masks]
     source_areas = np.asarray([mask.sum() for mask in source_masks], np.int64)

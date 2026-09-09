@@ -103,13 +103,20 @@ def gt_mask_path(instance_dir: Path, test_image: Path) -> Path:
 
 
 def append_metrics_row(scene_dir: Path, row: dict[str, Any]) -> None:
+    """Upsert by test_image, not a blind append -- a --resume run that
+    redoes a query (e.g. to add refine, see _already_evaluated's
+    require_refine) must replace that query's stale row rather than
+    duplicate it, or write_scene_summary's mean would double-count it."""
     metrics_path = scene_dir / "metrics.csv"
-    write_header = not metrics_path.exists()
-    with metrics_path.open("a", newline="") as handle:
+    existing_rows = []
+    if metrics_path.exists():
+        with metrics_path.open() as handle:
+            existing_rows = [r for r in csv.DictReader(handle) if r["test_image"] != row["test_image"]]
+    existing_rows.append({key: row[key] for key in METRICS_FIELDS})
+    with metrics_path.open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=METRICS_FIELDS)
-        if write_header:
-            writer.writeheader()
-        writer.writerow({key: row[key] for key in METRICS_FIELDS})
+        writer.writeheader()
+        writer.writerows(existing_rows)
 
 
 def write_scene_summary(scene_dir: Path, scene: str, dataset: str, instance: str) -> dict[str, Any]:
@@ -186,35 +193,59 @@ def reconstruct_and_refine_one_pair(
     if not gt_path.exists():
         raise FileNotFoundError(f"no GT mask for {test_image.name}: expected {gt_path}")
 
-    if reference_scene is None:
-        reference_scene = reconstruct_reference_scene(reference_images, config)
-    result = localize_and_render_query(
-        t0_image_paths=reference_images,
-        query_image_path=test_image,
-        reference_scene=reference_scene,
-        t0_reference_index=0,
-        config=config,
-    )
-    print(f"  reference/query alignment residual: {result.alignment_residual}", flush=True)
-
     recon_dir = intermediate_dir / "reconstruction"
-    recon_dir.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(result.render_t0).save(recon_dir / "render_t0.png")
-    Image.fromarray(result.clean_render).save(recon_dir / "clean_render.png")
-    Image.fromarray(result.image_t1).save(recon_dir / "image_t1.png")
-    # 3D world-position buffers for the geometric-identity test (unaffected
-    # by DI2FIX refine below, which only touches RGB appearance, not pixel
-    # alignment -- these stay valid even when render_t0/clean_render below
-    # get replaced by their refined versions).
-    import numpy as np
+    recon_marker_files = [
+        recon_dir / "render_t0.png", recon_dir / "clean_render.png", recon_dir / "image_t1.png",
+        recon_dir / "render_t0_positions.npy", recon_dir / "clean_render_positions.npy",
+        recon_dir / "image_t1_positions.npy", recon_dir / "scene_scale.json",
+        recon_dir / "render_t0_coverage.npy", recon_dir / "render_t0_confidence.npy",
+        recon_dir / "render_t0_corroboration.npy",
+    ]
+    reconstruction_cached = all(p.exists() for p in recon_marker_files)
 
-    np.save(recon_dir / "render_t0_positions.npy", result.render_t0_positions)
-    np.save(recon_dir / "clean_render_positions.npy", result.clean_render_positions)
-    np.save(recon_dir / "image_t1_positions.npy", result.image_t1_positions)
-    (recon_dir / "scene_scale.json").write_text(json.dumps({"scene_scale": result.scene_scale}))
-    np.save(recon_dir / "render_t0_coverage.npy", result.render_t0_coverage)
-    np.save(recon_dir / "render_t0_confidence.npy", result.render_t0_confidence)
-    np.save(recon_dir / "render_t0_corroboration.npy", result.render_t0_corroboration)
+    if reconstruction_cached:
+        # Stage 1 (VGGT-Omega reconstruction+localization) is the expensive
+        # part of this function -- reused as-is from a prior run when its
+        # full output set is already on disk, so a rerun that only needs to
+        # add refine/detect (e.g. the 2026-09-08 refine-audit fix) does not
+        # have to pay for it again. Safe because DI2FIX (stage below) only
+        # ever touches render_t0/clean_render's RGB appearance, never the
+        # geometry these files encode.
+        print(f"  [{stem}] reusing cached reconstruction from {recon_dir}", flush=True)
+        alignment_residual = float("nan")
+        prior_result_path = intermediate_dir / "paslcd_result.json"
+        if prior_result_path.exists():
+            alignment_residual = json.loads(prior_result_path.read_text()).get("alignment_residual", alignment_residual)
+    else:
+        if reference_scene is None:
+            reference_scene = reconstruct_reference_scene(reference_images, config)
+        result = localize_and_render_query(
+            t0_image_paths=reference_images,
+            query_image_path=test_image,
+            reference_scene=reference_scene,
+            t0_reference_index=0,
+            config=config,
+        )
+        print(f"  reference/query alignment residual: {result.alignment_residual}", flush=True)
+        alignment_residual = result.alignment_residual
+
+        recon_dir.mkdir(parents=True, exist_ok=True)
+        Image.fromarray(result.render_t0).save(recon_dir / "render_t0.png")
+        Image.fromarray(result.clean_render).save(recon_dir / "clean_render.png")
+        Image.fromarray(result.image_t1).save(recon_dir / "image_t1.png")
+        # 3D world-position buffers for the geometric-identity test (unaffected
+        # by DI2FIX refine below, which only touches RGB appearance, not pixel
+        # alignment -- these stay valid even when render_t0/clean_render below
+        # get replaced by their refined versions).
+        import numpy as np
+
+        np.save(recon_dir / "render_t0_positions.npy", result.render_t0_positions)
+        np.save(recon_dir / "clean_render_positions.npy", result.clean_render_positions)
+        np.save(recon_dir / "image_t1_positions.npy", result.image_t1_positions)
+        (recon_dir / "scene_scale.json").write_text(json.dumps({"scene_scale": result.scene_scale}))
+        np.save(recon_dir / "render_t0_coverage.npy", result.render_t0_coverage)
+        np.save(recon_dir / "render_t0_confidence.npy", result.render_t0_confidence)
+        np.save(recon_dir / "render_t0_corroboration.npy", result.render_t0_corroboration)
 
     Image.open(test_image).convert("RGB").save(images_dir / "query_after.png")
     Image.open(reference_images[0]).convert("RGB").save(images_dir / "reference_before_sample.png")
@@ -253,7 +284,7 @@ def reconstruct_and_refine_one_pair(
         "predictions_dir": predictions_dir,
         "visualizations_dir": visualizations_dir,
         "intermediate_dir": intermediate_dir,
-        "alignment_residual": result.alignment_residual,
+        "alignment_residual": alignment_residual,
     }
 
 

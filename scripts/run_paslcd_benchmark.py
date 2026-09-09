@@ -61,6 +61,8 @@ def _run_instance_subprocess(dataset: str, instance: str, args, log_dir: Path) -
         cmd += ["--reference-scene-cache-dir", str(args.reference_scene_cache_dir)]
     if args.resume:
         cmd.append("--resume")
+    if args.dump_inventory:
+        cmd.append("--dump-inventory")
     if args.parallel_instances > 1:
         # detect_batch.py alone uses ~7.3GB; two don't fit on a 16GB GPU
         # (confirmed by direct OOM testing) even though reconstruction
@@ -103,6 +105,7 @@ def main() -> int:
     parser.add_argument("--reference-scene-cache-dir", type=Path, default=None, help="reuse saved ReferenceScene .npz files (see build_paslcd_reference_scenes.py) instead of rebuilding each instance")
     parser.add_argument("--resume", action="store_true", help="skip query images already present in each scene's metrics.csv -- safe to re-run this command to continue an interrupted benchmark")
     parser.add_argument("--parallel-instances", type=int, default=1, help="run this many instances concurrently, each as its own subprocess/CUDA context (see run_parallel's docstring for the GPU-memory tradeoff). 1 = sequential, in-process (default).")
+    parser.add_argument("--dump-inventory", action="store_true", help="save each query's stage-1-3 detection bundle for later detect-only replays (see run_paslcd_scene.py --dump-inventory)")
     args = parser.parse_args()
 
     jobs = [
@@ -125,7 +128,7 @@ def main() -> int:
             summary = scene_runner.run_scene(
                 args.data_root, dataset, instance, args.output_root, args.config,
                 args.max_reference_images, args.skip_refine, args.limit_per_instance,
-                args.reference_scene_cache_dir, args.resume,
+                args.reference_scene_cache_dir, args.resume, dump_inventory=args.dump_inventory,
             )
             scene_summaries.append(summary)
 

@@ -29,7 +29,7 @@ change.
 from __future__ import annotations
 
 import time
-from dataclasses import asdict, dataclass, fields
+from dataclasses import asdict, dataclass, fields, replace
 from pathlib import Path
 from typing import Any, Sequence
 
@@ -46,7 +46,7 @@ from .stages.sam3_identity_location import (
     mask_descriptors,
     pairwise_mask_iou,
 )
-from .stages.sam3_proposals import Sam3AutomaticMaskGenerator, Sam3Proposal
+from .stages.sam3_proposals import Sam3AutomaticMaskGenerator, Sam3Proposal, Sam3TextPromptDetector
 from .adapters.dinov2 import Dinov2FeatureExtractor
 from .types import Label, ObjectMask
 from .visualization import colorize, instance_overlay, overlay
@@ -71,7 +71,97 @@ class ThreeImageSettings:
     area_ratio_low: float = 0.25
     area_ratio_high: float = 4.0
     minimum_track_iou: float = 0.20
+    # Ablation only (2026-09-08): when False, identity matching drops the
+    # SAM3/DINOv2 cosine-similarity requirement entirely and relies on
+    # bidirectional SAM2 tracking alone (no reciprocal-nearest-neighbor
+    # fallback either, since that is itself appearance-based) -- a
+    # "tracking only" baseline for the cumulative design-decision ablation.
+    # Not intended as a real operating mode: without appearance
+    # confirmation, any tracked pair is accepted regardless of whether it's
+    # really the same object.
+    enable_appearance_correspondence: bool = True
+    # Model-set ablation (2026-09-09). Every appearance gate in this module
+    # was a strict AND over SAM3 *and* DINOv2 cosine similarity, and the
+    # combined ranking score was min(sam, dino) -- so the weaker descriptor
+    # always dominated, and a correspondence had to satisfy two independent
+    # thresholds to exist at all. Whether that second descriptor buys any
+    # precision, or only costs recall, had never been measured. These flags
+    # drop either descriptor from every gate, score and validity check at
+    # once (identity, bridging, recall recovery, part suppression) so the
+    # question can be answered on the SceneDiff diagnostic subset. Both True
+    # reproduces the original behaviour exactly.
+    use_sam_features: bool = True
+    use_dino_features: bool = True
+    # False skips SAM2 entirely: no tracks are computed, so correspondence
+    # rests on appearance reciprocity (+ geometry), and clean-render
+    # bridging and recall recovery -- both track-driven by construction --
+    # have nothing to work with and fall silent. That loss is inherent to
+    # removing SAM2, not a side effect, and is part of what the ablation
+    # measures.
+    enable_tracking: bool = True
+    # Ablation only: when False, skips the clean-render bridge entirely (the
+    # pass that validates track-only candidates -- where a direct
+    # render/photo feature comparison failed -- via the shared clean_render
+    # feature domain instead). See "Bidirectional mask tracking" /
+    # "Matching and classification" in docs/METHODS.md for what this bridge
+    # is for.
+    enable_clean_bridge: bool = True
     same_location_iou: float = 0.45
+    # Failure-mode audit (2026-09-07): same_location_iou above gates on raw
+    # SAM3-mask-to-SAM3-mask IoU even when identity was already confirmed by
+    # tracking/feature evidence. On scenes with large glossy/reflective/
+    # low-texture surfaces (glass, glossy ceilings, plain carpet), render_t0
+    # is fragmented by reconstruction holes there while image_t1 (a real
+    # photo) is not, so a genuinely unchanged wall/floor's mask IoU falls
+    # below threshold purely from the render's incompleteness -- observed
+    # directly on Lounge/Lunch_room (track_iou 0.86 vs spatial_iou 0.42 on
+    # one real static-wall pair). When True, both masks are restricted to
+    # render_t0_coverage before computing IoU, so pixels neither side has
+    # trustworthy t0-side geometry for don't count as an artificial
+    # mismatch. No-op when render_t0_coverage is not supplied. Untested
+    # before this setting was added -- see the "Failure Mode Audit"
+    # artifact and roadmap_status memory for the diagnosis.
+    same_location_coverage_aware: bool = False
+    # Failure-mode audit, candidate fix (b): SAM2's propagation-based track
+    # is inherently more tolerant of the render/photo appearance gap than
+    # comparing two independently-run SAM3 segmentations, since it warps
+    # the source mask forward rather than re-segmenting from scratch. When
+    # True, a direct_identity pair's track_iou is allowed to stand in for
+    # spatial_iou (whichever is higher) once track_iou alone clears
+    # high_confidence_track_iou -- well above minimum_track_iou's admission
+    # bar, so this only fires when tracking is unusually confident, not on
+    # every candidate. Only applied to the direct_identity path (not
+    # clean_bridge_identity, whose pairs exist precisely because direct
+    # bidirectional tracking already fell short once). Untested before this
+    # setting was added -- see the "Failure Mode Audit" artifact.
+    same_location_prefer_track_iou: bool = False
+    high_confidence_track_iou: float = 0.70
+    # Shipped 2026-09-08, on by default. same_location_prefer_track_iou (see
+    # above) was tried first and did not help (MOVED precision flat-to-
+    # slightly-worse on a 100-query PASLCD holdout) -- SAM2's track crosses
+    # the same render/photo domain gap spatial IoU does, so it is not an
+    # independent, trustworthy signal either. This setting instead REJECTS a
+    # same-location test that falls below same_location_iou, rather than
+    # committing it as MOVED: neither object is consumed, so both fall
+    # through to independent removed/added classification and its quality
+    # filters (visibility, geometric identity, minimum area, duplicate
+    # suppression), which MOVED's union-mask path previously bypassed
+    # entirely. Validated end-to-end on two independent datasets before
+    # shipping: SceneDiff (n=23 real test-split pairs, t1-frame-only px/im
+    # IoU 0.1455 -> 0.1542, MOVED false-positive volume 3.97M -> 0px) and
+    # PASLCD (n=100, mIoU 0.1696 -> 0.1946, F1 0.2590 -> 0.2898, precision
+    # 0.2403 -> 0.3128, at a real recall cost of 0.3927 -> 0.3297 -- 3 of 4
+    # scenes improved, the one regression (Lunch_room) is the one scene
+    # independently confirmed to contain genuine moved objects, so the
+    # trade-off is understood, not a mystery).
+    reject_low_confidence_moved: bool = True
+    # Controlled object-state ablation: preserve an already-accepted
+    # identity when its masks fail the same-location test.  Existing 3D
+    # geometry decides whether that is positive MOVED evidence; if geometry
+    # is unavailable or still supports the same location, keep the pair as
+    # internal UNKNOWN.  In either case both endpoints stay consumed rather
+    # than falling through to independent REMOVED/ADDED hypotheses.
+    enable_conservative_state_resolver: bool = False
     tracking_batch_size: int = 16
     recover_unmatched_via_tracking: bool = True
     # Geometric identity test (point-cloud centroid + overlap), an
@@ -88,6 +178,21 @@ class ThreeImageSettings:
     geometric_centroid_fraction: float = 0.15
     geometric_overlap_fraction: float = 0.15
     minimum_geometric_overlap: float = 0.20
+    # Experiment (2026-09-08): the geometric-identity test above compares
+    # render_t0's own (uncleaned) 3D positions against image_t1's -- so a
+    # candidate t0-side object is checked against geometry that may still
+    # include old/transient content the depth-conflict filter (stage 2)
+    # already identified as since-removed. clean_render_positions is loaded
+    # every query (via FrameInventory `clean`) but was otherwise completely
+    # unused downstream -- confirmed by tracing every call site. When True,
+    # the geometric-identity check uses clean_render's positions in place of
+    # render_t0's for the t0-side point cloud (same pixel grid, so t0's own
+    # object masks index into it validly), on the theory that geometry which
+    # survived cleaning is higher-confidence "genuine background" than
+    # render_t0's raw, uncleaned geometry. Appearance matching (SAM/DINO) is
+    # unaffected -- only which position buffer backs the geometric term.
+    # Untested before this flag was added.
+    geometric_identity_use_clean_render: bool = False
     # GOLDILOCS's visibility filter (Appendix A.6 / masks.filter_visible):
     # drops a removed/added/moved decision whose mask is mostly supported by
     # unrendered (occluded/out-of-view/parallax-gap) pixels rather than real
@@ -113,6 +218,77 @@ class ThreeImageSettings:
     # Requires render_t0_confidence; falls back to the binary test above
     # when not supplied, same convention as every other setting here.
     use_confidence_weighted_visibility: bool = False
+    # Above-horizon suppression. Measured on 30 refine-complete PASLCD
+    # queries (2026-09-09): 45.5% of all false-positive pixels sit in the top
+    # quarter of the image against only 3.0% of genuinely changed pixels --
+    # a 15x discrimination, by far the largest single precision lever found
+    # so far (+0.025 mIoU, +0.078 precision, -0.0001 recall; 17 queries
+    # better, 0 worse, 13 tied). The false positives are ceilings and sky:
+    # textureless, distant, badly reconstructed surfaces that no real change
+    # ever occurs on.
+    #
+    # The criterion is deliberately NOT "high 3D elevation". That was tried
+    # first and is much weaker (5.9x at best, catching only 15% of the
+    # false positives) for a structural reason: ceiling and sky are exactly
+    # where the reconstruction is least reliable, so filtering them by their
+    # own reconstructed geometry means filtering on noise. Instead the
+    # caller supplies ``above_horizon`` -- a per-pixel boolean computed from
+    # the QUERY CAMERA's known orientation (VGGT-Omega's extrinsics, or an
+    # IMU gravity vector on a robot), i.e. "this viewing ray points above
+    # the horizontal". That depends only on camera pose, never on the
+    # suspect geometry of the pixels being judged.
+    #
+    # It also degrades safely on a camera that is not level: a downward-
+    # looking robot head produces an all-False map and suppresses nothing,
+    # where a fixed "top N% of the image" crop would delete the far end of
+    # the table. Disabled when no ``above_horizon`` is supplied, same
+    # fallback convention as every other setting here.
+    enable_horizon_suppression: bool = False
+    # Reject a decision when more than this fraction of its mask lies above
+    # the horizon. 0.5 (a simple majority) rather than the visibility
+    # filter's 0.8, because a genuine object straddling the horizon line is
+    # rarer than a ceiling blob partially dipping below it.
+    maximum_above_horizon_fraction: float = 0.5
+    # Semantic replacement/successor to enable_horizon_suppression above.
+    # Measured 2026-09-09: the geometric approach's up-axis estimation
+    # (RANSAC dominant-plane + camera-up sign disambiguation) assumes the
+    # scene's largest coplanar point cluster is the floor. On 8/30 PASLCD
+    # queries -- near-frontal, floor-poor reference photos (a kitchen
+    # counter shot head-on, a garden wall/shelf with no ground visible) --
+    # that assumption was simply wrong: the dominant plane was a cabinet
+    # front or fence, and the ENTIRE frame (100.0% of pixels) was
+    # misjudged as "above horizon", catastrophically suppressing nearly all
+    # recall on those queries (mean dIoU -0.246 on the 8 failures, vs a mean
+    # dIoU of +0.043 -- better than predicted -- on the 22 queries it got
+    # right). Net effect across all 30: -0.0341 mIoU, a regression, entirely
+    # driven by those 8 catastrophic failures.
+    #
+    # This flag instead asks a real detector "is there a ceiling or sky
+    # region here" (see detect_ceiling_sky_mask / Sam3AutomaticMaskGenerator
+    # .detect_text_prompt), directly, from image appearance -- no RANSAC, no
+    # up-axis, no assumption about which surface is the floor. Empirically
+    # validated on exactly the two PASLCD failure modes above: on the
+    # near-frontal counter/garden-wall shots it correctly finds NOTHING
+    # (0 detections, so nothing is suppressed -- the "only trigger when we
+    # actually see a ceiling" property is inherent to using a real detector,
+    # not a threshold to tune), and on a real indoor ceiling it found a
+    # precise 6.6%-of-frame region (vs the geometric approach's wrong
+    # 100%). Costs a SEPARATE SAM3 model load (see Sam3TextPromptDetector):
+    # the proposal-generation model is built without the grounding/text-
+    # prompt head, so it cannot be reused for this -- an earlier version of
+    # this docstring claimed otherwise and was wrong. Construct one
+    # ``Sam3TextPromptDetector`` and pass it in across a whole batch (as
+    # ``text_detector=``) to pay that load cost once, not once per query.
+    enable_ceiling_sky_suppression: bool = False
+    # Reject a detection prompt below this SAM3 confidence. 0.5 matches this
+    # pipeline's default Sam3Processor threshold elsewhere (see
+    # sam3_proposals.Sam3AutomaticMaskGenerator); validated empirically to
+    # find genuine ceiling/sky regions (0.605-0.973 scores on real hits)
+    # while returning zero detections on the two PASLCD failure cases.
+    ceiling_sky_confidence_threshold: float = 0.5
+    ceiling_sky_prompts: tuple[str, ...] = ("ceiling", "sky")
+    # Same majority-overlap semantics as maximum_above_horizon_fraction.
+    maximum_ceiling_sky_fraction: float = 0.5
     # PASLCD-specific precision safeguard (roadmap item 6): GOLDILOCS's own
     # dominant precision mechanism is a majority vote across several *query*
     # photos of the same change (paper Table 11: 59-80% -> 95-98% precision
@@ -133,6 +309,52 @@ class ThreeImageSettings:
     # other reference-signal settings above.
     enable_reference_corroboration: bool = False
     minimum_corroborating_views: int = 2
+    # Occlusion-aware REMOVED suppression (v7, 2026-09-09, user-proposed).
+    # A logic gap, not a threshold: render_t0's REMOVED mask and image_t1's
+    # ADDED mask live in the SAME pixel grid by construction, so when a new
+    # object is placed in front of (i.e. at the same 2D footprint as) an old
+    # one, the old object's footprint is simply occluded, not genuinely
+    # removed -- yet resolve_three_image_changes reported it as a SEPARATE
+    # "removed" decision. Worse, the final labels raster draws in priority
+    # order (ADDED, REMOVED, MOVED), each later label overwriting the
+    # earlier at shared pixels -- so REMOVED actually won those pixels in
+    # the output, the opposite of what is visually true (something new is
+    # sitting there right now). This suppresses the REMOVED decision itself
+    # (not just the raster tie) when it is MOSTLY explained by an addition,
+    # so the same physical event is not double-reported as two separate
+    # changes. Same majority-overlap convention as every other suppression
+    # filter here (visibility/horizon/ceiling-sky): a REMOVED object that is
+    # only partly, incidentally adjacent to an unrelated addition is left
+    # alone; only a clear majority overlap is suppressed. A suppressed
+    # footprint is merged INTO the addition (relabelled ADDED, whole
+    # footprint), and the labels raster is rebuilt with ADDED drawn OVER
+    # REMOVED so a retained minority-overlap REMOVED object's shared pixels
+    # still show the addition. Net effect on the binary changed/unchanged
+    # metric is nil by construction (same changed set as with this off);
+    # only the class semantics change. The v8 run instead patched pixels and
+    # reverted the uncovered remainder to unchanged, which left suppressed
+    # footprints visibly REMOVED and cost recall.
+    enable_occlusion_aware_removal_suppression: bool = False
+    maximum_removed_behind_added_fraction: float = 0.5
+    # Depth form of the same test (v9). 2D overlap cannot tell "hidden
+    # behind something new" from "the old surface is gone and we now see
+    # the cavity behind it" -- both overlap the addition's footprint. The
+    # position buffers can: render_t0_positions and image_t1_positions
+    # share the query camera's rays, so along a REMOVED footprint the t1
+    # surface is either nearer (occluded => merged into the addition),
+    # farther (revealed => stays REMOVED) or equal (no depth evidence, e.g.
+    # a thin poster taken off a wall => the appearance decision stands).
+    # The camera centre is not stored, so it is recovered as the least-
+    # squares intersection of the (p_t0, p_t1) lines at displaced pixels;
+    # measured on Cantina_1: stable to 3 decimals, residual <1% of scene
+    # scale. Used whenever both buffers and scene_scale are supplied; the
+    # 2D-overlap rule above is the fallback. Margin is a fraction of
+    # scene_scale like every other geometric threshold here (background
+    # false-"nearer" rate at 0.05: 0.4-0.8%). An object counts as occluded
+    # when at least minimum_occluded_fraction of its depth-valid footprint
+    # is nearer AND nearer outweighs farther.
+    occlusion_depth_margin_fraction: float = 0.05
+    minimum_occluded_fraction: float = 0.25
     # Same-footprint object-replacement detection (roadmap item 5's
     # replacement -- dropped the ported SSIM/Warped idea for a mechanism
     # grounded in an actual verified PASLCD failure: a red block swapped for
@@ -354,14 +576,49 @@ def _bidirectional_track_score(
     return np.minimum(forward_iou, backward_iou), np.maximum(forward_iou, backward_iou)
 
 
-def _feature_matrices(source: FrameInventory, target: FrameInventory) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+def _descriptor_valid(sam_valid: np.ndarray, dino_valid: np.ndarray,
+                      settings: "ThreeImageSettings | None") -> np.ndarray:
+    """Per-object descriptor validity over the enabled descriptors only -- a
+    disabled descriptor must not veto an object through its valid flag."""
+    ok = np.ones(np.shape(sam_valid), dtype=bool)
+    if settings is None or settings.use_sam_features:
+        ok &= np.asarray(sam_valid, bool)
+    if settings is None or settings.use_dino_features:
+        ok &= np.asarray(dino_valid, bool)
+    return ok
+
+
+def _appearance_pass(sam, dino, settings: "ThreeImageSettings") -> np.ndarray:
+    """Elementwise appearance gate: every ENABLED descriptor must clear its
+    threshold. Works on matrices and on scalars alike."""
+    ok = np.ones(np.shape(sam), dtype=bool)
+    if settings.use_sam_features:
+        ok &= np.asarray(sam) >= settings.minimum_sam_cosine
+    if settings.use_dino_features:
+        ok &= np.asarray(dino) >= settings.minimum_dino_cosine
+    return ok
+
+
+def _appearance_score(sam, dino, settings: "ThreeImageSettings") -> np.ndarray:
+    """min over the enabled descriptors -- identical to the historical
+    min(sam, dino) when both are on; zero when neither is."""
+    parts = []
+    if settings.use_sam_features:
+        parts.append(np.asarray(sam, dtype=np.float32))
+    if settings.use_dino_features:
+        parts.append(np.asarray(dino, dtype=np.float32))
+    if not parts:
+        return np.zeros(np.shape(sam), dtype=np.float32)
+    return np.minimum.reduce(parts)
+
+
+def _feature_matrices(source: FrameInventory, target: FrameInventory,
+                      settings: "ThreeImageSettings | None" = None) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     sam = cosine_similarity_matrix(source.sam, target.sam)
     dino = cosine_similarity_matrix(source.dino, target.dino)
     valid = (
-        source.sam.valid[:, None]
-        & target.sam.valid[None, :]
-        & source.dino.valid[:, None]
-        & target.dino.valid[None, :]
+        _descriptor_valid(source.sam.valid, source.dino.valid, settings)[:, None]
+        & _descriptor_valid(target.sam.valid, target.dino.valid, settings)[None, :]
     )
     return sam, dino, valid
 
@@ -511,28 +768,37 @@ def _identity_candidates(
     settings: ThreeImageSettings,
     scene_scale: float | None = None,
 ) -> tuple[list[tuple[int, int]], dict[str, np.ndarray]]:
-    sam, dino, valid = _feature_matrices(source, target)
+    sam, dino, valid = _feature_matrices(source, target, settings)
     source_area = _areas(source.objects)
     target_area = _areas(target.objects)
     ratio = target_area[None, :] / np.maximum(source_area[:, None], 1.0)
-    identity = (
-        valid
-        & (sam >= settings.minimum_sam_cosine)
-        & (dino >= settings.minimum_dino_cosine)
-        & (ratio >= settings.area_ratio_low)
-        & (ratio <= settings.area_ratio_high)
-    )
-    feature_score = np.minimum(sam, dino)
-    reciprocal = _reciprocal_with_margin(feature_score, identity, settings.minimum_identity_margin)
     tracked = bidirectional_track >= settings.minimum_track_iou
 
-    # Pass 1: identical to the pre-geometric gate/score. One-direction
-    # tracks are useful for ranking, but cannot independently establish
-    # identity. This pass is frozen exactly as it always was, so it
-    # reproduces every match the old code already got right, whatever
-    # happens in pass 2 below.
-    old_feasible = identity & (tracked | reciprocal)
-    score = feature_score + 0.20 * bidirectional_track + 0.05 * any_track
+    if settings.enable_appearance_correspondence:
+        identity = (
+            valid
+            & _appearance_pass(sam, dino, settings)
+            & (ratio >= settings.area_ratio_low)
+            & (ratio <= settings.area_ratio_high)
+        )
+        feature_score = _appearance_score(sam, dino, settings)
+        reciprocal = _reciprocal_with_margin(feature_score, identity, settings.minimum_identity_margin)
+        # Pass 1: identical to the pre-geometric gate/score. One-direction
+        # tracks are useful for ranking, but cannot independently establish
+        # identity. This pass is frozen exactly as it always was, so it
+        # reproduces every match the old code already got right, whatever
+        # happens in pass 2 below.
+        old_feasible = identity & (tracked | reciprocal)
+        score = feature_score + 0.20 * bidirectional_track + 0.05 * any_track
+    else:
+        # "Tracking only" ablation baseline: no appearance signal at all,
+        # so identity/reciprocal (both appearance-derived) drop out and
+        # ranking falls back to track strength alone.
+        identity = valid & (ratio >= settings.area_ratio_low) & (ratio <= settings.area_ratio_high)
+        feature_score = np.zeros_like(sam)
+        reciprocal = np.zeros_like(identity, dtype=bool)
+        old_feasible = identity & tracked
+        score = 0.20 * bidirectional_track + 0.05 * any_track
     matched = _assign(score, old_feasible)
 
     diagnostics = {
@@ -614,11 +880,7 @@ def _endpoint_map(bidirectional_track: np.ndarray, any_track: np.ndarray, minimu
 def _identity_at(
     sam: np.ndarray, dino: np.ndarray, valid: np.ndarray, row: int, column: int, settings: ThreeImageSettings
 ) -> bool:
-    return bool(
-        valid[row, column]
-        and sam[row, column] >= settings.minimum_sam_cosine
-        and dino[row, column] >= settings.minimum_dino_cosine
-    )
+    return bool(valid[row, column] and _appearance_pass(sam[row, column], dino[row, column], settings))
 
 
 def _visible_fraction(mask: np.ndarray, coverage: np.ndarray) -> float:
@@ -676,6 +938,8 @@ def resolve_three_image_changes(
     render_t0_coverage: np.ndarray | None = None,
     render_t0_confidence: np.ndarray | None = None,
     render_t0_corroboration: np.ndarray | None = None,
+    above_horizon: np.ndarray | None = None,
+    ceiling_sky_mask: np.ndarray | None = None,
 ) -> tuple[np.ndarray, list[ObjectMask], list[dict[str, Any]], dict[str, Any]]:
     """Resolve unchanged/moved/removed/added object states.
 
@@ -718,8 +982,17 @@ def resolve_three_image_changes(
     t1_clean_bi, t1_clean_any = _bidirectional_track_score(
         tracks.t1_to_clean, tracks.clean_to_t1, t1.objects, clean.objects
     )
-    direct_pairs, direct_features = _identity_candidates(t0, t1, direct_bi, direct_any, settings, scene_scale)
-    spatial = pairwise_mask_iou(t0.objects, t1.objects)
+    t0_for_identity = t0
+    if settings.geometric_identity_use_clean_render and clean.world_positions is not None:
+        # clean_render is rendered into the same T1 camera as render_t0, so
+        # t0's own object masks (defined on that same pixel grid) index into
+        # clean.world_positions validly -- see ThreeImageSettings docstring.
+        t0_for_identity = replace(t0, world_positions=clean.world_positions)
+    direct_pairs, direct_features = _identity_candidates(t0_for_identity, t1, direct_bi, direct_any, settings, scene_scale)
+    spatial = pairwise_mask_iou(
+        t0.objects, t1.objects,
+        validity=render_t0_coverage if settings.same_location_coverage_aware else None,
+    )
     # The clean point-cloud view can be incomplete, so requiring both track
     # directions here would discard the very bridge that is meant to recover
     # a render/photo domain gap. A one-way endpoint track is only a location
@@ -728,12 +1001,20 @@ def resolve_three_image_changes(
     t1_clean_map = _endpoint_map(t1_clean_any, t1_clean_any, settings.minimum_track_iou)
     clean_sam = cosine_similarity_matrix(clean.sam, clean.sam)
     clean_dino = cosine_similarity_matrix(clean.dino, clean.dino)
-    clean_valid = clean.sam.valid[:, None] & clean.sam.valid[None, :] & clean.dino.valid[:, None] & clean.dino.valid[None, :]
+    clean_descriptor_valid = _descriptor_valid(clean.sam.valid, clean.dino.valid, settings)
+    clean_valid = clean_descriptor_valid[:, None] & clean_descriptor_valid[None, :]
 
     consumed_t0: set[int] = set()
     consumed_t1: set[int] = set()
     decisions: list[dict[str, Any]] = []
     output_objects: list[ObjectMask] = []
+    state_resolver_counts = {
+        "low_location_associations": 0,
+        "moved": 0,
+        "unknown_identity_location": 0,
+        "unknown_unmatched_added_visibility": 0,
+        "unknown_unmatched_removed_visibility": 0,
+    }
 
     def record_pair(source: int, target: int, decision: Label, evidence: str) -> None:
         consumed_t0.add(source)
@@ -768,31 +1049,104 @@ def resolve_three_image_changes(
                 )
             )
 
+    def record_rejected(source: int, target: int, evidence: str) -> None:
+        decisions.append(
+            {
+                "decision": "location_mismatch_rejected",
+                "t0_object_id": source + 1,
+                "t1_object_id": target + 1,
+                "evidence": evidence,
+                "spatial_iou": float(spatial[source, target]),
+                "track_iou": float(direct_bi[source, target]),
+                "sam_cosine": float(direct_features["sam"][source, target]),
+                "dino_cosine": float(direct_features["dino"][source, target]),
+            }
+        )
+
+    def resolve_low_location_identity(source: int, target: int, evidence: str) -> None:
+        """Resolve state without revoking an identity that already passed.
+
+        A failed 2D same-location test alone is ambiguous because proposal
+        boundaries differ across render/photo domains.  The already-existing
+        geometric identity test supplies the independent state evidence:
+        resolvable geometry that fails its existing same-place criterion
+        supports MOVED; matching or unavailable geometry yields UNKNOWN.
+        No new score or threshold is introduced.
+        """
+        state_resolver_counts["low_location_associations"] += 1
+        geometry_resolvable = bool(direct_features["geometric_resolvable"][source, target])
+        geometry_same_location = bool(direct_features["geometric"][source, target])
+        if geometry_resolvable and not geometry_same_location:
+            record_pair(source, target, Label.MOVED, evidence)
+            decisions[-1]["state_resolver"] = "geometry_supported_moved"
+            decisions[-1]["geometric_score"] = float(direct_features["geometric_score"][source, target])
+            state_resolver_counts["moved"] += 1
+            return
+
+        consumed_t0.add(source)
+        consumed_t1.add(target)
+        decisions.append(
+            {
+                "decision": "unknown_identity_location",
+                "t0_object_id": source + 1,
+                "t1_object_id": target + 1,
+                "evidence": evidence,
+                "spatial_iou": float(spatial[source, target]),
+                "track_iou": float(direct_bi[source, target]),
+                "sam_cosine": float(direct_features["sam"][source, target]),
+                "dino_cosine": float(direct_features["dino"][source, target]),
+                "geometric_resolvable": geometry_resolvable,
+                "geometric_same_location": geometry_same_location,
+                "geometric_score": float(direct_features["geometric_score"][source, target]),
+                "state_resolver": "ambiguous_location_suppressed",
+            }
+        )
+        state_resolver_counts["unknown_identity_location"] += 1
+
     for source, target in direct_pairs:
-        decision = Label.UNCHANGED if spatial[source, target] >= settings.same_location_iou else Label.MOVED
-        record_pair(source, target, decision, "direct_identity")
+        location_score = spatial[source, target]
+        if settings.same_location_prefer_track_iou and direct_bi[source, target] >= settings.high_confidence_track_iou:
+            location_score = max(location_score, direct_bi[source, target])
+        if location_score >= settings.same_location_iou:
+            record_pair(source, target, Label.UNCHANGED, "direct_identity")
+        elif settings.enable_conservative_state_resolver:
+            resolve_low_location_identity(source, target, "direct_identity")
+        elif settings.reject_low_confidence_moved:
+            record_rejected(source, target, "direct_identity")
+        else:
+            record_pair(source, target, Label.MOVED, "direct_identity")
 
     # A reliable track can survive a render/photo feature-domain gap. Validate
     # such a pair by comparing its two endpoints inside the common clean-render
     # feature domain.
     bridge_edges = np.zeros_like(direct_bi, dtype=bool)
     bridge_scores = np.zeros_like(direct_bi, dtype=np.float32)
-    for source, target in zip(*np.nonzero(direct_any >= settings.minimum_track_iou)):
-        if source in consumed_t0 or target in consumed_t1:
-            continue
-        clean_source = t0_clean_map.get(int(source))
-        clean_target = t1_clean_map.get(int(target))
-        if clean_source is None or clean_target is None:
-            continue
-        if not _identity_at(clean_sam, clean_dino, clean_valid, clean_source, clean_target, settings):
-            continue
-        bridge_edges[source, target] = True
-        bridge_scores[source, target] = (
-            min(clean_sam[clean_source, clean_target], clean_dino[clean_source, clean_target]) + direct_bi[source, target]
-        )
+    if settings.enable_clean_bridge:
+        for source, target in zip(*np.nonzero(direct_any >= settings.minimum_track_iou)):
+            if source in consumed_t0 or target in consumed_t1:
+                continue
+            clean_source = t0_clean_map.get(int(source))
+            clean_target = t1_clean_map.get(int(target))
+            if clean_source is None or clean_target is None:
+                continue
+            if not _identity_at(clean_sam, clean_dino, clean_valid, clean_source, clean_target, settings):
+                continue
+            bridge_edges[source, target] = True
+            bridge_scores[source, target] = float(
+                _appearance_score(
+                    clean_sam[clean_source, clean_target], clean_dino[clean_source, clean_target], settings
+                )
+                + direct_bi[source, target]
+            )
     for source, target in _assign(bridge_scores, bridge_edges):
-        decision = Label.UNCHANGED if spatial[source, target] >= settings.same_location_iou else Label.MOVED
-        record_pair(source, target, decision, "clean_bridge_identity")
+        if spatial[source, target] >= settings.same_location_iou:
+            record_pair(source, target, Label.UNCHANGED, "clean_bridge_identity")
+        elif settings.enable_conservative_state_resolver:
+            resolve_low_location_identity(source, target, "clean_bridge_identity")
+        elif settings.reject_low_confidence_moved:
+            record_rejected(source, target, "clean_bridge_identity")
+        else:
+            record_pair(source, target, Label.MOVED, "clean_bridge_identity")
 
     for source, item in enumerate(t0.objects):
         if source in consumed_t0:
@@ -835,8 +1189,59 @@ def resolve_three_image_changes(
             ids = (item.metadata.get("t0_object_id"), item.metadata.get("t1_object_id"))
             row = decision_by_ids.get(ids)
             if row is not None:
-                row["decision"] = "visibility_filtered"
+                if settings.enable_conservative_state_resolver and item.label in (Label.ADDED, Label.REMOVED):
+                    previous = item.label.name.lower()
+                    row["decision"] = "unknown_unmatched_visibility"
+                    row["candidate_state"] = previous
+                    state_resolver_counts[f"unknown_unmatched_{previous}_visibility"] += 1
+                else:
+                    row["decision"] = "visibility_filtered"
                 row["render_support_fraction"] = support
+        output_objects = retained_objects
+
+    horizon_suppressed = 0
+    if settings.enable_horizon_suppression and above_horizon is not None:
+        sky = np.asarray(above_horizon, bool)
+        decision_by_ids = {(row.get("t0_object_id"), row.get("t1_object_id")): row for row in decisions}
+        retained_objects = []
+        for item in output_objects:
+            mask = np.asarray(item.mask, bool)
+            area = int(mask.sum())
+            fraction = float((mask & sky).sum()) / area if area else 0.0
+            item.metadata["above_horizon_fraction"] = fraction
+            if fraction <= settings.maximum_above_horizon_fraction:
+                retained_objects.append(item)
+                continue
+            horizon_suppressed += 1
+            # Demote the decisions row for the same reason the visibility
+            # filter does: recover_unmatched_via_tracking reads decisions,
+            # not output_objects, and must not resurrect an id suppressed here.
+            ids = (item.metadata.get("t0_object_id"), item.metadata.get("t1_object_id"))
+            row = decision_by_ids.get(ids)
+            if row is not None:
+                row["decision"] = "horizon_suppressed"
+                row["above_horizon_fraction"] = fraction
+        output_objects = retained_objects
+
+    ceiling_sky_suppressed = 0
+    if settings.enable_ceiling_sky_suppression and ceiling_sky_mask is not None:
+        sky = np.asarray(ceiling_sky_mask, bool)
+        decision_by_ids = {(row.get("t0_object_id"), row.get("t1_object_id")): row for row in decisions}
+        retained_objects = []
+        for item in output_objects:
+            mask = np.asarray(item.mask, bool)
+            area = int(mask.sum())
+            fraction = float((mask & sky).sum()) / area if area else 0.0
+            item.metadata["ceiling_sky_fraction"] = fraction
+            if fraction <= settings.maximum_ceiling_sky_fraction:
+                retained_objects.append(item)
+                continue
+            ceiling_sky_suppressed += 1
+            ids = (item.metadata.get("t0_object_id"), item.metadata.get("t1_object_id"))
+            row = decision_by_ids.get(ids)
+            if row is not None:
+                row["decision"] = "ceiling_sky_suppressed"
+                row["ceiling_sky_fraction"] = fraction
         output_objects = retained_objects
 
     corroboration_rejected = 0
@@ -863,14 +1268,9 @@ def resolve_three_image_changes(
                 row["reference_corroboration"] = corroboration
         output_objects = retained_objects
 
-    labels = np.zeros(shape, dtype=np.uint8)
     # Added is weakest where proposal masks overlap; same-identity motion is
     # the most specific object-level explanation.
-    priority = (Label.ADDED, Label.REMOVED, Label.MOVED)
-    for label_value in priority:
-        for item in output_objects:
-            if item.label == label_value:
-                labels[np.asarray(item.mask, bool)] = int(label_value)
+    labels = _rasterize_labels(shape, output_objects, (Label.ADDED, Label.REMOVED, Label.MOVED))
     # moved/removed/added counted from output_objects (post-visibility-filter)
     # rather than decisions, so this reflects what was actually rasterized;
     # unchanged is never filtered (see resolve_three_image_changes's
@@ -882,6 +1282,8 @@ def resolve_three_image_changes(
         "object_counts": {"render_t0": len(t0.objects), "clean_render": len(clean.objects), "image_t1": len(t1.objects)},
         "decision_counts": counts,
         "visibility_filter_rejected": visibility_filter_rejected,
+        "horizon_suppressed": horizon_suppressed,
+        "ceiling_sky_suppressed": ceiling_sky_suppressed,
         "corroboration_rejected": corroboration_rejected,
         "changed_pixel_fraction": float(np.mean(labels != int(Label.UNCHANGED))),
         "association_evidence": {
@@ -898,6 +1300,7 @@ def resolve_three_image_changes(
             "t1_to_clean_bidirectional_track_iou": t1_clean_bi.tolist(),
             "t1_to_clean_any_direction_track_iou": t1_clean_any.tolist(),
         },
+        "state_resolver": state_resolver_counts,
     }
     return labels, output_objects, decisions, diagnostics
 
@@ -909,6 +1312,145 @@ def _mask_iou(first: np.ndarray, second: np.ndarray) -> float:
     if not union:
         return 0.0
     return int(np.logical_and(first, second).sum()) / union
+
+
+def _estimate_camera_centre(
+    positions_t0: np.ndarray, positions_t1: np.ndarray, scene_scale: float,
+    *, minimum_lines: int = 500, maximum_residual_fraction: float = 0.10,
+) -> np.ndarray | None:
+    """Least-squares intersection of the lines through (p_t0, p_t1) at
+    pixels where the two buffers disagree by more than 5% of scene scale.
+    Both buffers are rendered/unprojected through the same query camera, so
+    every such line passes through its centre. None when there are too few
+    displaced pixels, the lines do not meet (median point-line distance
+    above ``maximum_residual_fraction`` of scene scale), or the recovered
+    centre does not see every valid point inside one forward half-space.
+
+    The residual cutoff only has to catch a non-converged fit: across the 30
+    PASLCD ablation queries the median residual spans 0.002-0.055 of scene
+    scale, and the "t1 nearer" false-positive rate on GT-unchanged pixels
+    stays at 0.2-1.8% over that whole range (an earlier 0.02 cutoff rejected
+    16/30 usable fits for no gain in that rate)."""
+    both = np.isfinite(positions_t0).all(-1) & np.isfinite(positions_t1).all(-1)
+    delta = positions_t1 - positions_t0
+    distance = np.linalg.norm(delta, axis=-1)
+    selected = both & (distance > 0.05 * scene_scale)
+    if int(selected.sum()) < minimum_lines:
+        return None
+    points = positions_t0[selected].astype(np.float64)
+    directions = (delta[selected] / distance[selected][:, None]).astype(np.float64)
+    count = len(points)
+    normal = count * np.eye(3) - directions.T @ directions
+    rhs = points.sum(0) - directions.T @ np.einsum("ij,ij->i", directions, points)
+    try:
+        centre = np.linalg.solve(normal, rhs)
+    except np.linalg.LinAlgError:
+        return None
+    offsets = centre[None, :] - points
+    residual = np.linalg.norm(offsets - directions * np.einsum("ij,ij->i", directions, offsets)[:, None], axis=-1)
+    if float(np.median(residual)) > maximum_residual_fraction * scene_scale:
+        return None
+    rays = positions_t1[np.isfinite(positions_t1).all(-1)] - centre
+    rays /= np.linalg.norm(rays, axis=-1, keepdims=True)
+    forward = rays.mean(0)
+    forward /= np.linalg.norm(forward)
+    if float((rays @ forward).min()) <= 0.0:
+        return None
+    return centre
+
+
+def suppress_removed_behind_added(
+    labels: np.ndarray, objects: Sequence[ObjectMask], decisions: list[dict[str, Any]],
+    settings: "ThreeImageSettings",
+    render_t0_positions: np.ndarray | None = None,
+    image_t1_positions: np.ndarray | None = None,
+    scene_scale: float | None = None,
+) -> tuple[np.ndarray, list[ObjectMask], list[dict[str, Any]], int, bool]:
+    """Reclassify a REMOVED decision to unchanged when its render_t0
+    footprint is mostly covered by an ADDED object's image_t1 footprint --
+    see enable_occlusion_aware_removal_suppression's docstring for why this
+    is a logic gap (double-reporting one physical event as two changes and
+    the raster ordering making REMOVED win it), not a threshold to tune.
+
+    Applied to the FINAL objects/labels/decisions -- i.e. called after
+    recover_unmatched_via_tracking, not from inside
+    resolve_three_image_changes -- so it also catches REMOVED decisions
+    that only exist because recall recovery reinstated them; an earlier
+    placement would miss those.
+    """
+    if not settings.enable_occlusion_aware_removal_suppression:
+        return labels, list(objects), decisions, 0, False
+
+    depth_t0 = depth_t1 = None
+    if render_t0_positions is not None and image_t1_positions is not None and scene_scale:
+        centre = _estimate_camera_centre(render_t0_positions, image_t1_positions, scene_scale)
+        if centre is not None:
+            depth_t0 = np.linalg.norm(render_t0_positions - centre, axis=-1)
+            depth_t1 = np.linalg.norm(image_t1_positions - centre, axis=-1)
+    depth_available = depth_t0 is not None
+    margin = settings.occlusion_depth_margin_fraction * (scene_scale or 0.0)
+
+    added_masks = [np.asarray(item.mask, bool) for item in objects if item.label == Label.ADDED]
+    if not added_masks and not depth_available:
+        return labels, list(objects), decisions, 0, False
+    added_union = np.zeros(labels.shape, dtype=bool)
+    for mask in added_masks:
+        added_union |= mask
+
+    decision_by_ids = {(row.get("t0_object_id"), row.get("t1_object_id")): row for row in decisions}
+    retained_objects = []
+    suppressed = 0
+    for item in objects:
+        if item.label != Label.REMOVED:
+            retained_objects.append(item)
+            continue
+        mask = np.asarray(item.mask, bool)
+        area = int(mask.sum())
+        fraction = float((mask & added_union).sum()) / area if area else 0.0
+        evidence: dict[str, Any] = {"removed_behind_added_fraction": fraction}
+        valid = mask & np.isfinite(depth_t0) & np.isfinite(depth_t1) if depth_available else None
+        if valid is not None and int(valid.sum()) >= max(20, 0.3 * area):
+            nearer = float(np.mean(depth_t1[valid] < depth_t0[valid] - margin))
+            farther = float(np.mean(depth_t1[valid] > depth_t0[valid] + margin))
+            evidence.update({"occlusion_evidence": "depth", "t1_nearer_fraction": nearer, "t1_farther_fraction": farther})
+            occluded = nearer >= settings.minimum_occluded_fraction and nearer > farther
+        else:
+            evidence["occlusion_evidence"] = "overlap_2d"
+            occluded = fraction > settings.maximum_removed_behind_added_fraction
+        item.metadata.update(evidence)
+        if not occluded:
+            retained_objects.append(item)
+            continue
+        suppressed += 1
+        # Merged into the addition, not dropped: the uncovered remainder of a
+        # majority-covered footprint is almost always the same new object
+        # under-segmented by SAM3 (IMG_2870: 96% of those pixels were GT
+        # change), not the old object peeking out. v8 reverted it to
+        # unchanged and lost exactly that recall.
+        retained_objects.append(replace(
+            item, label=Label.ADDED, metadata={**item.metadata, "merged_into_addition": True},
+        ))
+        ids = (item.metadata.get("t0_object_id"), item.metadata.get("t1_object_id"))
+        row = decision_by_ids.get(ids)
+        if row is not None:
+            row["decision"] = "removed_behind_added"
+            row.update(evidence)
+    # Rebuild rather than patch: the incoming raster was drawn ADDED-then-
+    # REMOVED, so a REMOVED footprint already overwrote every ADDED pixel it
+    # touched. Clearing only the non-overlapping part (what v8 did) left the
+    # overlap labelled REMOVED. Here REMOVED goes under ADDED: the addition
+    # is what is physically visible at those pixels in image_t1.
+    labels = _rasterize_labels(labels.shape, retained_objects, (Label.REMOVED, Label.ADDED, Label.MOVED))
+    return labels, retained_objects, decisions, suppressed, depth_available
+
+
+def _rasterize_labels(shape: tuple[int, ...], objects: Sequence[ObjectMask], priority: Sequence[Label]) -> np.ndarray:
+    labels = np.zeros(shape, dtype=np.uint8)
+    for label_value in priority:
+        for item in objects:
+            if item.label == label_value:
+                labels[np.asarray(item.mask, bool)] = int(label_value)
+    return labels
 
 
 def recover_unmatched_via_tracking(
@@ -961,16 +1503,16 @@ def recover_unmatched_via_tracking(
     ) -> tuple[float, float, float] | None:
         if candidate_mask is None:
             return None
-        if not source_inventory.sam.valid[source_id] or not source_inventory.dino.valid[source_id]:
+        if not _descriptor_valid(source_inventory.sam.valid[source_id], source_inventory.dino.valid[source_id], settings):
             return None
         candidate = ObjectMask(mask=candidate_mask)
         cand_sam = mask_descriptors(candidate_map_sam, [candidate], minimum_feature_cells=settings.minimum_sam_feature_cells)
         cand_dino = mask_descriptors(candidate_map_dino, [candidate], minimum_feature_cells=settings.minimum_dino_feature_cells)
-        if not (cand_sam.valid[0] and cand_dino.valid[0]):
+        if not _descriptor_valid(cand_sam.valid[0], cand_dino.valid[0], settings):
             return None
         sam_cos = float(source_inventory.sam.vectors[source_id] @ cand_sam.vectors[0])
         dino_cos = float(source_inventory.dino.vectors[source_id] @ cand_dino.vectors[0])
-        if sam_cos < settings.minimum_sam_cosine or dino_cos < settings.minimum_dino_cosine:
+        if not _appearance_pass(sam_cos, dino_cos, settings):
             return None
         source_area = float(np.asarray(source_inventory.objects[source_id].mask, bool).sum())
         if not area_ratio_ok(source_area, float(np.asarray(candidate_mask, bool).sum())):
@@ -1003,6 +1545,17 @@ def recover_unmatched_via_tracking(
         else:
             evidence_mask = np.logical_or(source_mask, tracked_mask)
         location_iou = _mask_iou(source_mask, tracked_mask)
+        if location_iou < settings.same_location_iou and settings.reject_low_confidence_moved:
+            # Don't commit to MOVED on weak location evidence -- undo the
+            # absorption above and leave both objects in their original
+            # removed/added buckets instead (see reject_low_confidence_moved
+            # docstring on ThreeImageSettings).
+            recovered_t0_ids.discard(t0_id)
+            dropped_object_indices.discard(object_index_by_removed_t0[t0_id])
+            if absorbed_t1 is not None:
+                recovered_t1_ids.discard(absorbed_t1)
+                dropped_object_indices.discard(object_index_by_added_t1[absorbed_t1])
+            continue
         new_label = Label.UNCHANGED if location_iou >= settings.same_location_iou else Label.MOVED
         recovered_decisions.append(
             {
@@ -1047,6 +1600,13 @@ def recover_unmatched_via_tracking(
         else:
             evidence_mask = np.logical_or(target_mask, tracked_mask)
         location_iou = _mask_iou(target_mask, tracked_mask)
+        if location_iou < settings.same_location_iou and settings.reject_low_confidence_moved:
+            recovered_t1_ids.discard(t1_id)
+            dropped_object_indices.discard(object_index_by_added_t1[t1_id])
+            if absorbed_t0 is not None:
+                recovered_t0_ids.discard(absorbed_t0)
+                dropped_object_indices.discard(object_index_by_removed_t0[absorbed_t0])
+            continue
         new_label = Label.UNCHANGED if location_iou >= settings.same_location_iou else Label.MOVED
         recovered_decisions.append(
             {
@@ -1081,12 +1641,7 @@ def recover_unmatched_via_tracking(
     final_decisions = kept_decisions + recovered_decisions
     final_objects = [item for index, item in enumerate(output_objects) if index not in dropped_object_indices]
 
-    new_labels = np.zeros(labels.shape, dtype=np.uint8)
-    priority = (Label.ADDED, Label.REMOVED, Label.MOVED)
-    for label_value in priority:
-        for item in final_objects:
-            if item.label == label_value:
-                new_labels[np.asarray(item.mask, bool)] = int(label_value)
+    new_labels = _rasterize_labels(labels.shape, final_objects, (Label.ADDED, Label.REMOVED, Label.MOVED))
 
     counts = {
         name: sum(row["decision"] == name for row in final_decisions)
@@ -1188,13 +1743,10 @@ def _suppress_feature_matched_parts(
                 parent_x.min() - margin <= center_x <= parent_x.max() + margin
                 and parent_y.min() - margin <= center_y <= parent_y.max() + margin
             )
-            features_match = (
-                inventory.sam.valid[index]
-                and inventory.sam.valid[parent]
-                and inventory.dino.valid[index]
-                and inventory.dino.valid[parent]
-                and sam[index, parent] >= settings.minimum_sam_cosine
-                and dino[index, parent] >= settings.minimum_dino_cosine
+            features_match = bool(
+                _descriptor_valid(inventory.sam.valid[index], inventory.dino.valid[index], settings)
+                and _descriptor_valid(inventory.sam.valid[parent], inventory.dino.valid[parent], settings)
+                and _appearance_pass(sam[index, parent], dino[index, parent], settings)
             )
             adjacent = bool(np.logical_and(mask, binary_dilation(parent_mask, iterations=max(margin, 1))).any())
             geometric_confirms = True
@@ -1288,6 +1840,165 @@ def find_color_replacement_regions(
     return objects
 
 
+def _dump_intermediate_stages(root: Path, inventories, raw_proposals, tracking,
+                              labels, objects, decisions) -> None:
+    """Persist the per-stage data a later re-analysis needs but the
+    visualizations throw away: proposal masks, SAM3/DINOv2 descriptors, SAM2
+    tracks, and the per-decision table. Masks are packed with np.packbits
+    (8x smaller than bool) and descriptors cast to float16 -- both lossless
+    enough for diagnosis, and the difference between a few MB and a few
+    hundred MB per query.
+
+    Written under ``root`` as one directory per stage so the artifacts.py
+    layout can point at them directly.
+    """
+    def pack(masks):
+        arr = np.asarray([np.asarray(m, bool) for m in masks]) if len(masks) else np.zeros((0, 1, 1), bool)
+        return {"packed": np.packbits(arr, axis=-1), "shape": np.asarray(arr.shape)}
+
+    proposals_dir = root / "proposals"; proposals_dir.mkdir(parents=True, exist_ok=True)
+    descriptors_dir = root / "descriptors"; descriptors_dir.mkdir(parents=True, exist_ok=True)
+    tracking_dir = root / "tracking"; tracking_dir.mkdir(parents=True, exist_ok=True)
+    resolution_dir = root / "resolution"; resolution_dir.mkdir(parents=True, exist_ok=True)
+
+    for frame, inventory in inventories.items():
+        selected = [o.mask for o in inventory.objects]
+        np.savez_compressed(proposals_dir / f"{frame}_selected.npz", **pack(selected),
+                            scores=np.asarray([float(o.score or 0.0) for o in inventory.objects]))
+        np.savez_compressed(proposals_dir / f"{frame}_raw.npz",
+                            **pack([p.mask for p in raw_proposals[frame]]))
+        np.savez_compressed(
+            descriptors_dir / f"{frame}.npz",
+            sam=np.asarray(inventory.sam.vectors, dtype=np.float16),
+            dino=np.asarray(inventory.dino.vectors, dtype=np.float16),
+        )
+
+    track_arrays = {}
+    for name in ("t0_to_t1", "t1_to_t0", "t0_to_clean", "clean_to_t0", "t1_to_clean", "clean_to_t1"):
+        tracks = getattr(tracking, name)
+        present = [i for i, t in enumerate(tracks) if t is not None]
+        track_arrays[f"{name}_index"] = np.asarray(present, dtype=np.int32)
+        if present:
+            stacked = np.asarray([np.asarray(tracks[i], bool) for i in present])
+            track_arrays[f"{name}_packed"] = np.packbits(stacked, axis=-1)
+            track_arrays[f"{name}_shape"] = np.asarray(stacked.shape)
+    np.savez_compressed(tracking_dir / "tracks.npz", **track_arrays)
+
+    np.savez_compressed(resolution_dir / "final_objects.npz", **pack([o.mask for o in objects]),
+                        labels=np.asarray([int(o.label) if o.label is not None else -1 for o in objects]))
+    save_json(resolution_dir / "decisions.json", decisions)
+    np.save(root.joinpath("labels.npy"), labels)
+
+
+def detect_ceiling_sky_mask(
+    text_detector: "Sam3TextPromptDetector", image: np.ndarray, settings: "ThreeImageSettings"
+) -> np.ndarray:
+    """Per-pixel boolean: does a real ceiling-or-sky region cover this pixel,
+    per SAM3's own grounded text-prompt detection on ``image`` (normally
+    image_t1, the real photo -- not a render, so it carries no hole/artifact
+    confusion). Replaces the geometric above_horizon approach's assumption
+    that the scene's largest coplanar point cluster is the floor, which
+    failed catastrophically (100% of frame misjudged) on near-frontal,
+    floor-poor reference photos -- see enable_ceiling_sky_suppression's
+    docstring for the measured comparison.
+
+    ``text_detector`` must be a Sam3TextPromptDetector, a SEPARATE model
+    instance from the automatic-mask-generator's -- they cannot share one
+    (see that class's docstring for why; an earlier version of this function
+    tried, and raised KeyError('pred_masks') on every call).
+
+    Unions every detection scoring >= text_detector.confidence_threshold
+    across all settings.ceiling_sky_prompts (not just the single best per
+    prompt): a scene can have more than one disjoint ceiling/sky patch.
+    Returns an all-False mask when nothing is found -- the caller's filter
+    then suppresses nothing, by construction, not by a tuned fallback.
+    """
+    mask = np.zeros(np.asarray(image).shape[:2], dtype=bool)
+    for prompt in settings.ceiling_sky_prompts:
+        for detection_mask, _score in text_detector.detect(image, prompt):
+            mask |= detection_mask
+    return mask
+
+
+def _dump_inventory_bundle(
+    path: str | Path,
+    inventory_t0: "FrameInventory", inventory_clean: "FrameInventory", inventory_t1: "FrameInventory",
+    tracking: "TrackingEvidence",
+    raw_t0: Sequence[Sam3Proposal], raw_clean: Sequence[Sam3Proposal], raw_t1: Sequence[Sam3Proposal],
+    sam_t0_map: np.ndarray, dino_t0_map: np.ndarray, sam_t1_map: np.ndarray, dino_t1_map: np.ndarray,
+    provenance: dict[str, Any] | None = None,
+) -> None:
+    """Persist everything stages 1-3 (SAM3 proposals+features, DINOv2
+    features+pooling, SAM2 tracking) produce that stages 4+ need, so a
+    LATER-STAGE-ONLY config change (e.g. a suppression filter, recall
+    recovery, color replacement, or any of the model-set ablation flags --
+    none of which alter proposal generation, pooling, or tracking) can
+    replay stages 4+ in ~1-2s/query instead of ~120s/query by skipping the
+    three GPU-heavy stages entirely, via ``load_inventory_from`` below.
+    Measured 2026-09-09: stages 1-3 are 95%+ of per-query wall time; stage 4
+    onward (resolve_three_image_changes + recovery + occlusion suppression +
+    color replacement) is under 2s combined.
+
+    The t0/t1 (not clean-render) dense per-pixel SAM3/DINOv2 feature maps
+    ARE included, despite otherwise only being used to BUILD the pooled
+    FrameInventory objects above: recover_unmatched_via_tracking pools a
+    FRESH descriptor from them for any track-recovered mask (one SAM2 found
+    but SAM3 never independently proposed, so it has no existing pooled
+    vector). Measured modest size (DINOv2's grid is 48x64x768 float16, a
+    few MB; SAM3's is comparable) -- a one-time few-hundred-MB cache, not a
+    concern. clean_render's own maps are never read after inventory-
+    building (recovery's signature takes only t0/t1), so those alone are
+    omitted. Pickle is used because every other field here is a plain
+    dataclass of numpy arrays (already proven safe for exactly this shape
+    by reconstruction.ReferenceScene's own pickle round-trip in
+    run_scenediff_diagnostic.py).
+
+    Correctness scope: only valid to replay for a NEW config whose
+    sam3_proposals / dinov2_features / sam2_tracking sections are unchanged
+    from the config that produced this dump -- those sections govern
+    exactly what is cached here. A config that only changes
+    three_image_comparison is always safe to replay, including every flag
+    explored in this project's suppression ablation AND the model-set
+    ablation's use_sam_features/use_dino_features/enable_tracking (they
+    change how resolve_three_image_changes CONSUMES the pooled descriptors/
+    tracks, not how those are computed).
+    """
+    import pickle
+
+    path = Path(path)
+    path.mkdir(parents=True, exist_ok=True)
+    (path / "bundle.pkl").write_bytes(pickle.dumps({
+        "inventory_t0": inventory_t0, "inventory_clean": inventory_clean, "inventory_t1": inventory_t1,
+        "tracking": tracking, "raw_t0": raw_t0, "raw_clean": raw_clean, "raw_t1": raw_t1,
+        "sam_t0_map": sam_t0_map, "dino_t0_map": dino_t0_map, "sam_t1_map": sam_t1_map, "dino_t1_map": dino_t1_map,
+        "provenance": provenance,
+    }))
+
+
+def _bundle_provenance(config: dict[str, Any], settings: "ThreeImageSettings") -> dict[str, Any]:
+    """What a dumped bundle depends on: the three stage-1-3 config sections,
+    plus whether DINOv2 was actually computed (use_dino_features: false
+    stores 1x1x1 placeholder maps that must never feed a DINO-on replay)."""
+    return {
+        "stage_config": {name: config.get(name, {}) for name in ("sam3_proposals", "dinov2_features", "sam2_tracking")},
+        "dino_computed": bool(settings.use_dino_features),
+    }
+
+
+def _load_inventory_bundle(path: str | Path, expected: dict[str, Any] | None = None) -> dict[str, Any]:
+    import pickle
+
+    bundle = pickle.loads((Path(path) / "bundle.pkl").read_bytes())
+    found = bundle.get("provenance")
+    if expected is not None and found is not None:
+        for name, section in expected["stage_config"].items():
+            if found["stage_config"].get(name) != section:
+                raise ValueError(f"inventory bundle at {path} was dumped with a different '{name}' config section; re-dump it")
+        if expected["dino_computed"] and not found["dino_computed"]:
+            raise ValueError(f"inventory bundle at {path} was dumped with use_dino_features: false and holds no DINOv2 maps; re-dump it")
+    return bundle
+
+
 def run_object_state_resolution(
     render_t0: np.ndarray,
     clean_render: np.ndarray,
@@ -1297,6 +2008,7 @@ def run_object_state_resolution(
     generator: "Sam3AutomaticMaskGenerator | None" = None,
     dino_extractor: "Dinov2FeatureExtractor | None" = None,
     tracker: "Sam2MaskTracker | None" = None,
+    text_detector: "Sam3TextPromptDetector | None" = None,
     render_t0_positions: np.ndarray | None = None,
     clean_render_positions: np.ndarray | None = None,
     image_t1_positions: np.ndarray | None = None,
@@ -1304,6 +2016,14 @@ def run_object_state_resolution(
     render_t0_coverage: np.ndarray | None = None,
     render_t0_confidence: np.ndarray | None = None,
     render_t0_corroboration: np.ndarray | None = None,
+    above_horizon: np.ndarray | None = None,
+    ceiling_sky_mask: np.ndarray | None = None,
+    dump_stages: str | Path | None = None,
+    sam_render_t0: np.ndarray | None = None,
+    sam_clean_render: np.ndarray | None = None,
+    sam_image_t1: np.ndarray | None = None,
+    dump_inventory_to: str | Path | None = None,
+    load_inventory_from: str | Path | None = None,
 ) -> ThreeImageResult:
     """Run SAM3 + DINOv2 + SAM2-tracking inference over three aligned images
     and write a T1-aligned change-detection result.
@@ -1353,6 +2073,23 @@ def run_object_state_resolution(
     ``render_t0_confidence``, if also supplied, additionally suppresses
     candidates sitting on geometry the reconstruction itself was not
     confident about.
+
+    ``sam_render_t0``/``sam_clean_render``/``sam_image_t1``, if supplied,
+    are used only for SAM3 proposal generation (object boundaries/masks and
+    the associated backbone feature map) in place of
+    ``render_t0``/``clean_render``/``image_t1``, while every downstream
+    step (DINOv2 features, tracking, color-replacement detection, output
+    artifacts) still uses the latter. This exists for the DI2FIX-refined
+    vs. raw comparison: refinement smooths texture that SAM3 relies on for
+    fine object boundaries, causing measurable under-segmentation on
+    refined renders (see docs -- object counts on a Meeting_room query
+    dropped from 35 to 12), while the same smoothing improves appearance-
+    comparison signals' precision. Passing the *raw* renders here and the
+    *refined* renders as the main three arguments decouples the two,
+    keeping raw-quality segmentation while still comparing denoised
+    appearance downstream. Must share the same pixel grid as the main
+    three images if supplied. Omit all three (the default) to keep
+    existing behavior unchanged.
     """
 
     images = tuple(np.asarray(image, dtype=np.uint8) for image in (render_t0, clean_render, image_t1))
@@ -1361,76 +2098,167 @@ def run_object_state_resolution(
     if len({image.shape for image in images}) != 1:
         raise ValueError("three-image inputs must already share one aligned pixel grid")
     render_t0, clean_render, image_t1 = images
+
+    sam_images = tuple(
+        np.asarray(image, dtype=np.uint8) if image is not None else fallback
+        for image, fallback in zip((sam_render_t0, sam_clean_render, sam_image_t1), (render_t0, clean_render, image_t1))
+    )
+    if any(image.shape != fallback.shape for image, fallback in zip(sam_images, (render_t0, clean_render, image_t1))):
+        raise ValueError("sam_render_t0/sam_clean_render/sam_image_t1 must share the main images' pixel grid")
+    sam_render_t0, sam_clean_render, sam_image_t1 = sam_images
+
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     settings = ThreeImageSettings.from_config(config)
     timings: dict[str, float] = {}
 
-    started = time.perf_counter()
     sam_cfg = config["sam3_proposals"]
-    owns_generator = generator is None
-    if generator is None:
-        generator = Sam3AutomaticMaskGenerator(sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"], **_proposal_kwargs(config))
-    try:
-        raw_t0, sam_t0 = generator.generate_with_feature_map(render_t0)
-        raw_clean, sam_clean = generator.generate_with_feature_map(clean_render)
-        raw_t1, sam_t1 = generator.generate_with_feature_map(image_t1)
-    finally:
-        if owns_generator:
-            generator.release()
-    objects_t0 = select_object_proposals(raw_t0, settings)
-    objects_clean = select_object_proposals(raw_clean, settings)
-    objects_t1 = select_object_proposals(raw_t1, settings)
-    timings["01_sam3_inventory_and_features"] = time.perf_counter() - started
 
-    started = time.perf_counter()
-    owns_dino = dino_extractor is None
-    if dino_extractor is None:
-        dino_extractor = Dinov2FeatureExtractor(config["dinov2_features"])
-    try:
-        dino_t0 = dino_extractor.feature_map(render_t0)
-        dino_clean = dino_extractor.feature_map(clean_render)
-        dino_t1 = dino_extractor.feature_map(image_t1)
-    finally:
-        if owns_dino:
-            dino_extractor.release()
-    inventory_t0 = _suppress_feature_matched_parts(
-        _build_inventory(objects_t0, sam_t0, dino_t0, settings, render_t0_positions), settings, scene_scale
-    )
-    inventory_clean = _suppress_feature_matched_parts(
-        _build_inventory(objects_clean, sam_clean, dino_clean, settings, clean_render_positions), settings, scene_scale
-    )
-    inventory_t1 = _suppress_feature_matched_parts(
-        _build_inventory(objects_t1, sam_t1, dino_t1, settings, image_t1_positions), settings, scene_scale
-    )
-    objects_t0 = list(inventory_t0.objects)
-    objects_clean = list(inventory_clean.objects)
-    objects_t1 = list(inventory_t1.objects)
-    timings["02_dinov2_and_pooling"] = time.perf_counter() - started
+    if load_inventory_from is not None:
+        # Fast-replay path: skip stages 1-3 (95%+ of wall time, all GPU-
+        # heavy) entirely, reusing a prior run's proposals/pooled-descriptors
+        # /tracks -- see _dump_inventory_bundle's docstring for exactly what
+        # this is and is not safe to do. generator/dino_extractor/tracker/
+        # text_detector are never even constructed on this path.
+        started = time.perf_counter()
+        bundle = _load_inventory_bundle(load_inventory_from, _bundle_provenance(config, settings))
+        inventory_t0, inventory_clean, inventory_t1 = bundle["inventory_t0"], bundle["inventory_clean"], bundle["inventory_t1"]
+        tracking = bundle["tracking"]
+        raw_t0, raw_clean, raw_t1 = bundle["raw_t0"], bundle["raw_clean"], bundle["raw_t1"]
+        sam_t0, dino_t0, sam_t1, dino_t1 = bundle["sam_t0_map"], bundle["dino_t0_map"], bundle["sam_t1_map"], bundle["dino_t1_map"]
+        objects_t0 = list(inventory_t0.objects)
+        objects_clean = list(inventory_clean.objects)
+        objects_t1 = list(inventory_t1.objects)
+        if not settings.enable_tracking:
+            # Same override the slow path applies below -- a loaded dump's
+            # tracks were computed with tracking enabled, so a config that
+            # disables it must still get all-None tracks, not the real ones.
+            none_for = lambda objects: tuple(None for _ in objects)  # noqa: E731
+            tracking = TrackingEvidence(
+                t0_to_t1=none_for(objects_t0), t1_to_t0=none_for(objects_t1),
+                t0_to_clean=none_for(objects_t0), clean_to_t0=none_for(objects_clean),
+                t1_to_clean=none_for(objects_t1), clean_to_t1=none_for(objects_clean),
+            )
+        load_seconds = time.perf_counter() - started
+        timings["01_sam3_inventory_and_features"] = 0.0
+        timings["02_dinov2_and_pooling"] = 0.0
+        timings["03_bidirectional_tracking"] = load_seconds
+    else:
+        started = time.perf_counter()
+        owns_generator = generator is None
+        if generator is None:
+            generator = Sam3AutomaticMaskGenerator(sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"], **_proposal_kwargs(config))
+        try:
+            raw_t0, sam_t0 = generator.generate_with_feature_map(sam_render_t0)
+            raw_clean, sam_clean = generator.generate_with_feature_map(sam_clean_render)
+            raw_t1, sam_t1 = generator.generate_with_feature_map(sam_image_t1)
+        finally:
+            if owns_generator:
+                generator.release()
 
-    started = time.perf_counter()
-    owns_tracker = tracker is None
-    if tracker is None:
-        tracker = Sam2MaskTracker(config["sam2_tracking"])
-    try:
-        track = lambda objects, source, target: _track_batches(tracker, objects, source, target, settings.tracking_batch_size)  # noqa: E731
-        tracking = TrackingEvidence(
-            t0_to_t1=track(objects_t0, render_t0, image_t1),
-            t1_to_t0=track(objects_t1, image_t1, render_t0),
-            t0_to_clean=track(objects_t0, render_t0, clean_render),
-            clean_to_t0=track(objects_clean, clean_render, render_t0),
-            t1_to_clean=track(objects_t1, image_t1, clean_render),
-            clean_to_t1=track(objects_clean, clean_render, image_t1),
+        objects_t0 = select_object_proposals(raw_t0, settings)
+        objects_clean = select_object_proposals(raw_clean, settings)
+        objects_t1 = select_object_proposals(raw_t1, settings)
+        timings["01_sam3_inventory_and_features"] = time.perf_counter() - started
+
+        started = time.perf_counter()
+        if settings.use_dino_features:
+            owns_dino = dino_extractor is None
+            if dino_extractor is None:
+                dino_extractor = Dinov2FeatureExtractor(config["dinov2_features"])
+            try:
+                dino_t0 = dino_extractor.feature_map(render_t0)
+                dino_clean = dino_extractor.feature_map(clean_render)
+                dino_t1 = dino_extractor.feature_map(image_t1)
+            finally:
+                if owns_dino:
+                    dino_extractor.release()
+        else:
+            # Keep the inventory/diagnostic schema stable without loading or
+            # evaluating a replacement representation. Every DINO validity,
+            # gate and score is ignored when use_dino_features is false.
+            dino_t0 = np.zeros((1, 1, 1), dtype=np.float32)
+            dino_clean = np.zeros((1, 1, 1), dtype=np.float32)
+            dino_t1 = np.zeros((1, 1, 1), dtype=np.float32)
+        inventory_t0 = _suppress_feature_matched_parts(
+            _build_inventory(objects_t0, sam_t0, dino_t0, settings, render_t0_positions), settings, scene_scale
         )
-    finally:
-        if owns_tracker:
-            tracker.release()
-    timings["03_bidirectional_tracking"] = time.perf_counter() - started
+        inventory_clean = _suppress_feature_matched_parts(
+            _build_inventory(objects_clean, sam_clean, dino_clean, settings, clean_render_positions), settings, scene_scale
+        )
+        inventory_t1 = _suppress_feature_matched_parts(
+            _build_inventory(objects_t1, sam_t1, dino_t1, settings, image_t1_positions), settings, scene_scale
+        )
+        objects_t0 = list(inventory_t0.objects)
+        objects_clean = list(inventory_clean.objects)
+        objects_t1 = list(inventory_t1.objects)
+        timings["02_dinov2_and_pooling"] = time.perf_counter() - started
+
+        started = time.perf_counter()
+        if not settings.enable_tracking:
+            # No-SAM2 ablation: every track is None, which _track_iou scores as
+            # zero, clean bridging skips, and recall recovery finds no candidate
+            # for. The tracker is never even constructed.
+            none_for = lambda objects: tuple(None for _ in objects)  # noqa: E731
+            tracking = TrackingEvidence(
+                t0_to_t1=none_for(objects_t0), t1_to_t0=none_for(objects_t1),
+                t0_to_clean=none_for(objects_t0), clean_to_t0=none_for(objects_clean),
+                t1_to_clean=none_for(objects_t1), clean_to_t1=none_for(objects_clean),
+            )
+        else:
+            owns_tracker = tracker is None
+            if tracker is None:
+                tracker = Sam2MaskTracker(config["sam2_tracking"])
+            try:
+                track = lambda objects, source, target: _track_batches(tracker, objects, source, target, settings.tracking_batch_size)  # noqa: E731
+                tracking = TrackingEvidence(
+                    t0_to_t1=track(objects_t0, render_t0, image_t1),
+                    t1_to_t0=track(objects_t1, image_t1, render_t0),
+                    t0_to_clean=track(objects_t0, render_t0, clean_render),
+                    clean_to_t0=track(objects_clean, clean_render, render_t0),
+                    t1_to_clean=track(objects_t1, image_t1, clean_render),
+                    clean_to_t1=track(objects_clean, clean_render, image_t1),
+                )
+            finally:
+                if owns_tracker:
+                    tracker.release()
+        timings["03_bidirectional_tracking"] = time.perf_counter() - started
+
+        if dump_inventory_to is not None:
+            _dump_inventory_bundle(dump_inventory_to, inventory_t0, inventory_clean, inventory_t1, tracking,
+                                   raw_t0, raw_clean, raw_t1, sam_t0, dino_t0, sam_t1, dino_t1,
+                                   provenance=_bundle_provenance(config, settings))
+
+    # Deliberately OUTSIDE the load_inventory_from branch above: this needs
+    # only sam_image_t1 pixels and a Sam3TextPromptDetector, not any of
+    # stages 1-3's proposals/pooling/tracking, so it must run the same way
+    # on a fast replay as on a full run -- a config with
+    # enable_ceiling_sky_suppression on must still get a real mask when
+    # replaying, not silently skip it because stages 1-3 were skipped too.
+    if settings.enable_ceiling_sky_suppression and ceiling_sky_mask is None:
+        # A SEPARATE model from `generator` -- Sam3AutomaticMaskGenerator
+        # builds its model with enable_segmentation=False (only needs grid-
+        # point automatic proposals), so it has no grounding/text-prompt head
+        # to reuse. See Sam3TextPromptDetector's docstring: an earlier version
+        # of this code assumed the two could share a model and was wrong,
+        # caught by an end-to-end smoke test before it reached a real run.
+        owns_text_detector = text_detector is None
+        if text_detector is None:
+            text_detector = Sam3TextPromptDetector(
+                sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"],
+                confidence_threshold=settings.ceiling_sky_confidence_threshold,
+            )
+        try:
+            ceiling_sky_mask = detect_ceiling_sky_mask(text_detector, sam_image_t1, settings)
+        finally:
+            if owns_text_detector:
+                text_detector.release()
 
     started = time.perf_counter()
     labels, objects, decisions, diagnostics = resolve_three_image_changes(
         inventory_t0, inventory_clean, inventory_t1, tracking, settings, scene_scale,
-        render_t0_coverage, render_t0_confidence, render_t0_corroboration,
+        render_t0_coverage, render_t0_confidence, render_t0_corroboration, above_horizon,
+        ceiling_sky_mask,
     )
     timings["04_object_state_resolution"] = time.perf_counter() - started
 
@@ -1445,6 +2273,23 @@ def run_object_state_resolution(
             "decision_counts": recovery_diagnostics["decision_counts"],
             "changed_pixel_fraction": recovery_diagnostics["changed_pixel_fraction"],
             "tracking_recovery": recovery_diagnostics,
+        }
+
+    started = time.perf_counter()
+    labels, objects, decisions, occlusion_suppressed, occlusion_depth_available = suppress_removed_behind_added(
+        labels, objects, decisions, settings, render_t0_positions, image_t1_positions, scene_scale
+    )
+    timings["05b_occlusion_aware_removal_suppression"] = time.perf_counter() - started
+    diagnostics = {**diagnostics, "occlusion_suppressed": occlusion_suppressed, "occlusion_depth_available": occlusion_depth_available}
+    if occlusion_suppressed:
+        diagnostics = {
+            **diagnostics,
+            "decision_counts": {
+                **diagnostics["decision_counts"],
+                "removed": sum(1 for item in objects if item.label == Label.REMOVED),
+                "added": sum(1 for item in objects if item.label == Label.ADDED),
+            },
+            "changed_pixel_fraction": float(np.mean(labels != int(Label.UNCHANGED))),
         }
 
     started = time.perf_counter()
@@ -1492,6 +2337,14 @@ def run_object_state_resolution(
     save_image(output_dir / "objects_t1_raw.png", _raw_overlay(image_t1, raw_t1))
     diagnostics = {**diagnostics, "settings": asdict(settings), "timings": timings, "decisions": decisions}
     save_json(output_dir / "inference.json", diagnostics)
+
+    if dump_stages is not None:
+        _dump_intermediate_stages(
+            Path(dump_stages),
+            inventories={"t0": inventory_t0, "clean": inventory_clean, "t1": inventory_t1},
+            raw_proposals={"t0": raw_t0, "clean": raw_clean, "t1": raw_t1},
+            tracking=tracking, labels=labels, objects=objects, decisions=decisions,
+        )
     return ThreeImageResult(
         labels=labels, objects=tuple(objects), decisions=tuple(decisions), diagnostics=diagnostics,
         artifacts_dir=output_dir, timings=timings,

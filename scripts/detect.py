@@ -46,6 +46,27 @@ def main() -> int:
         help="optional render_t0_corroboration.npy written by run_paslcd_pair.py, to activate the cross-reference-"
              "view corroboration filter (needs enable_reference_corroboration: true in config too)",
     )
+    parser.add_argument(
+        "--dump-stages", type=Path, default=None,
+        help="optional directory to receive proposals/, descriptors/, tracking/, resolution/ and labels.npy "
+             "(the intermediate data the visualizations discard), for stage-wise diagnosis",
+    )
+    parser.add_argument(
+        "--dump-inventory-to", type=Path, default=None,
+        help="save stages 1-3's pooled inventories/tracks/dense feature maps here for --load-inventory-from "
+             "reuse by a later run whose config only changes three_image_comparison (~120s/query -> ~1-2s/query)",
+    )
+    parser.add_argument(
+        "--load-inventory-from", type=Path, default=None,
+        help="skip stages 1-3 (SAM3 proposals, DINOv2 features, SAM2 tracking) entirely, loading a prior "
+             "--dump-inventory-to bundle instead -- only valid when this run's sam3_proposals/dinov2_features/"
+             "sam2_tracking config sections match the config that produced the dump",
+    )
+    parser.add_argument(
+        "--above-horizon", type=Path, default=None,
+        help="optional above_horizon.npy (per-pixel bool, computed from the query camera's own orientation) to "
+             "activate above-horizon suppression (needs enable_horizon_suppression: true in config too)",
+    )
     args = parser.parse_args()
 
     import numpy as np
@@ -71,6 +92,14 @@ def main() -> int:
         geometry_kwargs["render_t0_confidence"] = np.load(args.render_t0_confidence)
     if args.render_t0_corroboration is not None:
         geometry_kwargs["render_t0_corroboration"] = np.load(args.render_t0_corroboration)
+    if args.above_horizon is not None:
+        geometry_kwargs["above_horizon"] = np.load(args.above_horizon)
+    if args.dump_stages is not None:
+        geometry_kwargs["dump_stages"] = args.dump_stages
+    if args.dump_inventory_to is not None:
+        geometry_kwargs["dump_inventory_to"] = args.dump_inventory_to
+    if args.load_inventory_from is not None:
+        geometry_kwargs["load_inventory_from"] = args.load_inventory_from
 
     result = run_object_state_resolution(render_t0, clean_render, image_t1, args.output_dir, config, **geometry_kwargs)
     print(

@@ -544,3 +544,70 @@ class Sam3AutomaticMaskGenerator:
         finally:
             self._capture_full_image_feature = False
             self._captured_full_image_feature = None
+
+
+class Sam3TextPromptDetector:
+    """Grounded text-prompt detection (e.g. "ceiling", "sky"): a SEPARATE
+    SAM3 model instance from Sam3AutomaticMaskGenerator's.
+
+    They cannot share a model. Sam3AutomaticMaskGenerator.load() builds its
+    model with enable_segmentation=False (only enable_inst_interactivity=True
+    is needed for grid-point automatic proposals) -- calling set_text_prompt
+    on that model raises KeyError('pred_masks') in _forward_grounding,
+    because the grounding head was never enabled. Discovered by an end-to-end
+    smoke test (2026-09-09) before it could waste a 30-query GPU run;
+    the original design here mistakenly assumed the two paths shared a
+    model, and that assumption was wrong.
+
+    This means ceiling/sky detection genuinely costs a second SAM3 load
+    (extra VRAM and load time), not the "free, already-warm" reuse the
+    first version of this feature claimed. Lazily loaded and released like
+    every other stage model in this pipeline, and meant to be built once
+    and reused across a whole batch (see run_object_state_resolution's
+    text_detector parameter), not once per query.
+    """
+
+    def __init__(self, checkpoint: str | Path, *, source: str | Path | None = None,
+                confidence_threshold: float = 0.5) -> None:
+        self.checkpoint = str(Path(checkpoint).resolve())
+        self.source = Path(source).resolve() if source is not None else None
+        self.confidence_threshold = float(confidence_threshold)
+        self._processor = None
+
+    def load(self) -> None:
+        if self._processor is not None:
+            return
+        import torch
+
+        if self.source is not None and str(self.source) not in sys.path:
+            sys.path.insert(0, str(self.source))
+        from sam3.model.sam3_image_processor import Sam3Processor
+        from sam3.model_builder import build_sam3_image_model
+
+        enable_sam3_numerics(torch)
+        model = build_sam3_image_model(
+            checkpoint_path=self.checkpoint, load_from_HF=False, device="cuda", eval_mode=True,
+        )
+        self._processor = Sam3Processor(model, device="cuda", confidence_threshold=self.confidence_threshold)
+
+    def release(self) -> None:
+        self._processor = None
+        import torch
+        torch.cuda.empty_cache()
+
+    def detect(self, image: np.ndarray, prompt: str) -> list[tuple[np.ndarray, float]]:
+        """Every detection at/above this instance's confidence_threshold, as
+        (boolean_mask, score) pairs -- not just the single best one, since a
+        scene can have more than one disjoint ceiling/sky patch."""
+        import torch
+        from PIL import Image
+
+        self.load()
+        with torch.inference_mode(), torch.autocast("cuda", dtype=torch.bfloat16):
+            state = self._processor.set_image(Image.fromarray(np.asarray(image, dtype=np.uint8)))
+            state = self._processor.set_text_prompt(prompt=prompt, state=state)
+            scores = state["scores"]
+            return [
+                (state["masks"][i, 0].cpu().numpy().astype(bool), float(scores[i].item()))
+                for i in range(scores.numel())
+            ]

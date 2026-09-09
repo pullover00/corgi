@@ -75,7 +75,7 @@ three_image_comparison:
   same_location_iou: 0.45
   reject_low_confidence_moved: true
   tracking_batch_size: 16
-  recover_unmatched_via_tracking: true
+  recover_unmatched_via_tracking: false
   # Geometric-identity test (docs/goldilocs_analysis.html roadmap item 2):
   # masks each object proposal against its frame's 3D world-position buffer
   # and compares centroid distance + point-set overlap between candidates.
@@ -153,7 +153,7 @@ three_image_comparison:
   # keeps the one known false-positive class, thin draped high-confidence-
   # free objects like a caution tape, from eroding precision while genuinely
   # recovering new true positives: 22 REPLACED detections across 6 queries).
-  enable_color_replacement_detection: true
+  enable_color_replacement_detection: false
   color_replacement_minimum_colorfulness: 40.0
   color_replacement_residual_percentile: 90.0
   minimum_color_replacement_area: 40

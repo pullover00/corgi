@@ -34,19 +34,13 @@ docs/METHODS.md          # method description + results
 run_pipeline.sh          # chains the three stage CLIs across conda envs
 ```
 
-## Setup
+## Setup    
 
-**New machine / fresh clone: see [SETUP.md](SETUP.md)** for the full,
-concrete list (pinned sibling-repo commits, checkpoint sources and hashes,
-conda env package lists in `envs/`, the PASLCD dataset). Run
-`scripts/fetch_assets.sh` first -- it automates what can be automated and
-prints exact manual steps for the rest.
-
-Short version: three separate reconstruction/generation models are involved
+Three separate reconstruction/generation models are involved
 (VGGT-Omega, DI²FIX/Difix, and SAM3+SAM2+DINOv2), each with its own
 conda env because their torch/diffusers pins conflict. This repo does not
-vendor any of them -- point the config and env vars at your own checkouts
-(or the ones `fetch_assets.sh` clones into `external/`).
+vendor any of them -- point the config and env vars below at your own
+checkouts.
 
 1. **VGGT-Omega** (stage 1): checkout + conda env with its own
    requirements. Set `reconstruction.vggt_omega_root` and
@@ -57,14 +51,11 @@ vendor any of them -- point the config and env vars at your own checkouts
    env (`diffusers`, `torch`, `peft`). Set `refine.di2fix_root`. The
    `nvidia/difix_ref` checkpoint downloads from Hugging Face on first run
    (~5GB). Set `refine.enabled: false` in the config to skip this stage
-   entirely -- every result reported in this project's design-log artifact
-   was produced with it disabled.
+   entirely.
 3. **Detection env** (stage 3): a conda env with SAM3, SAM2, DINOv2, and
    `scipy`/`torch`/`PIL`. Needs:
    - `SAM3_SOURCE` and `SAM3_IMAGE_CHECKPOINT` set in the environment (SAM3
-     has no public pip/checkpoint distribution at time of writing) --
-     exported inline in whatever shell invokes `detect.py`/`detect_batch.py`,
-     not persisted anywhere (see SETUP.md section 2).
+     has no public pip/checkpoint distribution at time of writing).
    - `checkpoints/sam2.1_hiera_large.pt` and
      `checkpoints/dinov2_vitb14_reg4_pretrain.pth` present (symlink or copy
      them in; see `checkpoints/manifest.json` for source/hashes).
@@ -116,10 +107,9 @@ the others.
 
 ## Not carried over from the original repo
 
-This is a from-scratch trim, not a copy: no ChangeSim benchmark/eval code,
-no warehouse-specific experiment scripts, no accumulated one-off analysis
-scripts. If you need the single-photo-pair path or ChangeSim reproduction,
-they remain in the original `change_detect` repo. `reconstruction_mast3r.py`
-was added back later, deliberately, as a controlled ablation against
-VGGT-Omega's joint multi-view reconstruction (single before/after photo
-reconstruction is not otherwise used in the main pipeline).
+This is a from-scratch trim, not a copy: no MASt3R (single before/after
+photo reconstruction is superseded by VGGT-Omega's multi-view approach
+here), no ChangeSim benchmark/eval code, no warehouse-specific experiment
+scripts, no accumulated one-off analysis scripts. If you need the
+single-photo-pair path or ChangeSim reproduction, they remain in the
+original `change_detect` repo.

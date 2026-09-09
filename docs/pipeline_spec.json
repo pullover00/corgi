@@ -1,0 +1,217 @@
+{
+  "$schema_note": "Machine-readable specification of the change_pipeline method (3D-reconstruction-based object-level change detection). Written for an LLM drafting a paper Method section. Every field is grounded in the actual repository code as of 2026-09-08 (src/ocmask_pipeline/, scripts/, configs/pipeline.yaml, docs/METHODS.md) -- do not invent numbers not present here.",
+  "task": {
+    "name": "3D object-level change detection between two time-separated captures of the same physical scene",
+    "input": "Two sets of images of the same scene captured at different times (T0='before', T1='after'). The T0 side may be a single photo, a small set of unordered reference photos, or frames sampled from a walkthrough video, depending on dataset (see 'dataset_protocols'). The T1 side is always exactly one query image in the current methodology.",
+    "output": "A per-pixel label map aligned to the T1 query image, with classes {unchanged, added, removed, moved, warped, replaced}, plus the underlying object-level decisions (one entry per matched/unmatched object with its mask, class, and score).",
+    "distinguishing_idea": "Unlike two-view (single-photo-per-timestep) change detection, this method first performs full 3D multi-view reconstruction of the 'before' state from many reference images, then localizes and renders the single 'after' query image's viewpoint into that reconstruction, so the change-detection stage always compares two same-viewpoint renders (of geometry, not of the raw un-posed photo pair) plus the real query photo -- a 3-image comparison, not a 2-image one."
+  },
+  "pipeline_stages": [
+    {
+      "id": 1,
+      "name": "Multi-view reconstruction",
+      "module": "ocmask_pipeline.reconstruction",
+      "key_functions": ["reconstruct_reference_scene", "localize_and_render_query", "reconstruct_and_render (legacy/2-set variant, see notes)"],
+      "model": {
+        "name": "VGGT-Omega",
+        "type": "feed-forward multi-view transformer",
+        "checkpoint": "vggt_omega_1b_512.pt",
+        "description": "Given N unposed input images, predicts in one forward pass: a camera pose (extrinsics + intrinsics) and a per-pixel depth map for every input image, all expressed in one shared, jointly-consistent world coordinate frame. No separate structure-from-motion or pose-alignment step is needed across the images given to one call."
+      },
+      "procedure_reference_scene_pattern": [
+        "1. Reconstruct the T0 reference-image set alone (reconstruct_reference_scene): run VGGT-Omega once on the T0 images only, unproject each frame's depth into a shared world frame, keep points whose predicted depth confidence clears a percentile threshold (depth_confidence_percentile, default 20.0) computed over the whole T0 batch. Store this as an isolated 'reference scene' (point cloud + per-frame poses), independent of any query.",
+        "2. Localize the query (localize_and_render_query): run VGGT-Omega again on (T0 images + the single T1 query image) jointly, to obtain posed camera geometry for the query relative to the T0 images.",
+        "3. Two independent VGGT-Omega calls do not share a coordinate frame or scale (only, up to noise, the same relative camera geometry for the T0 images they have in common). A closed-form similarity transform (rotation, translation, isotropic scale) is fit via Umeyama's (1991) least-squares method between the T0 images' camera centers as seen in call 1 (the isolated reference scene) and as seen in call 2 (the joint call with the query) -- this is '_fit_similarity_transform' in reconstruction.py. The reference scene's point cloud is then brought into the query's own frame using this transform.",
+        "4. A sanity-check scalar, 'alignment_residual' (mean camera-center error after alignment, in the reference scene's own world units), is reported per query -- large residual means the two calls disagree on the reference geometry's shape and the result should not be trusted."
+      ],
+      "why_this_pattern": "Avoids re-running the (expensive) T0 reference reconstruction once per query; the reference scene is built once and reused. Also decouples the T0 reconstruction's quality from any particular query image.",
+      "legacy_joint_variant": "An earlier/simpler variant, reconstruct_and_render(t0_paths, t1_paths, t0_ref_idx, t1_ref_idx, config), reconstructs T0 and T1 image sets jointly in a single VGGT-Omega call over their concatenation, then splats both resulting point clouds into the T1 reference camera directly -- no separate alignment step is needed because both sides come from one call. This is what ChangeSim's script still uses (both sides are single images, so there is nothing to gain from the reference-scene/query split), and was SceneDiff's original approach before 2026-09-08 (see 'dataset_protocols.scenediff' below).",
+      "reconstruction_hyperparameters": {
+        "frames_per_video": 10,
+        "image_resolution": 512,
+        "depth_confidence_percentile": 20.0,
+        "cleaned_depth_confidence_percentile": 35.0,
+        "depth_epsilon": 0.001,
+        "minimum_valid_depth": 1e-6
+      }
+    },
+    {
+      "id": 2,
+      "name": "Canonical-scene cleaning (mutual depth-conflict filter)",
+      "module": "ocmask_pipeline.geometry",
+      "key_function": "reverse_depth_filter",
+      "purpose": "A raw before/after point-cloud union still contains superimposed old-state and new-state geometry for every changed object. This step separates genuine, still-present background from add/remove transients.",
+      "mechanism": "Every point from the T0 cloud is reprojected into the T1 reference camera and compared against that camera's own observed depth at the same pixel. If the T0 point sits closer to the camera than what T1 actually observed there, it must be occluding something transient (not depicting real, still-present background) and is dropped. The identical check runs in the opposite direction: T1's points checked against the T0 reference frame's own observed depth. Points surviving both directions are pooled into one canonical (cleaned) point cloud.",
+      "conservative_bias": "The check requires reliable *opposing* evidence to reject a point, and defaults to *keeping* a point when the opposing view offers none (out of frustum, or no valid depth there). Consequently a genuinely new object -- invisible to the opposing timestep's own reconstruction -- is not wrongly treated as background by this step alone; resolving it as 'added' is left entirely to the downstream object-matching stage (stage 5)."
+      ,"parameters": {"z_buffer_epsilon": 0.0001, "cleaned_depth_confidence_percentile": 35.0}
+    },
+    {
+      "id": 3,
+      "name": "Rendering into a common pixel grid",
+      "module": "ocmask_pipeline.geometry",
+      "key_function": "render_points",
+      "mechanism": "The uncleaned T0 cloud and the cleaned canonical cloud are each splatted (z-buffered point rendering, small footprint per point, conservative single-pixel hole filling) into the T1 reference camera, producing two synthetic renders on exactly the pixel grid of the real T1 photo.",
+      "outputs": {
+        "render_t0": "Old scene rendered into the T1 camera, from the UNCLEANED T0 point cloud (still contains old-state objects that were later removed/replaced).",
+        "clean_render": "Canonical scene rendered into the T1 camera, from the CLEANED point cloud (stage 2's output) -- used as a third-view 'bridge' feature domain in stage 5 when a direct render/photo comparison fails.",
+        "image_t1": "The real, unmodified T1 query photo. Used directly; no rendering."
+      },
+      "auxiliary_buffers_saved_for_downstream_use": [
+        "render_t0_positions / clean_render_positions / image_t1_positions: per-pixel 3D world-position buffers, used by stage 5's geometric-identity test.",
+        "render_t0_coverage: binary per-pixel mask of whether that pixel has any trustworthy splatted T0 geometry at all, used by the visibility filter and the coverage-aware IoU option.",
+        "render_t0_confidence: continuous per-pixel confidence (not just binary coverage), used by the optional confidence-weighted visibility variant.",
+        "scene_scale: a per-scene scalar (not guaranteed metric/consistent across scenes) that all of stage 5's geometric thresholds are expressed as a *fraction of*, rather than as absolute distances."
+      ],
+      "splatting_parameters": {"splat_radius": 1, "hole_fill_enabled": true, "hole_fill_min_neighbors": 5, "hole_fill_max_relative_depth": 0.02}
+    },
+    {
+      "id": 4,
+      "name": "Render refinement (DI2FIX / Difix)",
+      "module": "scripts/refine.py, src/ocmask_pipeline/refine.py",
+      "optional": false,
+      "note_mandatory": "Despite being config-gated (refine.enabled), this is treated in this project as a REQUIRED pipeline stage, not an ablation -- multiple batch runs silently omitted it due to a script bug (fixed 2026-09-08) and that was treated as a defect to be corrected, not a valid variant.",
+      "model": {
+        "name": "DI2FIX / Difix (nvidia/difix_ref)",
+        "type": "single-step image-conditioned diffusion model",
+        "num_inference_steps": 1,
+        "timestep": 199,
+        "guidance_scale": 0.0,
+        "prompt": "remove degradation"
+      },
+      "purpose": "render_t0 and clean_render still carry residual splatting artifacts from underconstrained regions of the reconstruction (speckle noise, small holes). Each is independently denoised by Difix, conditioned on the real image_t1 photo as reference.",
+      "known_failure_mode": "Can hallucinate plausible-but-fabricated content into a genuine gap left by the depth-conflict filter (observed once: a fabricated liquid-filled container filling a removed-object gap in clean_render). Not seen to propagate into a wrong final decision in limited testing, but not architecturally guaranteed not to.",
+      "invocation": "Run as a subprocess in a dedicated conda environment (difix3d) separate from the main pipeline's environment, called once per render_t0/clean_render pair, taking image_t1 as the conditioning reference."
+    },
+    {
+      "id": 5,
+      "name": "Object-level change resolution (3-image comparison)",
+      "module": "ocmask_pipeline.change_detection",
+      "key_function": "resolve_three_image_changes / run_object_state_resolution",
+      "settings_dataclass": "ThreeImageSettings",
+      "input_contract": "Exactly three images on one aligned pixel grid: render_t0, clean_render, image_t1 (from stages 3-4). All object matching and classification below operates purely on this 3-image contract, independent of how they were produced upstream.",
+      "substages": [
+        {
+          "name": "5a. Per-frame object inventory",
+          "mechanism": "SAM3's automatic mask generator proposes class-agnostic object masks independently in each of the three images. Raw proposals are filtered: masks below minimum_mask_area (16 px) or above maximum_mask_area_fraction (0.25 of image area) are dropped; near-duplicate or nested proposals are merged (largest enclosing mask wins, via duplicate_iou=0.80 / duplicate_containment=0.65, so e.g. a lid or button does not become a separate object from the instance it belongs to; part_maximum_area_ratio=0.40 with part_bbox_margin_pixels=3 further suppresses small 'part' proposals inside a larger one).",
+          "descriptors": "For every retained mask, two independent appearance descriptors are computed: a pooled dense SAM3 image-encoder feature and a pooled dense DINOv2 feature (dinov2_vitb14_reg), each averaged over the mask's footprint in that model's own feature map and L2-normalized.",
+          "sam3_proposal_params": {"points_per_side": 96, "pred_iou_threshold": 0.8, "stability_threshold": 0.8, "crop_layers": 1, "box_nms_threshold": 0.7, "crop_nms_threshold": 0.7},
+          "dinov2_params": {"model": "dinov2_vitb14_reg", "full_image_resolution": [896, 672], "patch_size": 14}
+        },
+        {
+          "name": "5b. Bidirectional mask tracking",
+          "mechanism": "Every object's mask is tracked with SAM2 (mask-prompted propagation between a fixed image pair, NOT video-frame tracking) into each of the other two images: t0<->t1, t0<->clean, t1<->clean -- giving, for every object, a candidate location (or 'not found') in the other two frames.",
+          "model": "SAM2.1 Hiera-Large (sam2.1_hiera_l), compiled image encoder, cuda-graphs optimized on local hardware (vos_optimized: true locally; forced false on the remote machine due to a Blackwell-specific CUDA-graphs bug -- a real, documented confound between local/remote numbers).",
+          "tracking_params": {"minimum_track_iou": 0.2, "track_area_ratio_bounds": [0.5, 2.0], "minimum_mask_area": 32}
+        },
+        {
+          "name": "5c. Identity matching",
+          "mechanism": "An object in render_t0 and an object in image_t1 are accepted as one identity ONLY when independent signals agree: EITHER (a reliable bidirectional SAM2 track between them) AND (both SAM3 cosine similarity >= minimum_sam_cosine=0.65 AND DINOv2 cosine similarity >= minimum_dino_cosine=0.60), OR, when tracking is unavailable, mutual nearest-neighbor agreement between the two independent feature systems alone (a track-free fallback, so identity is never gated solely on tracking quality). An additional minimum_identity_margin=0.02 requires the best match to beat the second-best by a margin, and area_ratio_low/high=[0.25, 4.0] bounds how much the two masks' areas may differ.",
+          "ablation_flag_enable_appearance_correspondence": "When disabled (ablation-only, not a real operating mode), identity matching drops the SAM3/DINOv2 cosine-similarity requirement entirely and relies on bidirectional SAM2 tracking alone (also dropping the reciprocal-nearest-neighbor fallback, since that too is appearance-based). Used as the 'tracking only' baseline row in the cumulative ablation table -- NOT intended as production behavior, since without appearance confirmation any tracked pair is accepted regardless of whether it is really the same object."
+        },
+        {
+          "name": "5d. Clean-render bridging",
+          "mechanism": "When a direct render_t0<->image_t1 feature comparison fails (typically because render_t0 is synthetic and image_t1 is a real photo, widening the render/photo appearance domain gap), a track-only candidate pair can still be validated by independently checking both endpoints' identity inside the shared clean_render feature domain instead -- i.e. render_t0<->clean_render and clean_render<->image_t1 comparisons, which each individually face a smaller domain gap than render_t0<->image_t1 directly.",
+          "ablation_flag_enable_clean_bridge": "When disabled (ablation-only), this bridging pass is skipped entirely; only direct render_t0<->image_t1 comparisons are used."
+        },
+        {
+          "name": "5e. Classification (unchanged vs. moved) and low-confidence rejection",
+          "mechanism": "A matched (same-identity) pair is classified UNCHANGED or MOVED by the spatial IoU between its two masks against same_location_iou=0.45.",
+          "reject_low_confidence_moved_flag": "Shipped 2026-09-08, on by default. When a same-location identity match's spatial IoU falls BELOW same_location_iou, the match is REJECTED outright (recorded as a 'location_mismatch_rejected' diagnostic) rather than being classified MOVED -- neither object is consumed by the pair, so both independently fall through to the ADDED/REMOVED path (5g) below, where they pass through the visibility/geometric/area/duplicate filters that the old MOVED union-mask path bypassed entirely. Net effect on validation data: MOVED false positives get relabeled as ADDED+REMOVED (and often then filtered out by those downstream gates), rather than genuinely eliminating the underlying identity-matching noise -- the practical benefit scales with how many downstream filters can actually act on the resulting ADDED/REMOVED candidates, which in turn scales with reconstruction richness (see 'known_limitations').",
+          "coverage_aware_iou_option (same_location_coverage_aware, default false)": "On scenes with large glossy/reflective/low-texture surfaces, render_t0 can be fragmented by reconstruction holes there while image_t1 (a real photo) is not, so a genuinely unchanged surface's mask IoU can fall below threshold purely from the render's incompleteness. When enabled, both masks are restricted to render_t0_coverage before computing IoU, so pixels neither side has trustworthy T0-side geometry for don't count as an artificial mismatch. No-op when render_t0_coverage is not supplied.",
+          "prefer_track_iou_option (same_location_prefer_track_iou, default false, high_confidence_track_iou=0.70)": "SAM2's propagation-based track is inherently more tolerant of the render/photo appearance gap than re-segmenting from scratch (comparing two independent SAM3 segmentations). When enabled, a direct_identity pair's track_iou is allowed to stand in for spatial_iou (whichever is higher) once track_iou alone clears 0.70 -- only applied to the direct_identity path, not the clean-render-bridged path."
+        },
+        {
+          "name": "5f. Geometric identity (second assignment pass)",
+          "flag": "enable_geometric_identity (default true)",
+          "mechanism": "Masks each object proposal against its frame's 3D world-position buffer (from stage 3) and compares centroid distance + point-set overlap between candidates, both expressed as fractions of the per-scene scale (not absolute distances, since reconstruction scale is not guaranteed metric or consistent across scenes). Runs strictly AFTER and separate from the appearance/tracking-based pass (5c-5e), restricted to objects that pass left unmatched on BOTH sides -- so it can only rescue otherwise-removed+added objects, never perturb a match the first pass already resolved.",
+          "parameters": {"geometric_centroid_fraction": 0.08, "geometric_overlap_fraction": 0.08, "minimum_geometric_overlap": 0.40},
+          "tuning_history": "Tightened from initial defaults (0.15/0.15/0.20) after end-to-end validation on Cantina_Instance_1 (n=6): at the looser defaults, one bad rescue nearly doubled changed-pixel-fraction on one query, net -3.8% mean F1 / -8.7% precision across the sample (other 5/6 queries unaffected)."
+        },
+        {
+          "name": "5g. Recovering proposal-generation misses (recall recovery)",
+          "flag": "recover_unmatched_via_tracking (default true)",
+          "mechanism": "SAM3's automatic mask generator is not guaranteed to independently propose a mask for the same object in both frames -- one frame's grid can simply miss it, which naively looks identical to a genuine removal/addition. Before finalizing any unmatched object as removed/added, it is revisited using the SAM2 track already computed for it (regardless of whether that track ever found a matching *proposed* object): if the track was accepted, the opposite frame's own dense SAM3/DINOv2 feature maps are pooled under the tracked mask directly (not tied to any pre-existing proposal there) and checked against the same identity thresholds as 5c. If they agree, the object is reclassified unchanged/moved (absorbing any independently-proposed but wrongly-orphaned object at the same location, if one exists) instead of removed/added.",
+          "interaction_with_reject_low_confidence_moved": "Both the T0->T1 and T1->T0 recovery loops also check the recovered pair's location_iou against same_location_iou: if it falls below threshold and reject_low_confidence_moved is enabled, the tentative recovery is discarded (the object stays unmatched, falling through to removed/added) rather than being committed as MOVED.",
+          "measured_impact": "This one mechanism reduced changed-pixel fraction from 23.3% to 14.3% on the development pair (kitchen_2_kitchen_3, SceneDiff), roughly halving both false removals and false additions -- by far the single largest contributor in every ablation run performed."
+        },
+        {
+          "name": "5h. Visibility filter",
+          "flag": "enable_visibility_filter (default true)",
+          "mechanism": "Drops a removed/added/moved decision whose mask is mostly supported by unrendered pixels rather than real reconstructed geometry, using render_t0_coverage. Replaces an earlier border-touching-proposal filter (dropped because it destroyed real edge-adjacent objects far more often than it removed background).",
+          "threshold": "minimum_render_support_fraction: 0.8 (matches ChangeSim's/GOLDILOCS's own published default)",
+          "confidence_weighted_variant": "use_confidence_weighted_visibility (default false): uses the continuous render_t0_confidence buffer instead of the binary coverage test. Requires render_t0_confidence, only available on reconstructions run after this option was added. Believed (not yet validated) to be the mechanism behind why the reject_low_confidence_moved fix produces a genuine net reduction in false positives on richer reconstructions (PASLCD, 24 views) but only a relabeling (MOVED -> ADDED+REMOVED, no net reduction) on sparser ones (SceneDiff ~10 views, ChangeSim 1 view) -- the binary test may be too permissive to filter out the newly-created ADDED/REMOVED candidates on sparse reconstructions."
+        },
+        {
+          "name": "5i. Cross-reference-view corroboration",
+          "flag": "enable_reference_corroboration (default FALSE -- validated and rejected)",
+          "mechanism": "A PASLCD-specific precision safeguard: checks whether a reference-side decision is corroborated by multiple T0 reference views (render_t0_corroboration), since PASLCD provides many T0 reference images but only one T1 query (unlike GOLDILOCS's own dominant precision mechanism, cross-*query*-view majority vote, which needs multiple query images PASLCD does not provide).",
+          "validation_result_negative": "Validated end-to-end (Cantina_Instance_1, n=6, same reconstructions as 5j's validation): net -10.6% F1, -14.3% recall, driven almost entirely by one query where the filter rejected two genuine decisions (a MOVED and a REMOVED object) whose reference-side geometry was real but only lightly covered by the capture trajectory -- not a reconstruction artifact, which is what this gate was meant to catch. Kept disabled; the honest negative result."
+        },
+        {
+          "name": "5j. Same-footprint color-replacement detection",
+          "flag": "enable_color_replacement_detection (default true)",
+          "module": "color_residual.py, change_detection.find_color_replacement_regions",
+          "mechanism": "A dense chromaticity-residual pass directly over render_t0/image_t1 (not identity matching between two proposals), catching same-footprint color swaps (e.g. a red block replaced by a blue one) that SAM3 never segments as their own proposal in EITHER frame -- absorbed instead into a larger surrounding surface's mask, so no per-object comparison of any kind ever runs on that region. Gated by colorfulness (color_replacement_minimum_colorfulness=40.0), residual percentile (color_replacement_residual_percentile=90.0), minimum area (minimum_color_replacement_area=40 px), and a confidence floor (color_replacement_minimum_confidence=0.3) that specifically suppresses the known false-positive class of thin, draped, low-confidence-geometry objects (e.g. caution tape).",
+          "validation_result_positive": "Validated end-to-end (Cantina_Instance_1, n=6): 6/6 queries improved, 0 regressed. Mean F1 +2.8%, recall +4.5%, precision +0.3% (essentially flat -- the confidence gate keeps the caution-tape false-positive class from eroding precision while genuinely recovering 22 new REPLACED true positives across 6 queries)."
+        }
+      ],
+      "output_label_map": {
+        "classes": ["UNCHANGED=0", "ADDED=1", "REMOVED=2", "MOVED=3", "WARPED=4", "REPLACED=5"],
+        "rasterization": "Final per-pixel label map is aligned to image_t1. Where object masks overlap, priority order is ADDED > REMOVED > MOVED (ADDED is treated as the weakest/most easily-superseded explanation and yields to any more specific one).",
+        "replaced_class_history": "An earlier version classified same-location, confidently-different-identity pairs as REPLACED via identity matching; removed because such a pair is just a removed+added object sharing a mask slot, not a distinct physical event, and PASLCD/SceneDiff GT has no REPLACED analogue. REPLACED was reintroduced later for the unrelated color-residual mechanism (5j) above, which finds genuinely different cases (no matched pair exists to fall through from) -- for binary (changed-vs-unchanged) evaluation the label value itself is not scored, same as MOVED vs ADDED/REMOVED already wasn't."
+      }
+    }
+  ],
+  "dataset_protocols": {
+    "note": "The reconstruct-a-reference-set-then-compare-a-single-query methodology (stage 1's 'reference_scene_pattern') is NOT applied uniformly -- it varies by dataset, partly by design and partly forced by each dataset's own native protocol. This is an honest limitation/confound to state explicitly in a paper, not to gloss over.",
+    "paslcd": {
+      "t0": "Up to 24 unordered reference photos of the 'before' scene, reconstructed once via reconstruct_reference_scene and reused across all of that scene's queries.",
+      "t1": "A single query photo (test_image), localized and rendered against the fixed reference scene via localize_and_render_query.",
+      "pattern": "reference-set-vs-single-query (the canonical pattern)."
+    },
+    "scenediff": {
+      "t0": "10 frames sampled evenly from video1 (plus the dataset's own most-representative frame index if not already included), reconstructed via reconstruct_reference_scene.",
+      "t1": "As of 2026-09-08: a SINGLE frame from video2 (the dataset's own most-representative T1 frame index), localized via localize_and_render_query. PRIOR to 2026-09-08, both sides sampled ~10-11 frames each and were jointly reconstructed via reconstruct_and_render -- changed specifically to remove the cross-dataset methodology confound with PASLCD and to match the intended real-world query pattern (one new observation vs. an existing reconstruction, not two observation sets).",
+      "pattern": "reference-set-vs-single-query (as of 2026-09-08; previously joint two-set reconstruction).",
+      "data_quirks": [
+        "video1.mp4/video2.mp4 in the benchmark are NOT raw footage -- some objects are repainted with flat synthetic colors (a review-tool visualization artifact). The true footage is original_video{1,2}.*; using the wrong files biases both reconstruction and appearance matching.",
+        "original_video files carry sensor-orientation metadata that OpenCV's VideoCapture does not apply automatically -- CAP_PROP_ORIENTATION_AUTO must be set explicitly or frames come out sideways."
+      ]
+    },
+    "changesim": {
+      "t0": "A single image (image0).",
+      "t1": "A single image (image1).",
+      "pattern": "single-image-vs-single-image (degenerate case, NOT the reference-set pattern) -- forced by the dataset's own native 2-image protocol (also how the 5 baseline methods in the standard ChangeSim comparison table are evaluated), not a pipeline design choice. No multi-view reconstruction happens on either side; reconstruct_and_render is called with single-element image lists on both sides.",
+      "known_limitation": "Reconstruction quality from a single image per side is worse than PASLCD's 24-reference-image setup or SceneDiff's 10-frame setup -- an expected, documented limitation of the dataset's own protocol, not a bug. Correlates with weaker downstream filtering: recall-recovery/reject-fix mechanisms that rely on the visibility filter and geometric-identity test to clean up newly-created ADDED/REMOVED candidates have less reconstructed geometry to work with here than on PASLCD/SceneDiff."
+      ,"gt_decoding": "Raw AirSim segmentation IDs are decoded into the pipeline's Label enum via a fixed RGB-to-raw-ID palette (CHANGESIM_RGB_TO_RAW), ported from and verified against the official ChangeSim idx2color.txt palette."
+    }
+  },
+  "evaluation": {
+    "paslcd_metric": {
+      "reference_implementation": "PASLCD's own released evaluate.py (MV3DCD, github.com/Chumsy0725/MV3DCD, CVPR 2025, 'Multi-View Pose-Agnostic Change Localization with Zero Labels')",
+      "procedure": [
+        "GT mask loaded grayscale, thresholded at 127 -> {0,1} binary.",
+        "Prediction loaded grayscale; if shape differs from GT, prediction (never GT) is resized to GT's shape with cv2.INTER_NEAREST (label map, not photo -- no interpolation blending).",
+        "Prediction thresholded at 127 -> {0,1} the same way.",
+        "IoU = TP/(TP+FP+FN); F1 = 2*TP/(2*TP+FP+FN); zero_division convention: score is 0.0 (not 1.0 or NaN) when the denominator is 0 (matches torchmetrics JaccardIndex/F1Score task='binary')."
+      ],
+      "additional_metrics_not_in_original": "Precision = TP/(TP+FP), Recall = TP/(TP+FN), same zero-division convention, added because the SceneDiff evaluation also needed them."
+    },
+    "scenediff_metric": {
+      "official_protocol_not_yet_wired_up": "SceneDiff's own paper (arXiv 2512.16908) evaluates with Average Precision over point-in-box matching (prediction reduced to mask centroid; a GT object is a true positive if any detection point falls inside its box), reported per-view (obj/im AP) and per-scene (obj/sc AP, the paper's distinguishing contribution: each changed object counted once across the whole video pair, duplicate detections of the same object counted as false positives). A pixel-level px/im IoU is also reported. The authors' own evaluator is at github.com/yuqunw/scene_diff (scripts/evaluate_multiview.py).",
+      "restricted_metric_actually_used": "scripts/scenediff_pxim_iou.py implements a deliberately restricted, t1-frame-only version of the official pooled px/im IoU: pooled TP/(TP+FP+FN) across all evaluated pairs' single T1 frame. Restricted to one frame per pair (rather than every frame of video2) because prior to the 2026-09-08 methodology change, video1/video2 used different camera trajectories not directly comparable without redoing reconstruction per frame; even after the change, only the one T1 query frame per pair has a pipeline prediction to evaluate against."
+    },
+    "changesim_metric": "Same compute_binary_metrics (IoU/F1/Precision/Recall) machinery as PASLCD, applied to ChangeSim's own GT masks after RGB-to-raw-ID decoding."
+  },
+  "known_limitations_and_negative_results": [
+    "reject_low_confidence_moved (5e) relabels rather than eliminates MOVED false-positive noise on reconstructions with little geometry to fall back on (SceneDiff, ChangeSim) -- only genuinely reduces error on richer reconstructions (PASLCD) where the resulting ADDED/REMOVED candidates can then be caught by the visibility/geometric filters. Visually confirmed via cross-dataset example comparison.",
+    "enable_reference_corroboration (5i) was implemented, validated, and REJECTED (net -10.6% F1) -- included here as an honest negative result, not proposed as part of the method.",
+    "DI2FIX refinement (stage 4) can hallucinate fabricated content into genuine reconstruction gaps; observed once, not seen to propagate to a wrong final decision but not architecturally guaranteed not to.",
+    "The reference-set-vs-single-query methodology (stage 1's canonical pattern) is not applied to ChangeSim at all -- forced by that dataset's native single-image-per-side protocol, a genuine cross-dataset confound to disclose rather than hide.",
+    "Local vs. remote-machine evaluation runs differ in one SAM2 setting (vos_optimized: compiled/cuda-graphs on local hardware, forced off on a remote machine due to a GPU-architecture-specific bug) -- a documented, real confound between some of this project's own local and remote numbers that has not been fully reconciled."
+  ],
+  "software_environment": {
+    "orchestration": "Multiple conda environments invoked via subprocess: a VGGT-Omega/reconstruction env (vggt-omega), a DI2FIX/Difix env (difix3d), and a detection env (goldilocs, running SAM3/DINOv2/SAM2) -- kept separate due to incompatible dependency requirements between the reconstruction and diffusion/segmentation stacks.",
+    "caching_convention": "Every batch run persists intermediate stage outputs to disk (raw reconstruction renders + positions/coverage/confidence buffers + scene_scale, then refined renders, then detect-stage inference.json/labels.png) via a JSON manifest, so a pipeline change downstream of reconstruction (e.g. a change_detection.py threshold) can be re-evaluated against cached reconstructions without repeating the expensive VGGT-Omega/DI2FIX stages, and so the same cached data can support future fine-tuning."
+  }
+}

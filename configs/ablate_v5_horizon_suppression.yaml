@@ -108,6 +108,8 @@ three_image_comparison:
   # ChangeSim's / every GOLDILOCS config's own published default
   # (masks.py's filter_visible docstring), not yet validated on PASLCD.
   enable_visibility_filter: true
+  enable_horizon_suppression: true
+  maximum_above_horizon_fraction: 0.5
   minimum_render_support_fraction: 0.8
   # Our extension: use the continuous confidence-weighted score
   # (change_detection._confidence_weighted_visible_fraction) instead of the

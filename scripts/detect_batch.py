@@ -18,9 +18,20 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 import time
 from pathlib import Path
+
+# Newer torch/inductor builds (needed for sm_120/Blackwell GPUs -- see
+# SETUP.md) hit a CUDA-graphs tensor-aliasing bug in SAM2's compiled VOS
+# path ("accessing tensor output of CUDAGraphs that has been overwritten
+# by a subsequent run"), not reproduced with the torch version this repo
+# was originally validated against. Disabling inductor's cudagraph capture
+# sidesteps it -- pure speed tradeoff, not a correctness one. setdefault
+# so an explicit environment choice (e.g. re-enabling it once fixed
+# upstream) still wins.
+os.environ.setdefault("TORCHINDUCTOR_CUDAGRAPHS", "0")
 
 REPO = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO / "src"))
@@ -46,15 +57,40 @@ def main() -> int:
     from ocmask_pipeline.change_detection import _proposal_kwargs, run_object_state_resolution
     from ocmask_pipeline.config import load_config
     from ocmask_pipeline.stages.sam2_tracking_backend import Sam2MaskTracker
-    from ocmask_pipeline.stages.sam3_proposals import Sam3AutomaticMaskGenerator
+    from ocmask_pipeline.change_detection import ThreeImageSettings
+    from ocmask_pipeline.stages.sam3_proposals import Sam3AutomaticMaskGenerator, Sam3TextPromptDetector
 
     config = load_config(args.config)
     items = json.loads(args.manifest.read_text())
 
     sam_cfg = config["sam3_proposals"]
-    generator = Sam3AutomaticMaskGenerator(sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"], **_proposal_kwargs(config))
-    dino_extractor = Dinov2FeatureExtractor(config["dinov2_features"])
-    tracker = Sam2MaskTracker(config["sam2_tracking"])
+    ceiling_sky_settings = ThreeImageSettings.from_config(config)
+    # If every item in this batch is a fast replay (--load-inventory-from
+    # equivalent: item["load_inventory_from"] set), stages 1-3 never run for
+    # any of them, so SAM3/DINOv2/SAM2 are never touched -- skip loading
+    # them at all rather than pay their load time for nothing. A mixed
+    # batch (some replay, some not) still needs all three, since at least
+    # one item takes the slow path.
+    all_replay = items and all(item.get("load_inventory_from") for item in items)
+    generator = None if all_replay else Sam3AutomaticMaskGenerator(sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"], **_proposal_kwargs(config))
+    dino_extractor = (
+        None
+        if all_replay or not ceiling_sky_settings.use_dino_features
+        else Dinov2FeatureExtractor(config["dinov2_features"])
+    )
+    tracker = None if all_replay else Sam2MaskTracker(config["sam2_tracking"])
+    # A SEPARATE SAM3 model from `generator` (see Sam3TextPromptDetector's
+    # docstring for why they cannot share one) -- built once and reused
+    # across the whole batch, same as the other three, but only when this
+    # run's config actually needs it, so a batch with the flag off pays no
+    # extra VRAM/load cost.
+    text_detector = (
+        Sam3TextPromptDetector(
+            sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"],
+            confidence_threshold=ceiling_sky_settings.ceiling_sky_confidence_threshold,
+        )
+        if ceiling_sky_settings.enable_ceiling_sky_suppression else None
+    )
 
     results = []
     try:
@@ -76,10 +112,23 @@ def main() -> int:
                 geometry_kwargs["render_t0_confidence"] = np.load(item["render_t0_confidence"])
             if "render_t0_corroboration" in item:
                 geometry_kwargs["render_t0_corroboration"] = np.load(item["render_t0_corroboration"])
+            if "above_horizon" in item:
+                geometry_kwargs["above_horizon"] = np.load(item["above_horizon"])
+            if "dump_stages" in item:
+                geometry_kwargs["dump_stages"] = item["dump_stages"]
+            if item.get("dump_inventory_to"):
+                geometry_kwargs["dump_inventory_to"] = item["dump_inventory_to"]
+            if item.get("load_inventory_from"):
+                geometry_kwargs["load_inventory_from"] = item["load_inventory_from"]
+            if "sam_render_t0" in item:
+                geometry_kwargs["sam_render_t0"] = np.asarray(Image.open(item["sam_render_t0"]).convert("RGB"))
+                geometry_kwargs["sam_clean_render"] = np.asarray(Image.open(item["sam_clean_render"]).convert("RGB"))
+                geometry_kwargs["sam_image_t1"] = np.asarray(Image.open(item["sam_image_t1"]).convert("RGB"))
 
             result = run_object_state_resolution(
                 render_t0, clean_render, image_t1, item["output_dir"], config,
                 generator=generator, dino_extractor=dino_extractor, tracker=tracker,
+                text_detector=text_detector,
                 **geometry_kwargs,
             )
             summary = {
@@ -93,9 +142,14 @@ def main() -> int:
             results.append(summary)
             print(f"[{index + 1}/{len(items)}] {item['output_dir']} -- {summary['wall_seconds']:.1f}s", flush=True)
     finally:
-        generator.release()
-        dino_extractor.release()
-        tracker.release()
+        if generator is not None:
+            generator.release()
+        if dino_extractor is not None:
+            dino_extractor.release()
+        if tracker is not None:
+            tracker.release()
+        if text_detector is not None:
+            text_detector.release()
 
     if args.results_output:
         args.results_output.write_text(json.dumps(results, indent=2))

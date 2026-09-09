@@ -111,6 +111,13 @@ class ReconstructionResult:
     # this substitutes the reference side's redundancy instead. See
     # change_detection's reference-corroboration filter.
     render_t0_corroboration: np.ndarray | None = None
+    # Per-pixel boolean "this viewing ray points above the horizontal",
+    # computed from the query camera's own pose (see above_horizon_map) and
+    # independent of the reconstructed depth at those pixels. Activates
+    # change_detection's above-horizon suppression, which drops ceiling/sky
+    # false positives. All-False for a camera pitched at or below level, so
+    # a downward-looking robot head suppresses nothing.
+    above_horizon: np.ndarray | None = None
 
 
 def _unproject_depth_map_to_point_map(depth_map: np.ndarray, extrinsic: np.ndarray, intrinsic: np.ndarray) -> np.ndarray:
@@ -347,6 +354,75 @@ def reconstruct_reference_scene(t0_image_paths: list[str | Path], config: dict[s
     )
 
 
+def estimate_world_up(points: np.ndarray, extrinsic: np.ndarray, iterations: int = 200,
+                      seed: int = 0) -> np.ndarray | None:
+    """Estimate the scene's up-axis for above-horizon suppression.
+
+    VGGT-Omega's world frame is arbitrary and carries no gravity, so "up" has
+    to be recovered. Two independent signals are combined, neither of which
+    is the image frame:
+
+      axis -- the normal of the scene's dominant plane (ground/floor), found
+              by RANSAC over ``points``. Measured on 30 PASLCD queries, this
+              axis aligns with the scene vertical in 26/30 cases.
+      sign -- the plane normal is sign-ambiguous, and the obvious heuristic
+              ("most content lies above the ground") picks the wrong side in
+              14 of those 30. Resolved instead against the camera's own up
+              axis, which only assumes the camera is not upside down -- true
+              for a handheld capture and for a robot head at any pitch,
+              including one looking straight down.
+
+    Returns a unit vector, or None when no dominant plane is found (the
+    caller then supplies no above_horizon map and suppression stays off).
+    """
+    finite = points[np.isfinite(points).all(axis=-1)]
+    if len(finite) < 500:
+        return None
+    rng = np.random.default_rng(seed)
+    sample = finite[rng.choice(len(finite), min(20000, len(finite)), replace=False)]
+    tolerance = 0.01 * float(np.percentile(np.linalg.norm(sample - sample.mean(axis=0), axis=1), 90))
+    best_normal, best_inliers = None, 0
+    for triangle in rng.integers(0, len(sample), size=(iterations, 3)):
+        a, b, c = sample[triangle]
+        normal = np.cross(b - a, c - a)
+        norm = float(np.linalg.norm(normal))
+        if norm < 1e-9:
+            continue
+        normal = normal / norm
+        inliers = int((np.abs((sample - a) @ normal) < tolerance).sum())
+        if inliers > best_inliers:
+            best_normal, best_inliers = normal, inliers
+    if best_normal is None or best_inliers < 0.05 * len(sample):
+        return None
+    # extrinsic is world->camera [R|t]; the camera's own up axis in world
+    # coordinates is R^T @ (0,-1,0) == -R[1] under the OpenCV convention.
+    camera_up_world = -extrinsic[:3, :3][1]
+    if float(best_normal @ camera_up_world) < 0:
+        best_normal = -best_normal
+    return best_normal
+
+
+def above_horizon_map(shape: tuple[int, int], intrinsic: np.ndarray, extrinsic: np.ndarray,
+                      world_up: np.ndarray) -> np.ndarray:
+    """Per-pixel "this viewing ray points above the horizontal".
+
+    Deliberately a function of camera pose and intrinsics ONLY -- never of
+    the reconstructed depth at these pixels. Ceilings and sky are precisely
+    where the reconstruction is least trustworthy, so judging them by their
+    own recovered geometry means judging them on noise (measured: an
+    elevation-based rule separates false positives from real changes at only
+    5.9x, against 15.1x for a purely view-direction rule).
+    """
+    height, width = shape
+    us, vs = np.meshgrid(np.arange(width, dtype=np.float64), np.arange(height, dtype=np.float64))
+    pixels = np.stack([us, vs, np.ones_like(us)], axis=-1)
+    rays_camera = pixels @ np.linalg.inv(intrinsic).T
+    # (d @ R)_i == (R^T d)_i, i.e. camera-frame direction back into world.
+    rays_world = rays_camera @ extrinsic[:3, :3]
+    rays_world /= np.linalg.norm(rays_world, axis=-1, keepdims=True)
+    return (rays_world @ world_up) > 0
+
+
 def _camera_centers(extrinsic: np.ndarray) -> np.ndarray:
     """World-space camera centers from a batch of world-to-camera extrinsics."""
     rotation = extrinsic[:, :3, :3]
@@ -536,6 +612,14 @@ def localize_and_render_query(
     clean_render, _, coverage_clean, clean_render_positions, _ = render_points(cleaned_points, cleaned_colors, query_intrinsic, query_extrinsic, image_shape, **render_kwargs)
     image_t1 = colors[query_index]
 
+    # Up-axis from the reference cloud (the widest, best-observed geometry
+    # available), sign disambiguated against the query camera's own pose.
+    world_up = estimate_world_up(input_points, query_extrinsic)
+    above_horizon = (
+        above_horizon_map(image_shape, query_intrinsic, query_extrinsic, world_up)
+        if world_up is not None else None
+    )
+
     # This process runs two VGGT-Omega models sequentially (reference_scene's
     # own build, then this call) and stays alive afterward while refine.py /
     # detect.py run as subprocesses in other conda envs on the same GPU.
@@ -566,4 +650,5 @@ def localize_and_render_query(
         render_t0_coverage=coverage_t0,
         render_t0_confidence=render_t0_confidence,
         render_t0_corroboration=corroboration_count,
+        above_horizon=above_horizon,
     )

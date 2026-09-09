@@ -108,6 +108,11 @@ three_image_comparison:
   # ChangeSim's / every GOLDILOCS config's own published default
   # (masks.py's filter_visible docstring), not yet validated on PASLCD.
   enable_visibility_filter: true
+  enable_ceiling_sky_suppression: true
+  enable_occlusion_aware_removal_suppression: true
+  maximum_removed_behind_added_fraction: 0.5
+  ceiling_sky_confidence_threshold: 0.5
+  maximum_ceiling_sky_fraction: 0.5
   minimum_render_support_fraction: 0.8
   # Our extension: use the continuous confidence-weighted score
   # (change_detection._confidence_weighted_visible_fraction) instead of the
@@ -153,7 +158,7 @@ three_image_comparison:
   # keeps the one known false-positive class, thin draped high-confidence-
   # free objects like a caution tape, from eroding precision while genuinely
   # recovering new true positives: 22 REPLACED detections across 6 queries).
-  enable_color_replacement_detection: true
+  enable_color_replacement_detection: false
   color_replacement_minimum_colorfulness: 40.0
   color_replacement_residual_percentile: 90.0
   minimum_color_replacement_area: 40

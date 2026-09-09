@@ -1,0 +1,126 @@
+schema_version: 1
+reconstruction:
+  frames_per_video: 10
+  image_resolution: 512
+  depth_confidence_percentile: 20.0
+  cleaned_depth_confidence_percentile: 35.0
+  depth_epsilon: 0.001
+  minimum_valid_depth: 1.0e-06
+  z_buffer_epsilon: 0.0001
+  splat_radius: 1
+  hole_fill_enabled: true
+  hole_fill_min_neighbors: 5
+  hole_fill_max_relative_depth: 0.02
+  vggt_omega_checkpoint: /home/tessa/vggt-omega/vggt_omega/models/vggt_omega_1b_512.pt
+  vggt_omega_root: /home/tessa/vggt-omega
+  corroboration_radius_fraction: 0.08
+reconstruction_mast3r:
+  device: cuda
+  checkpoint: checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth
+  mast3r_root: /home/tessa/goldilocs/src/mast3r
+  lr1: 0.07
+  niter1: 500
+  lr2: 0.014
+  niter2: 200
+  optim_level: coarse
+  matching_conf_thr: 0
+  shared_intrinsics: false
+  desc_conf_output_key: desc_conf
+  subsample: 8
+  scenegraph_type: complete
+refine:
+  enabled: true
+  model: nvidia/difix_ref
+  prompt: remove degradation
+  num_inference_steps: 1
+  timestep: 199
+  guidance_scale: 0.0
+  di2fix_root: /home/tessa/DF3DV/DI2FIX
+three_image_comparison:
+  minimum_mask_area: 16
+  maximum_mask_area_fraction: 0.25
+  duplicate_iou: 0.8
+  duplicate_containment: 0.65
+  duplicate_minimum_area_ratio: 0.0
+  part_maximum_area_ratio: 0.4
+  part_bbox_margin_pixels: 3
+  minimum_sam_feature_cells: 1.0
+  minimum_dino_feature_cells: 1.0
+  minimum_sam_cosine: 0.65
+  minimum_dino_cosine: 0.6
+  minimum_identity_margin: 0.02
+  area_ratio_low: 0.25
+  area_ratio_high: 4.0
+  minimum_track_iou: 0.2
+  same_location_iou: 0.45
+  tracking_batch_size: 16
+  recover_unmatched_via_tracking: false
+  enable_geometric_identity: false
+  geometric_centroid_fraction: 0.08
+  geometric_overlap_fraction: 0.08
+  minimum_geometric_overlap: 0.4
+  enable_visibility_filter: true
+  minimum_render_support_fraction: 0.8
+  use_confidence_weighted_visibility: false
+  enable_reference_corroboration: false
+  minimum_corroborating_views: 2
+  enable_color_replacement_detection: true
+  color_replacement_minimum_colorfulness: 40.0
+  color_replacement_residual_percentile: 90.0
+  minimum_color_replacement_area: 40
+  color_replacement_minimum_confidence: 0.3
+  enable_appearance_correspondence: false
+  enable_clean_bridge: false
+sam3_proposals:
+  sam3_source: ${SAM3_SOURCE}
+  sam3_image_checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+  proposals:
+    points_per_side: 96
+    points_per_batch: 32
+    pred_iou_threshold: 0.8
+    stability_threshold: 0.8
+    stability_offset: 1.0
+    crop_layers: 1
+    crop_downscale_factor: 2
+    box_nms_threshold: 0.7
+    crop_nms_threshold: 0.7
+    minimum_mask_area: 16
+    multimask_output: true
+    mask_to_mask_refinement: false
+dinov2_features:
+  dinov2:
+    source: src/dinov2
+    checkpoint: checkpoints/dinov2_vitb14_reg4_pretrain.pth
+    checkpoint_sha256: 73182a088cf94833c94b1666d1c99e02fe87e2007bff57b564fb6206e25dba71
+    model: dinov2_vitb14_reg
+    mixed_precision: true
+    full_image_width: 896
+    full_image_height: 672
+    patch_size: 14
+    minimum_feature_cells: 4.0
+sam2_tracking:
+  device: cuda
+  sam2:
+    checkpoint: checkpoints/sam2.1_hiera_large.pt
+    checkpoint_sha256: 2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318
+    model_cfg: configs/sam2.1/sam2.1_hiera_l.yaml
+    mixed_precision: true
+    compile_image_encoder: true
+    vos_optimized: true
+    points_per_side: 64
+    pred_iou_thresh: 0.8
+    stability_score_thresh: 0.8
+    crop_n_layers: 1
+    crop_n_points_downscale_factor: 2
+    multimask_output: true
+    use_m2m: false
+  tracking:
+    minimum_mask_area: 32
+    minimum_track_iou: 0.2
+    track_area_ratio_bounds:
+    - 0.5
+    - 2.0
+    minimum_track_score: 0.0
+    no3d_movement_iou: 0.5
+    visibility_alpha: 0.8
+    replacement_overlap_iou: 0.1

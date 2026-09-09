@@ -19,14 +19,27 @@ sys.path.insert(0, str(REPO / "scripts"))
 import run_paslcd_pair as pair  # noqa: E402
 
 
-def _already_evaluated(scene_dir: Path, stem: str) -> bool:
+def _already_evaluated(scene_dir: Path, stem: str, require_refine: bool = False) -> bool:
+    """A query only counts as done if it has a metrics.csv row AND (when
+    require_refine) its refine stage actually ran. Without the second check,
+    --resume against a directory that was completed with refine missing
+    (e.g. an old --skip-refine or pre-refine-wiring run) would silently skip
+    every query forever once a refine-enabled rerun points at it -- exactly
+    the bug found in the 2026-09-08 refine-completeness audit."""
     metrics_path = scene_dir / "metrics.csv"
     if not metrics_path.exists():
         return False
     import csv
 
     with metrics_path.open() as handle:
-        return any(row["test_image"] == stem for row in csv.DictReader(handle))
+        found = any(row["test_image"] == stem for row in csv.DictReader(handle))
+    if not found:
+        return False
+    if require_refine:
+        refined_marker = scene_dir / "intermediate" / stem / "refined" / "render_t0.png"
+        if not refined_marker.exists():
+            return False
+    return True
 
 
 def run_scene(
@@ -41,6 +54,7 @@ def run_scene(
     reference_scene_cache_dir: Path | None = None,
     resume: bool = False,
     detect_lock_file: Path | None = None,
+    dump_inventory: bool = False,
 ) -> dict:
     instance_dir = data_root / dataset / instance
     reference_images, test_images = pair.discover_instance_images(instance_dir)
@@ -52,7 +66,7 @@ def run_scene(
     scene_dir = output_root / pair.scene_name(dataset, instance)
 
     if resume:
-        test_images = [t for t in test_images if not _already_evaluated(scene_dir, t.stem)]
+        test_images = [t for t in test_images if not _already_evaluated(scene_dir, t.stem, require_refine=not skip_refine)]
         if not test_images:
             print(f"[{dataset}/{instance}] all queries already evaluated, skipping", flush=True)
             return pair.write_scene_summary(scene_dir, pair.scene_name(dataset, instance), dataset, instance)
@@ -75,6 +89,10 @@ def run_scene(
     if reference_scene is None:
         print(f"[{dataset}/{instance}] building reference scene from {len(reference_images)} images", flush=True)
         reference_scene = pair.build_reference_scene(reference_images, config_path)
+        if reference_scene_cache_dir:
+            reference_scene_cache_dir.mkdir(parents=True, exist_ok=True)
+            reference_scene.save(reference_scene_cache_dir / f"{pair.scene_name(dataset, instance)}.npz")
+            print(f"[{dataset}/{instance}] saved reference scene to {reference_scene_cache_dir}", flush=True)
 
     # Stages 1-2 (reconstruction + optional refine) still run per-query --
     # they're comparatively cheap (~1 min) and each needs its own VGGT-Omega
@@ -107,6 +125,9 @@ def run_scene(
             }
             for p in all_paths.values()
         ]
+        if dump_inventory:
+            for entry, p in zip(manifest, all_paths.values()):
+                entry["dump_inventory_to"] = str(p["intermediate_dir"] / "inventory")
         manifest_path = scene_dir / "detect_batch_manifest.json"
         manifest_path.write_text(json.dumps(manifest, indent=2))
         detect_cmd = [
@@ -168,12 +189,13 @@ def main() -> int:
     parser.add_argument("--reference-scene-cache-dir", type=Path, default=None, help="reuse a saved ReferenceScene .npz (see build_paslcd_reference_scenes.py) instead of rebuilding")
     parser.add_argument("--resume", action="store_true", help="skip query images already present in this scene's metrics.csv")
     parser.add_argument("--detect-lock-file", type=Path, default=None, help="serialize the detect_batch.py subprocess against this flock file -- use when running multiple instances concurrently (see run_paslcd_benchmark.py --parallel-instances), since detect_batch.py alone uses ~7.3GB and two do not fit on a 16GB GPU")
+    parser.add_argument("--dump-inventory", action="store_true", help="also save each query's stage-1-3 detection bundle (proposals, descriptors, tracks) to intermediate/<stem>/inventory/ for later detect-only replays (see change_detection._dump_inventory_bundle)")
     args = parser.parse_args()
 
     summary = run_scene(
         args.data_root, args.dataset, args.instance, args.output_root, args.config,
         args.max_reference_images, args.skip_refine, args.limit,
-        args.reference_scene_cache_dir, args.resume, args.detect_lock_file,
+        args.reference_scene_cache_dir, args.resume, args.detect_lock_file, args.dump_inventory,
     )
     print(json.dumps(summary, indent=2))
     return 0

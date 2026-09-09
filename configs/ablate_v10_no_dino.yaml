@@ -57,6 +57,7 @@ refine:
 # Object-inventory cleanup and association/classification thresholds for
 # change_detection.run_object_state_resolution. See its docstring.
 three_image_comparison:
+  use_dino_features: false
   minimum_mask_area: 16
   maximum_mask_area_fraction: 0.25
   duplicate_iou: 0.80
@@ -108,6 +109,13 @@ three_image_comparison:
   # ChangeSim's / every GOLDILOCS config's own published default
   # (masks.py's filter_visible docstring), not yet validated on PASLCD.
   enable_visibility_filter: true
+  enable_ceiling_sky_suppression: true
+  enable_occlusion_aware_removal_suppression: true
+  maximum_removed_behind_added_fraction: 0.5
+  occlusion_depth_margin_fraction: 0.05
+  minimum_occluded_fraction: 0.25
+  ceiling_sky_confidence_threshold: 0.5
+  maximum_ceiling_sky_fraction: 0.5
   minimum_render_support_fraction: 0.8
   # Our extension: use the continuous confidence-weighted score
   # (change_detection._confidence_weighted_visible_fraction) instead of the
