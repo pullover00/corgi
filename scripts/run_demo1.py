@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import time
 import subprocess
 import sys
 from pathlib import Path
@@ -98,8 +99,101 @@ def save_panel(paths: dict[str, Path], detect_dir: Path, panel_path: Path) -> No
     panel.save(panel_path)
 
 
+def reference_fingerprint(sources: list[Path], config_path: Path) -> dict:
+    """What the cached reference reconstruction depends on: the source images
+    (identity, size, mtime) and the reconstruction config section. If any of
+    it changes the cache is stale -- the reference set was edited three times
+    on 2026-09-09 alone, and a silently stale reconstruction would put every
+    detected change in the wrong place."""
+    from ocmask_pipeline.config import load_config
+
+    return {
+        "sources": [{"path": str(p.resolve()), "size": p.stat().st_size, "mtime": p.stat().st_mtime}
+                    for p in sources],
+        "reconstruction": load_config(config_path).get("reconstruction"),
+    }
+
+
+def cached_reference_scene(sources: list[Path], cache: Path, config_path: Path, config,
+                           rebuild: bool = False):
+    """Reference scene from ``cache`` (.npz + .json sidecar) when its
+    fingerprint matches, else rebuilt and saved. Returns (scene, staged_paths).
+
+    The staged copies live in a STABLE directory beside the cache, not in the
+    per-run inputs dir: localize_and_render_query raises unless the query-time
+    t0 paths equal the cached scene's image_paths exactly, so per-run staging
+    would make the cache unusable by construction. Only the isolated
+    reference pass is saved -- localization still runs VGGT-Omega on
+    reference + query jointly for every query, by design.
+    """
+    from ocmask_pipeline.reconstruction import ReferenceScene, reconstruct_reference_scene
+
+    staged = stage_inputs(sources, cache.parent / f"{cache.stem}_inputs")
+    fp = reference_fingerprint(sources, config_path)
+    side = cache.with_suffix(".json")
+    if not rebuild and cache.exists() and side.exists():
+        try:
+            if json.loads(side.read_text()) == fp:
+                scene = ReferenceScene.load(cache)
+                if scene.image_paths == staged:
+                    print(f"reference scene: loaded from cache {cache}", flush=True)
+                    return scene, staged
+                print("reference scene: cache paths differ from staged inputs, rebuilding", flush=True)
+            else:
+                print("reference scene: sources or reconstruction config changed, rebuilding", flush=True)
+        except Exception as e:  # a corrupt cache must never block a run
+            print(f"reference scene: cache unreadable ({e}), rebuilding", flush=True)
+    print("reference scene: reconstructing (once, in isolation from queries)...", flush=True)
+    scene = reconstruct_reference_scene(staged, config)
+    cache.parent.mkdir(parents=True, exist_ok=True)
+    scene.save(cache)
+    side.write_text(json.dumps(fp, indent=2))
+    print(f"reference scene: saved to {cache}", flush=True)
+    return scene, staged
+
+
+def refine_via_worker(worker_dir: Path, paths: dict, config_path: Path, refined_dir: Path,
+                      timeout_s: float = 600.0) -> bool:
+    """Hand the refine job to a resident refine_worker.py if one is alive.
+    Returns True on success; False (with a printed reason) when there is no
+    live worker, it failed, or it timed out -- the caller then falls back to
+    the per-run subprocess, so a missing worker never changes the result,
+    only the time."""
+    hb = worker_dir / "heartbeat"
+    if not hb.exists() or time.time() - hb.stat().st_mtime > 10.0:
+        print("refine: no live worker, using the per-run subprocess", flush=True)
+        return False
+    rid = f"{int(time.time() * 1000)}_{os.getpid()}"
+    (worker_dir / "requests").mkdir(parents=True, exist_ok=True)
+    (worker_dir / "results").mkdir(parents=True, exist_ok=True)
+    (worker_dir / "requests" / f"{rid}.json").write_text(json.dumps({
+        "render_t0": str(paths["render_t0"]), "clean_render": str(paths["clean_render"]),
+        "image_t1": str(paths["image_t1"]), "config": str(config_path), "output_dir": str(refined_dir)}))
+    done, err = worker_dir / "results" / f"{rid}.done", worker_dir / "results" / f"{rid}.err"
+    t0 = time.time()
+    while time.time() - t0 < timeout_s:
+        if done.exists():
+            print(f"refine: worker finished in {json.loads(done.read_text())['seconds']:.1f}s", flush=True)
+            return True
+        if err.exists():
+            print("refine: worker FAILED, falling back to the subprocess:\n" + err.read_text(), flush=True)
+            return False
+        if time.time() - hb.stat().st_mtime > 30.0:
+            # Give up only if the worker really stopped. Its heartbeat runs on
+            # a dedicated thread, so a stale one means the process is gone --
+            # not merely busy loading the model.
+            print("refine: worker heartbeat stopped, falling back to the subprocess", flush=True)
+            (worker_dir / "requests" / f"{rid}.json").unlink(missing_ok=True)
+            return False
+        time.sleep(0.5)
+    print("refine: worker timed out, falling back to the subprocess", flush=True)
+    (worker_dir / "requests" / f"{rid}.json").unlink(missing_ok=True)
+    return False
+
+
 def run_query(reference_images: list[Path], query: Path, out_root: Path,
-              config_path: Path, reference_scene, skip_refine: bool) -> dict:
+              config_path: Path, reference_scene, skip_refine: bool,
+              refine_worker_dir: Path | None = None) -> dict:
     import numpy as np
     from PIL import Image
 
@@ -139,13 +233,16 @@ def run_query(reference_images: list[Path], query: Path, out_root: Path,
     paths = {k: recon_dir / f"{k}.png" for k in ("render_t0", "clean_render", "image_t1")}
     if not skip_refine and config.get("refine", {}).get("enabled", False):
         refined_dir = q_dir / "refined"
-        subprocess.run(
-            ["conda", "run", "--no-capture-output", "-n", DIFIX_ENV, "python", str(REPO / "scripts/refine.py"),
-             "--render-t0", str(paths["render_t0"]), "--clean-render", str(paths["clean_render"]),
-             "--image-t1", str(paths["image_t1"]), "--config", str(config_path),
-             "--output-dir", str(refined_dir)],
-            check=True,
-        )
+        # A live refine_worker.py (model already loaded) does it in seconds;
+        # otherwise the per-run subprocess, which reloads DI2FIX each time.
+        if not (refine_worker_dir and refine_via_worker(refine_worker_dir, paths, config_path, refined_dir)):
+            subprocess.run(
+                ["conda", "run", "--no-capture-output", "-n", DIFIX_ENV, "python", str(REPO / "scripts/refine.py"),
+                 "--render-t0", str(paths["render_t0"]), "--clean-render", str(paths["clean_render"]),
+                 "--image-t1", str(paths["image_t1"]), "--config", str(config_path),
+                 "--output-dir", str(refined_dir)],
+                check=True,
+            )
         paths["render_t0"] = refined_dir / "render_t0.png"
         paths["clean_render"] = refined_dir / "clean_render.png"
 
@@ -194,6 +291,15 @@ def main() -> int:
     ap.add_argument("--max-reference-images", type=int, default=None,
                     help="uniformly subsample the reference set (VRAM/quality tradeoff)")
     ap.add_argument("--skip-refine", action="store_true")
+    ap.add_argument("--reference-scene-cache", type=Path, default=None,
+                    help="reuse the isolated reference reconstruction from this .npz "
+                         "(built and saved on first use; invalidated automatically when "
+                         "the reference images or the reconstruction config change)")
+    ap.add_argument("--rebuild-reference", action="store_true",
+                    help="ignore an existing --reference-scene-cache and rebuild it")
+    ap.add_argument("--refine-worker-dir", type=Path, default=None,
+                    help="use a resident scripts/refine_worker.py in this directory when one is "
+                         "alive (falls back to the per-run refine subprocess otherwise)")
     args = ap.parse_args()
 
     from ocmask_pipeline.config import load_config
@@ -209,15 +315,19 @@ def main() -> int:
         reference_raw = even_subsample(reference_raw, args.max_reference_images)
 
     work = args.out / "inputs"
-    reference_images = stage_inputs(reference_raw, work / "reference")
     queries = stage_inputs(queries_raw, work / "queries")
+    config = load_config(args.config)
+    if args.reference_scene_cache:
+        reference_scene, reference_images = cached_reference_scene(
+            reference_raw, args.reference_scene_cache, args.config, config, args.rebuild_reference)
+    else:
+        reference_images = stage_inputs(reference_raw, work / "reference")
+        print("reconstructing reference scene (once, in isolation from queries)...", flush=True)
+        reference_scene = reconstruct_reference_scene(reference_images, config)
     print(f"{len(reference_images)} reference images, {len(queries)} query image(s)", flush=True)
 
-    config = load_config(args.config)
-    print("reconstructing reference scene (once, in isolation from queries)...", flush=True)
-    reference_scene = reconstruct_reference_scene(reference_images, config)
-
-    summaries = [run_query(reference_images, q, args.out, args.config, reference_scene, args.skip_refine)
+    summaries = [run_query(reference_images, q, args.out, args.config, reference_scene, args.skip_refine,
+                           args.refine_worker_dir)
                  for q in queries]
     (args.out / "summary.json").write_text(json.dumps(summaries, indent=2))
     print(f"\nwrote {args.out / 'summary.json'}")
