@@ -30,10 +30,11 @@ import numpy as np
 from PIL import Image
 
 
-def refine_renders(render_t0: np.ndarray, clean_render: np.ndarray, image_t1: np.ndarray, config: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
-    """Return (fixed_render_t0, fixed_clean_render); image_t1 is untouched
-    and used only as the reference image."""
-
+def load_refiner(config: dict[str, Any]):
+    """Load DI2FIX's DifixPipeline onto the GPU. Split out of refine_renders
+    so a resident worker (scripts/refine_worker.py) can load it ONCE: the
+    load is ~2.5 min of a ~2.7 min refine stage (measured 2026-09-09), the
+    single denoising step on two images is seconds."""
     refine_cfg = config["refine"]
     di2fix_src = Path(refine_cfg["di2fix_root"]) / "src"
     if str(di2fix_src) not in sys.path:
@@ -48,7 +49,13 @@ def refine_renders(render_t0: np.ndarray, clean_render: np.ndarray, image_t1: np
     # repo metadata before it knows that.
     pipe = DifixPipeline.from_pretrained(refine_cfg["model"], torch_dtype=torch.float16, trust_remote_code=True)
     pipe.to("cuda")
+    return pipe
 
+
+def refine_with(pipe, render_t0: np.ndarray, clean_render: np.ndarray, image_t1: np.ndarray,
+                config: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
+    """refine_renders with an already-loaded pipeline."""
+    refine_cfg = config["refine"]
     ref_image = Image.fromarray(np.asarray(image_t1, dtype=np.uint8))
     height, width = ref_image.size[1], ref_image.size[0]
 
@@ -67,3 +74,10 @@ def refine_renders(render_t0: np.ndarray, clean_render: np.ndarray, image_t1: np
         return np.asarray(output, dtype=np.uint8)
 
     return fix(render_t0), fix(clean_render)
+
+
+def refine_renders(render_t0: np.ndarray, clean_render: np.ndarray, image_t1: np.ndarray, config: dict[str, Any]) -> tuple[np.ndarray, np.ndarray]:
+    """Return (fixed_render_t0, fixed_clean_render); image_t1 is untouched
+    and used only as the reference image. Loads the model per call -- see
+    load_refiner for the resident alternative."""
+    return refine_with(load_refiner(config), render_t0, clean_render, image_t1, config)

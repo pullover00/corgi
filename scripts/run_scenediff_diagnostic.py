@@ -35,8 +35,10 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import os
 import pickle
+import shlex
 import shutil
 import subprocess
 import sys
@@ -64,10 +66,26 @@ RENDER_FILES = {
 DETECT_STAGES = ("proposals", "descriptors", "tracking", "resolution", "labels")
 
 
-def stores(root: Path, pair: str, query: str, experiment: str) -> tuple[ArtifactStore, ArtifactStore]:
-    shared = ArtifactStore(root, DATASET, pair, "shared", query=query)
+def stores(root: Path, pair: str, query: str, experiment: str,
+           shared_name: str = "shared") -> tuple[ArtifactStore, ArtifactStore]:
+    shared = ArtifactStore(root, DATASET, pair, shared_name, query=query)
     own = ArtifactStore(root, DATASET, pair, experiment, query=query, fallback=shared)
     return shared, own
+
+
+def nested_reference_subset(n_available: int, n_views: int) -> list[int]:
+    """Positions (into the existing baseline T0 frame list) of ``n_views``
+    evenly spaced frames, fixed before any run and independent of content:
+    fraction f_i = i/(n-1) of the way through the list (f = 1/2 for n = 1),
+    position = floor(f * (K-1) + 0.5). Nested for the ablation's ladder --
+    K=10: {5} < {0,5,9} < {0,2,5,7,9}; K=11: {5} < {0,5,10} < {0,3,5,8,10} --
+    so every smaller reference set is contained in the larger ones. The
+    annotators' representative T0 frame is NOT forced in (it would break
+    both the even spacing and the nesting)."""
+    if n_views >= n_available:
+        return list(range(n_available))
+    fractions = [0.5] if n_views == 1 else [i / (n_views - 1) for i in range(n_views)]
+    return sorted({int(math.floor(f * (n_available - 1) + 0.5)) for f in fractions})
 
 
 def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int):
@@ -95,7 +113,9 @@ def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int):
 
 
 def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, experiment: str,
-                       skip_refine: bool) -> dict | None:
+                       skip_refine: bool, inventory_source_experiment: str | None = None,
+                       dump_inventory: bool = False, reference_views: int | None = None,
+                       refine_worker_dir: Path | None = None) -> dict | None:
     import numpy as np
     from PIL import Image
     from ocmask_pipeline.reconstruction import localize_and_render_query, reconstruct_reference_scene
@@ -104,7 +124,28 @@ def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, expe
     t0_frames, query_frame, t0_indices, t1_idx = prepare_frames(
         pair_dir, frames_root, int(config["reconstruction"]["frames_per_video"]))
     query = f"t1_{t1_idx:04d}"
-    shared, own = stores(root, pair, query, experiment)
+    shared_name = "shared"
+    subset_positions = None
+    if reference_views is not None:
+        # Reference-view-count ablation: a deterministic, nested, evenly
+        # spaced subset of the BASELINE run's own T0 frame list (which must
+        # already exist), so the only thing that changes is how many of the
+        # same frames the reference reconstruction sees. Everything that
+        # depends on the reference set (reconstruction, localization,
+        # render, refine) lives under its own shared_ref<N> cell; the T1
+        # query is untouched.
+        baseline = root / DATASET / pair / "shared" / "reference_reconstruction" / "t0_frames.json"
+        if not baseline.exists():
+            raise FileNotFoundError(f"baseline T0 frame list required for --reference-views: {baseline}")
+        baseline_frames = json.loads(baseline.read_text())
+        subset_positions = nested_reference_subset(len(baseline_frames["indices"]), reference_views)
+        t0_indices = [baseline_frames["indices"][i] for i in subset_positions]
+        t0_frames = [Path(baseline_frames["paths"][i]) for i in subset_positions]
+        missing = [str(p) for p in t0_frames if not p.exists()]
+        if missing:
+            raise FileNotFoundError(f"baseline T0 frames missing on disk: {missing}")
+        shared_name = f"shared_ref{reference_views}"
+    shared, own = stores(root, pair, query, experiment, shared_name)
 
     # --- reference reconstruction (scene-level, shared) ---
     ref_dir = shared.stage_dir("reference_reconstruction")
@@ -119,7 +160,9 @@ def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, expe
         (ref_dir / "reference_scene.pkl").write_bytes(pickle.dumps(reference_scene))
         (ref_dir / "t0_frames.json").write_text(json.dumps({"indices": t0_indices, "paths": [str(p) for p in t0_frames]}))
         shared.commit("reference_reconstruction", config, ["reference_scene.pkl", "t0_frames.json"],
-                      extra={"seconds": time.perf_counter() - started, "n_frames": len(t0_frames)})
+                      extra={"seconds": time.perf_counter() - started, "n_frames": len(t0_frames),
+                             "reference_views": reference_views,
+                             "subset_positions_in_baseline_list": subset_positions})
 
     # --- localization + render (query-level, shared) ---
     render_dir = shared.stage_dir("render")
@@ -159,14 +202,27 @@ def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, expe
         else:
             print(f"  [{pair}] refine: {shared.stale_reason('refine', config)}", flush=True)
             started = time.perf_counter()
-            subprocess.run(
-                ["conda", "run", "--no-capture-output", "-n", DIFIX_ENV, "python", str(REPO / "scripts/refine.py"),
-                 "--render-t0", str(render_dir / "render_t0.png"), "--clean-render", str(render_dir / "clean_render.png"),
-                 "--image-t1", str(render_dir / "image_t1.png"), "--config", str(config["_config_path"]),
-                 "--output-dir", str(refine_dir)],
-                check=True,
-            )
-            shared.commit("refine", config, ["render_t0.png", "clean_render.png"], extra={"seconds": time.perf_counter() - started})
+            # A live scripts/refine_worker.py (model already resident) does
+            # the same DifixPipeline call in seconds; otherwise the per-run
+            # subprocess reloads the model (~2.5 min). Output is identical.
+            via_worker = False
+            if refine_worker_dir is not None:
+                from run_demo1 import refine_via_worker
+                via_worker = refine_via_worker(
+                    refine_worker_dir,
+                    {"render_t0": render_dir / "render_t0.png", "clean_render": render_dir / "clean_render.png",
+                     "image_t1": render_dir / "image_t1.png"},
+                    Path(config["_config_path"]), refine_dir)
+            if not via_worker:
+                subprocess.run(
+                    ["conda", "run", "--no-capture-output", "-n", DIFIX_ENV, "python", str(REPO / "scripts/refine.py"),
+                     "--render-t0", str(render_dir / "render_t0.png"), "--clean-render", str(render_dir / "clean_render.png"),
+                     "--image-t1", str(render_dir / "image_t1.png"), "--config", str(config["_config_path"]),
+                     "--output-dir", str(refine_dir)],
+                    check=True,
+                )
+            shared.commit("refine", config, ["render_t0.png", "clean_render.png"],
+                          extra={"seconds": time.perf_counter() - started, "via_worker": via_worker})
     render_t0 = (refine_dir if refine_on else render_dir) / "render_t0.png"
     clean_render = (refine_dir if refine_on else render_dir) / "clean_render.png"
 
@@ -179,6 +235,14 @@ def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, expe
             continue
         if (render_dir / name).exists():
             entry[key] = str(render_dir / name)
+    experiment_dir = own.stage_dir("labels").parent
+    if dump_inventory:
+        entry["dump_inventory_to"] = str(experiment_dir / "inventory")
+    if inventory_source_experiment is not None:
+        inventory_dir = experiment_dir.parent / inventory_source_experiment / "inventory"
+        if not (inventory_dir / "bundle.pkl").exists():
+            raise FileNotFoundError(f"missing replay inventory bundle: {inventory_dir / 'bundle.pkl'}")
+        entry["load_inventory_from"] = str(inventory_dir)
     return {"pair": pair, "query": query, "t1_idx": t1_idx, "entry": entry, "own": own, "shared": shared}
 
 
@@ -206,6 +270,19 @@ def main() -> int:
     ap.add_argument("--config", type=Path, required=True)
     ap.add_argument("--root", type=Path, default=REPO / "results/scenediff_diagnostic")
     ap.add_argument("--skip-refine", action="store_true")
+    ap.add_argument("--dump-inventory", action="store_true",
+                    help="persist stages 1-3 plus dense recovery features for later state-only replay")
+    ap.add_argument("--inventory-source-experiment", default=None,
+                    help="load a prior experiment's inventory bundle and rerun only stages 4+")
+    ap.add_argument("--reference-views", type=int, default=None,
+                    help="reference-view-count ablation: reconstruct from this many evenly spaced, nested "
+                         "frames of the baseline's own T0 frame list (see nested_reference_subset); "
+                         "shared stages go under shared_ref<N>")
+    ap.add_argument("--refine-worker-dir", type=Path, default=None,
+                    help="use a live scripts/refine_worker.py in this directory for the refine stage "
+                         "(falls back to the per-run subprocess when none is alive)")
+    ap.add_argument("--detect-extra-args", default="",
+                    help="extra CLI args passed through to detect_batch.py, e.g. '--sequential-model-lifecycle'")
     ap.add_argument("--through", choices=("refine", "detect"), default="detect",
                     help="'refine' stops after the shared reconstruction/render/refine stages -- lets the "
                          "base-independent GPU work run before the detect-side variant is decided")
@@ -218,6 +295,10 @@ def main() -> int:
     exp_root = args.root / DATASET / "_experiments" / args.experiment
     exp_root.mkdir(parents=True, exist_ok=True)
     shutil.copy(args.config, exp_root / "config.yaml")
+    (exp_root / "invocation.json").write_text(json.dumps({
+        "argv": sys.argv, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+        "reference_views": args.reference_views, "inventory_source_experiment": args.inventory_source_experiment,
+    }, indent=2))
 
     pairs = [l.strip() for l in args.pair_ids_file.read_text().splitlines() if l.strip()]
     print(f"experiment {args.experiment}: {len(pairs)} pairs, config {args.config}", flush=True)
@@ -226,16 +307,31 @@ def main() -> int:
     for pair in pairs:
         pair_dir = args.benchmark_root / "data" / pair
         try:
-            item = reconstruct_stages(pair, pair_dir, args.root, config, args.experiment, args.skip_refine)
+            item = reconstruct_stages(
+                pair, pair_dir, args.root, config, args.experiment, args.skip_refine,
+                inventory_source_experiment=args.inventory_source_experiment,
+                dump_inventory=args.dump_inventory, reference_views=args.reference_views,
+                refine_worker_dir=args.refine_worker_dir,
+            )
             if item:
                 items.append(item)
         except Exception as e:  # noqa: BLE001 -- one bad pair must not sink the batch; it is recorded
             failed[pair] = f"{type(e).__name__}: {e}"
             print(f"  [{pair}] RECONSTRUCTION FAILED: {failed[pair]}", flush=True)
 
+    reference_sets = {}
+    for it in items:
+        ref = it["shared"].stage_dir("reference_reconstruction")
+        reference_sets[it["pair"]] = {
+            "t0_frames": json.loads((ref / "t0_frames.json").read_text())["indices"],
+            "reference_seconds": (json.loads((ref / "manifest.json").read_text()).get("extra") or {}).get("seconds"),
+            "t1_idx": it["t1_idx"],
+            "alignment_residual": json.loads((it["shared"].stage_dir("localization") / "alignment.json").read_text())["alignment_residual"],
+        }
+    (exp_root / "reference_sets.json").write_text(json.dumps(reference_sets, indent=2))
+
     if args.through == "refine":
-        residuals = {it["pair"]: json.loads((it["shared"].stage_dir("localization") / "alignment.json").read_text())["alignment_residual"]
-                     for it in items}
+        residuals = {it["pair"]: reference_sets[it["pair"]]["alignment_residual"] for it in items}
         (exp_root / "shared_stages.json").write_text(json.dumps({"alignment_residuals": residuals, "failed": failed}, indent=2))
         print(f"\nshared stages complete for {len(items)} pairs; residuals: "
               + ", ".join(f"{k.split('_')[0]}={v:.4f}" for k, v in residuals.items()) + f"; failed={list(failed)}")
@@ -250,7 +346,7 @@ def main() -> int:
         started = time.perf_counter()
         subprocess.run(
             ["conda", "run", "--no-capture-output", "-n", DETECT_ENV, "python", str(REPO / "scripts/detect_batch.py"),
-             "--manifest", str(manifest), "--config", str(args.config)],
+             "--manifest", str(manifest), "--config", str(args.config), *shlex.split(args.detect_extra_args)],
             check=True,
         )
         per_query_seconds = (time.perf_counter() - started) / max(len(todo), 1)

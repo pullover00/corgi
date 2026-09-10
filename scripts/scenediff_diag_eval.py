@@ -62,7 +62,11 @@ def main() -> int:
     result["timings"] = inference.get("timings")
     result["n_decisions_by_kind"] = {k: sum(1 for d in decisions if d.get("decision") == k)
                                      for k in ("unchanged", "moved", "removed", "added", "replaced",
+                                               "unknown_identity_location", "unknown_unmatched_visibility",
                                                "visibility_filtered", "horizon_suppressed")}
+    result["n_decisions_by_kind"]["unknown"] = sum(
+        1 for d in decisions if str(d.get("decision", "")).startswith("unknown_")
+    )
     by_evidence: dict[str, int] = {}
     for d in decisions:
         if d.get("decision") in ("unchanged", "moved"):

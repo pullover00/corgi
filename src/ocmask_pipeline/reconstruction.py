@@ -453,6 +453,44 @@ def _fit_similarity_transform(source: np.ndarray, target: np.ndarray) -> tuple[n
     return rotation, translation, scale
 
 
+def _fit_single_frame_transform(
+    source_extrinsic: np.ndarray, target_extrinsic: np.ndarray,
+    source_world_points: np.ndarray, target_depth: np.ndarray,
+    source_conf: np.ndarray, target_conf: np.ndarray, conf_pct: float,
+) -> tuple[np.ndarray, np.ndarray, float]:
+    """Similarity transform (rotation, translation, scale) from a reference
+    reconstruction's world frame into a second call's world frame when the
+    two calls share exactly ONE image, so camera centers alone cannot fix
+    it (_fit_similarity_transform needs >= 2). Both calls see that image
+    through the same physical camera, so their camera-space coordinates of
+    it agree up to the per-call global scale: x_target_cam = s * x_source_cam.
+    With E = [R | t] (world -> camera) in each call,
+
+        X_target = s * R_t^T R_s X_source + R_t^T (s t_s - t_t)
+
+    and s is the median ratio of the two calls' depths of that frame over
+    pixels both are confident about (the same confidence percentile the
+    rest of this module uses). For VGGT-Omega, whose world frame is the
+    first camera's, both extrinsics are ~identity and this reduces to a
+    pure scale, but the general form is used so the assumption is not
+    load-bearing."""
+    rotation_source, translation_source = source_extrinsic[:3, :3], source_extrinsic[:3, 3]
+    rotation_target, translation_target = target_extrinsic[:3, :3], target_extrinsic[:3, 3]
+    source_depth = (source_world_points @ rotation_source.T + translation_source)[..., 2]
+    valid = (
+        np.isfinite(source_depth) & np.isfinite(target_depth)
+        & (source_depth > 1e-6) & (target_depth > 1e-6)
+        & (source_conf >= np.percentile(source_conf, conf_pct))
+        & (target_conf >= np.percentile(target_conf, conf_pct))
+    )
+    if valid.sum() < 100:
+        raise ValueError("single-frame alignment: too few confident pixels shared between the two calls")
+    scale = float(np.median(target_depth[valid] / source_depth[valid]))
+    rotation = rotation_target.T @ rotation_source
+    translation = rotation_target.T @ (scale * translation_source - translation_target)
+    return rotation, translation, scale
+
+
 def localize_and_render_query(
     t0_image_paths: list[str | Path],
     query_image_path: str | Path,
@@ -504,7 +542,20 @@ def localize_and_render_query(
     # --- align reference_scene's isolated frame into this call's frame ---
     source_centers = _camera_centers(reference_scene.extrinsic)
     target_centers = _camera_centers(predictions["extrinsic"][:num_t0])
-    rotation, translation, scale = _fit_similarity_transform(source_centers, target_centers)
+    if num_t0 >= 2:
+        rotation, translation, scale = _fit_similarity_transform(source_centers, target_centers)
+    else:
+        # A single reference camera gives one center in each frame, which
+        # fixes the translation but leaves rotation and scale undetermined
+        # (Umeyama's source variance is zero). Use the shared frame's full
+        # pose for the rotation and its depth ratio for the scale instead --
+        # see _fit_single_frame_transform. Only ever reached by the
+        # reference-view-count ablation (N_T0 = 1); N >= 2 is unchanged.
+        rotation, translation, scale = _fit_single_frame_transform(
+            reference_scene.extrinsic[0], predictions["extrinsic"][0],
+            reference_scene.world_points[0], depth_2d[0],
+            reference_scene.depth_conf[0], depth_conf[0], conf_pct,
+        )
     aligned_centers = scale * source_centers @ rotation.T + translation
     alignment_residual = float(np.linalg.norm(target_centers - aligned_centers, axis=1).mean())
 

@@ -48,6 +48,10 @@ def main() -> int:
     )
     parser.add_argument("--config", type=Path, default=REPO / "configs/pipeline.yaml")
     parser.add_argument("--results-output", type=Path, default=None, help="write the per-item result summaries here as a JSON list")
+    parser.add_argument(
+        "--sequential-model-lifecycle", action="store_true",
+        help="load/release proposal, tracking, and text models inside each item to lower peak VRAM; slower but identical",
+    )
     args = parser.parse_args()
 
     import numpy as np
@@ -72,13 +76,17 @@ def main() -> int:
     # batch (some replay, some not) still needs all three, since at least
     # one item takes the slow path.
     all_replay = items and all(item.get("load_inventory_from") for item in items)
-    generator = None if all_replay else Sam3AutomaticMaskGenerator(sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"], **_proposal_kwargs(config))
+    reuse_models = not args.sequential_model_lifecycle
+    generator = (
+        Sam3AutomaticMaskGenerator(sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"], **_proposal_kwargs(config))
+        if reuse_models and not all_replay else None
+    )
     dino_extractor = (
         None
-        if all_replay or not ceiling_sky_settings.use_dino_features
+        if all_replay or not ceiling_sky_settings.use_dino_features or not reuse_models
         else Dinov2FeatureExtractor(config["dinov2_features"])
     )
-    tracker = None if all_replay else Sam2MaskTracker(config["sam2_tracking"])
+    tracker = Sam2MaskTracker(config["sam2_tracking"]) if reuse_models and not all_replay else None
     # A SEPARATE SAM3 model from `generator` (see Sam3TextPromptDetector's
     # docstring for why they cannot share one) -- built once and reused
     # across the whole batch, same as the other three, but only when this
@@ -89,7 +97,7 @@ def main() -> int:
             sam_cfg["sam3_image_checkpoint"], source=sam_cfg["sam3_source"],
             confidence_threshold=ceiling_sky_settings.ceiling_sky_confidence_threshold,
         )
-        if ceiling_sky_settings.enable_ceiling_sky_suppression else None
+        if ceiling_sky_settings.enable_ceiling_sky_suppression and not all_replay and reuse_models else None
     )
 
     results = []

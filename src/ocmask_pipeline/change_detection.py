@@ -155,12 +155,16 @@ class ThreeImageSettings:
     # independently confirmed to contain genuine moved objects, so the
     # trade-off is understood, not a mystery).
     reject_low_confidence_moved: bool = True
-    # Controlled object-state ablation: preserve an already-accepted
-    # identity when its masks fail the same-location test.  Existing 3D
-    # geometry decides whether that is positive MOVED evidence; if geometry
-    # is unavailable or still supports the same location, keep the pair as
-    # internal UNKNOWN.  In either case both endpoints stay consumed rather
-    # than falling through to independent REMOVED/ADDED hypotheses.
+    # Controlled object-state ablations.  The first flag changes only the
+    # location-mismatch branch: preserve an already-accepted identity and
+    # use existing 3D evidence to choose MOVED vs internal UNKNOWN.  The
+    # second changes only the bookkeeping for genuinely unmatched objects
+    # whose existing visibility filter finds insufficient reference support:
+    # retain UNKNOWN as the candidate state instead of a generic filtered
+    # rejection.  The legacy combined flag enables both for reproducibility
+    # of the earlier PASLCD experiment.
+    enable_location_mismatch_state_resolver: bool = False
+    enable_conservative_unmatched_state_resolution: bool = False
     enable_conservative_state_resolver: bool = False
     tracking_batch_size: int = 16
     recover_unmatched_via_tracking: bool = True
@@ -402,6 +406,14 @@ class ThreeImageSettings:
         if unknown:
             raise ValueError("Unknown three_image_comparison settings: " + ", ".join(unknown))
         return cls(**values)
+
+    @property
+    def location_mismatch_state_resolver_enabled(self) -> bool:
+        return self.enable_location_mismatch_state_resolver or self.enable_conservative_state_resolver
+
+    @property
+    def conservative_unmatched_state_resolution_enabled(self) -> bool:
+        return self.enable_conservative_unmatched_state_resolution or self.enable_conservative_state_resolver
 
 
 @dataclass(frozen=True)
@@ -1109,7 +1121,7 @@ def resolve_three_image_changes(
             location_score = max(location_score, direct_bi[source, target])
         if location_score >= settings.same_location_iou:
             record_pair(source, target, Label.UNCHANGED, "direct_identity")
-        elif settings.enable_conservative_state_resolver:
+        elif settings.location_mismatch_state_resolver_enabled:
             resolve_low_location_identity(source, target, "direct_identity")
         elif settings.reject_low_confidence_moved:
             record_rejected(source, target, "direct_identity")
@@ -1141,7 +1153,7 @@ def resolve_three_image_changes(
     for source, target in _assign(bridge_scores, bridge_edges):
         if spatial[source, target] >= settings.same_location_iou:
             record_pair(source, target, Label.UNCHANGED, "clean_bridge_identity")
-        elif settings.enable_conservative_state_resolver:
+        elif settings.location_mismatch_state_resolver_enabled:
             resolve_low_location_identity(source, target, "clean_bridge_identity")
         elif settings.reject_low_confidence_moved:
             record_rejected(source, target, "clean_bridge_identity")
@@ -1189,7 +1201,7 @@ def resolve_three_image_changes(
             ids = (item.metadata.get("t0_object_id"), item.metadata.get("t1_object_id"))
             row = decision_by_ids.get(ids)
             if row is not None:
-                if settings.enable_conservative_state_resolver and item.label in (Label.ADDED, Label.REMOVED):
+                if settings.conservative_unmatched_state_resolution_enabled and item.label in (Label.ADDED, Label.REMOVED):
                     previous = item.label.name.lower()
                     row["decision"] = "unknown_unmatched_visibility"
                     row["candidate_state"] = previous
@@ -1926,6 +1938,7 @@ def _dump_inventory_bundle(
     tracking: "TrackingEvidence",
     raw_t0: Sequence[Sam3Proposal], raw_clean: Sequence[Sam3Proposal], raw_t1: Sequence[Sam3Proposal],
     sam_t0_map: np.ndarray, dino_t0_map: np.ndarray, sam_t1_map: np.ndarray, dino_t1_map: np.ndarray,
+    ceiling_sky_mask: np.ndarray | None = None,
     provenance: dict[str, Any] | None = None,
 ) -> None:
     """Persist everything stages 1-3 (SAM3 proposals+features, DINOv2
@@ -1971,6 +1984,7 @@ def _dump_inventory_bundle(
         "inventory_t0": inventory_t0, "inventory_clean": inventory_clean, "inventory_t1": inventory_t1,
         "tracking": tracking, "raw_t0": raw_t0, "raw_clean": raw_clean, "raw_t1": raw_t1,
         "sam_t0_map": sam_t0_map, "dino_t0_map": dino_t0_map, "sam_t1_map": sam_t1_map, "dino_t1_map": dino_t1_map,
+        "ceiling_sky_mask": ceiling_sky_mask,
         "provenance": provenance,
     }))
 
@@ -2126,6 +2140,8 @@ def run_object_state_resolution(
         tracking = bundle["tracking"]
         raw_t0, raw_clean, raw_t1 = bundle["raw_t0"], bundle["raw_clean"], bundle["raw_t1"]
         sam_t0, dino_t0, sam_t1, dino_t1 = bundle["sam_t0_map"], bundle["dino_t0_map"], bundle["sam_t1_map"], bundle["dino_t1_map"]
+        if ceiling_sky_mask is None:
+            ceiling_sky_mask = bundle.get("ceiling_sky_mask")
         objects_t0 = list(inventory_t0.objects)
         objects_clean = list(inventory_clean.objects)
         objects_t1 = list(inventory_t1.objects)
@@ -2224,11 +2240,6 @@ def run_object_state_resolution(
                     tracker.release()
         timings["03_bidirectional_tracking"] = time.perf_counter() - started
 
-        if dump_inventory_to is not None:
-            _dump_inventory_bundle(dump_inventory_to, inventory_t0, inventory_clean, inventory_t1, tracking,
-                                   raw_t0, raw_clean, raw_t1, sam_t0, dino_t0, sam_t1, dino_t1,
-                                   provenance=_bundle_provenance(config, settings))
-
     # Deliberately OUTSIDE the load_inventory_from branch above: this needs
     # only sam_image_t1 pixels and a Sam3TextPromptDetector, not any of
     # stages 1-3's proposals/pooling/tracking, so it must run the same way
@@ -2253,6 +2264,14 @@ def run_object_state_resolution(
         finally:
             if owns_text_detector:
                 text_detector.release()
+
+    if dump_inventory_to is not None:
+        _dump_inventory_bundle(
+            dump_inventory_to, inventory_t0, inventory_clean, inventory_t1, tracking,
+            raw_t0, raw_clean, raw_t1, sam_t0, dino_t0, sam_t1, dino_t1,
+            ceiling_sky_mask=ceiling_sky_mask,
+            provenance=_bundle_provenance(config, settings),
+        )
 
     started = time.perf_counter()
     labels, objects, decisions, diagnostics = resolve_three_image_changes(
