@@ -88,7 +88,8 @@ def nested_reference_subset(n_available: int, n_views: int) -> list[int]:
     return sorted({int(math.floor(f * (n_available - 1) + 0.5)) for f in fractions})
 
 
-def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int):
+def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int,
+                   queries_file: Path | None = None):
     from run_scenediff_batch import (extract_frames, representative_frame_index,
                                      resolve_original_video, sample_frame_indices)
     import cv2
@@ -99,7 +100,9 @@ def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int):
     # (max usable in-scope GT objects; relative position for removed-only
     # pairs). The old most-common-index rule tie-broke table_5_table_6 to a
     # frame with no decodable mask while frame 85 carried both objects.
-    queries_file = pair_dir.parents[1] / "diagnostic_subset_queries.json"
+    # --queries-file overrides the diagnostic default so other pair lists (the
+    # 250-pair held-out test split) get the same pre-registered rule.
+    queries_file = queries_file or pair_dir.parents[1] / "diagnostic_subset_queries.json"
     preset = json.loads(queries_file.read_text()).get(pair_dir.name) if queries_file.exists() else None
     t1_rep = int(preset["t1_idx"]) if preset else representative_frame_index(objects, "in_video2", "video2_frame_idx")
     video1, video2 = resolve_original_video(pair_dir, 1), resolve_original_video(pair_dir, 2)
@@ -115,14 +118,15 @@ def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int):
 def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, experiment: str,
                        skip_refine: bool, inventory_source_experiment: str | None = None,
                        dump_inventory: bool = False, reference_views: int | None = None,
-                       refine_worker_dir: Path | None = None) -> dict | None:
+                       refine_worker_dir: Path | None = None,
+                       queries_file: Path | None = None) -> dict | None:
     import numpy as np
     from PIL import Image
     from ocmask_pipeline.reconstruction import localize_and_render_query, reconstruct_reference_scene
 
     frames_root = root / DATASET / pair / "frames"
     t0_frames, query_frame, t0_indices, t1_idx = prepare_frames(
-        pair_dir, frames_root, int(config["reconstruction"]["frames_per_video"]))
+        pair_dir, frames_root, int(config["reconstruction"]["frames_per_video"]), queries_file=queries_file)
     query = f"t1_{t1_idx:04d}"
     shared_name = "shared"
     subset_positions = None
@@ -283,6 +287,9 @@ def main() -> int:
                          "(falls back to the per-run subprocess when none is alive)")
     ap.add_argument("--detect-extra-args", default="",
                     help="extra CLI args passed through to detect_batch.py, e.g. '--sequential-model-lifecycle'")
+    ap.add_argument("--queries-file", type=Path, default=None,
+                    help="JSON of fixed t1 query frames per pair (scenediff_select_query_frames.py output); "
+                         "defaults to <benchmark-root>/diagnostic_subset_queries.json")
     ap.add_argument("--through", choices=("refine", "detect"), default="detect",
                     help="'refine' stops after the shared reconstruction/render/refine stages -- lets the "
                          "base-independent GPU work run before the detect-side variant is decided")
@@ -298,6 +305,8 @@ def main() -> int:
     (exp_root / "invocation.json").write_text(json.dumps({
         "argv": sys.argv, "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
         "reference_views": args.reference_views, "inventory_source_experiment": args.inventory_source_experiment,
+        "queries_file": str(args.queries_file) if args.queries_file else None,
+        "pair_ids_file": str(args.pair_ids_file),
     }, indent=2))
 
     pairs = [l.strip() for l in args.pair_ids_file.read_text().splitlines() if l.strip()]
@@ -311,7 +320,7 @@ def main() -> int:
                 pair, pair_dir, args.root, config, args.experiment, args.skip_refine,
                 inventory_source_experiment=args.inventory_source_experiment,
                 dump_inventory=args.dump_inventory, reference_views=args.reference_views,
-                refine_worker_dir=args.refine_worker_dir,
+                refine_worker_dir=args.refine_worker_dir, queries_file=args.queries_file,
             )
             if item:
                 items.append(item)

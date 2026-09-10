@@ -11,10 +11,14 @@ Rule (data availability only, never model output):
      representative t0 frame is through video1, so the query plausibly
      views the vacated location
 
-Writes data/scenediff_benchmark/diagnostic_subset_queries.json, which
-run_scenediff_diagnostic.py reads. Needs pycocotools (goldilocs env).
+By default writes data/scenediff_benchmark/diagnostic_subset_queries.json for
+the diagnostic subset, which run_scenediff_diagnostic.py reads. Pass
+--pair-ids-file / --out to fix queries for another pair list under the SAME
+rule (added 2026-09-10 for the 250-pair held-out test-split run, so every
+pair's query is chosen by the pre-registered data-availability rule instead
+of the runner's most-common-frame fallback). Needs pycocotools (goldilocs env).
 """
-import json, pickle, sys
+import argparse, json, pickle, sys
 from pathlib import Path
 import cv2
 sys.path.insert(0, "scripts"); sys.path.insert(0, "src")
@@ -25,8 +29,13 @@ BENCH = Path("data/scenediff_benchmark")
 def nframes(p):
     c = cv2.VideoCapture(str(p)); n = int(c.get(cv2.CAP_PROP_FRAME_COUNT)); c.release(); return n
 
+ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+ap.add_argument("--pair-ids-file", type=Path, default=BENCH / "diagnostic_subset.txt")
+ap.add_argument("--out", type=Path, default=BENCH / "diagnostic_subset_queries.json")
+args = ap.parse_args()
+
 out = {}
-for pair in BENCH.joinpath("diagnostic_subset.txt").read_text().split():
+for pair in args.pair_ids_file.read_text().split():
     pd = BENCH / "data" / pair
     objs = pickle.loads((pd / "segments.pkl").read_bytes())["objects"]
     cands = sorted({int(o["video2_frame_idx"]) for o in objs if o.get("in_video2") and int(o.get("video2_frame_idx", -1)) >= 0})
@@ -50,5 +59,5 @@ for pair in BENCH.joinpath("diagnostic_subset.txt").read_text().split():
                      "n_gt_objects": 0, "added_px": 0, "moved_bucket_px": 0, "t0_rep": t0_rep, "n1": n1, "n2": n2}
     r = out[pair]
     print(f"{pair:52s} t1={r['t1_idx']:4d}  gt_objs={r['n_gt_objects']}  added_px={r['added_px']:7d}  moved_px={r['moved_bucket_px']:7d}  [{r['rule']}]")
-BENCH.joinpath("diagnostic_subset_queries.json").write_text(json.dumps(out, indent=2))
-print(f"\nwrote {BENCH/'diagnostic_subset_queries.json'} ({sum(1 for r in out.values() if r['n_gt_objects']>0)}/{len(out)} evaluable)")
+args.out.write_text(json.dumps(out, indent=2))
+print(f"\nwrote {args.out} ({sum(1 for r in out.values() if r['n_gt_objects']>0)}/{len(out)} evaluable)")
