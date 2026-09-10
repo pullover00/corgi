@@ -49,6 +49,47 @@ def sample_frame_indices(frame_count, num_samples):
     return sorted(set(indices))
 
 
+VIS_FPS = 30.0  # video1.mp4 / video2.mp4 -- the review videos the annotations index -- are 30 fps
+
+
+def video_meta(path):
+    """(frame_count, fps) for a video, without applying orientation."""
+    import cv2
+
+    capture = cv2.VideoCapture(str(path))
+    n = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
+    fps = float(capture.get(cv2.CAP_PROP_FPS))
+    capture.release()
+    return n, fps
+
+
+def annotation_to_original_index(idx: int, original_video) -> dict:
+    """Map an annotation frame index to the matching frame of original_video*.
+
+    SceneDiff's annotations (``video{1,2}_frame_idx``) index the 30 fps review
+    videos ``video{1,2}.mp4``, but this pipeline reads ``original_video{1,2}``
+    (the review videos have objects repainted with flat colors). Those are NOT
+    the same index space: original_video2 is 10 fps for every P0x kitchen pair
+    -- exactly a third of the frames -- and 60 or 120 fps for ~25 varied pairs.
+    Discovered 2026-09-10 during the 250-pair held-out run, when an annotation
+    index ran past the end of a shorter original; 72 of 250 pairs were reading
+    the wrong moment. Verified by image correlation over 183 pairs:
+    video2.mp4[i] matches original[round(i*fps/30)] at median 0.992, and
+    original[i] at median 0.266.
+
+    Originals already near 30 fps (29.92-29.97) are treated as identity and only
+    clamped: rounding would shift high indices by one frame (298 -> 297) and
+    break continuity with every earlier SceneDiff run for no measurable gain.
+    """
+    n, fps = video_meta(original_video)
+    ratio = fps / VIS_FPS
+    if abs(ratio - 1.0) < 0.05:
+        return {"original_idx": min(n - 1, max(0, idx)), "original_n": n,
+                "original_fps": round(fps, 3), "ratio": 1.0}
+    return {"original_idx": min(n - 1, max(0, int(round(idx * ratio)))), "original_n": n,
+            "original_fps": round(fps, 3), "ratio": round(ratio, 4)}
+
+
 def resolve_original_video(pair_dir: Path, video_number: int) -> Path:
     prefix = f"original_video{video_number}"
     for name in sorted(pair_dir.iterdir()):

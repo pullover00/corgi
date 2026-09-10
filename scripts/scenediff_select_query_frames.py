@@ -23,11 +23,13 @@ from pathlib import Path
 import cv2
 sys.path.insert(0, "scripts"); sys.path.insert(0, "src")
 from scenediff_gt_eval import load_query_gt
-from run_scenediff_batch import representative_frame_index, resolve_original_video
+from run_scenediff_batch import (VIS_FPS, annotation_to_original_index, representative_frame_index,
+                                 resolve_original_video, video_meta)
 
 BENCH = Path("data/scenediff_benchmark")
 def nframes(p):
     c = cv2.VideoCapture(str(p)); n = int(c.get(cv2.CAP_PROP_FRAME_COUNT)); c.release(); return n
+
 
 ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
 ap.add_argument("--pair-ids-file", type=Path, default=BENCH / "diagnostic_subset.txt")
@@ -51,12 +53,19 @@ for pair in args.pair_ids_file.read_text().split():
     if best:
         out[pair] = {"t1_idx": best[1], "rule": "max_usable_gt_objects", "n_gt_objects": best[4],
                      "added_px": best[2], "moved_bucket_px": best[3], "candidates": cands}
+        m = annotation_to_original_index(best[1], resolve_original_video(pd, 2))
+        out[pair].update({"t1_idx_original": m["original_idx"], "video2_original_n": m["original_n"],
+                          "video2_original_fps": m["original_fps"], "fps_ratio": m["ratio"]})
     else:
         t0_rep = representative_frame_index(objs, "in_video1", "video1_frame_idx")
         n1, n2 = nframes(resolve_original_video(pd, 1)), nframes(resolve_original_video(pd, 2))
         t1 = max(0, min(n2 - 1, round(t0_rep / max(n1 - 1, 1) * (n2 - 1))))
+        # t1 here is already an original_video2 frame index (computed from original frame counts)
+        n2m, fps2 = video_meta(resolve_original_video(pd, 2))
         out[pair] = {"t1_idx": t1, "rule": "relative_position_of_t0_rep (no in-scope GT at any frame)",
-                     "n_gt_objects": 0, "added_px": 0, "moved_bucket_px": 0, "t0_rep": t0_rep, "n1": n1, "n2": n2}
+                     "n_gt_objects": 0, "added_px": 0, "moved_bucket_px": 0, "t0_rep": t0_rep, "n1": n1, "n2": n2,
+                     "t1_idx_original": t1, "video2_original_n": n2m, "video2_original_fps": round(fps2, 3),
+                     "fps_ratio": round(fps2 / VIS_FPS, 4)}
     r = out[pair]
     print(f"{pair:52s} t1={r['t1_idx']:4d}  gt_objs={r['n_gt_objects']}  added_px={r['added_px']:7d}  moved_px={r['moved_bucket_px']:7d}  [{r['rule']}]")
 args.out.write_text(json.dumps(out, indent=2))

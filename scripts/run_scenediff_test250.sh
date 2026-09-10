@@ -22,7 +22,7 @@ export SAM3_IMAGE_CHECKPOINT
 EXP=scenediff_v10_no_dino_no_refine
 CONFIG=configs/scenediff_v10_no_dino_no_refine.yaml
 ROOT=results/scenediff_test250
-QUERIES=data/scenediff_benchmark/test250_queries.json
+QUERIES=data/scenediff_benchmark/test250_queries_v2.json
 CHUNKS=data/scenediff_benchmark/test_split_250_chunks
 EXPDIR=$ROOT/SceneDiff/_experiments/$EXP
 LOGS=$EXPDIR/logs; mkdir -p "$LOGS"

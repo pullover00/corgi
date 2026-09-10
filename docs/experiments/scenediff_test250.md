@@ -79,6 +79,56 @@ No threshold, config, query-frame, pair-list or code change; no rerun of any
 pair "to check"; no per-pair exclusion beyond the four declared aggregates.
 If the run is interrupted, the launcher is re-run as is.
 
+## Addendum A — protocol defect found after launch, before any evaluation (2026-09-10)
+
+**Status when found (~22:40):** chunk 1 of 10, ~10 pairs reconstructed, **zero pairs through
+detection or evaluation**. No metric had been computed or seen. File mtimes record the ordering:
+the runner patch (22:41), the corrected selector (22:42), the v2 query file and affected-pair
+list (22:43) and this addendum's draft (22:43) all predate the first chunk aggregate that became
+visible (chunk_01 summary, 23:31) by ~48 minutes. The run was stopped at 23:35 with chunks 1-2
+partially done; the decision to fix was Tessa's (option A, 2026-09-10).
+
+**Defect.** SceneDiff's annotation frame indices (`video1_frame_idx`, `video2_frame_idx`) index
+the 30 fps review videos `video{1,2}.mp4`. This pipeline deliberately reads
+`original_video{1,2}` (the review videos have objects repainted with flat colors) and assumed a
+shared index space. They differ for half the split: `original_video*` is **10 fps for all 100 P0x
+kitchen pairs** (exactly 1/3 the frames), 60 fps for 19 and 120 fps for 6 varied pairs, and
+~30 fps (identity) for the rest. Verified by image correlation over the 183 pairs with a non-zero
+query index: `video2.mp4[i]` matches `original[round(i*fps/30)]` at **median 0.992** and
+`original[i]` at **median 0.266**.
+
+**Consequence under the frozen protocol.** 38 pairs fail at frame extraction (index past the end
+of a shorter original -- `bathroom_9_bathroom_10` was the trigger) and others silently use a query
+frame from the wrong moment, evaluated against GT for a different instant. Counting both the T1
+query frame and the annotators' representative T0 frame (which is added to the T0 reference set
+and is remapped by the same rule), **98 of 250 pairs** are affected: 31 through T1
+only, 41 through both, 26 through T0 only. The same defect explains the 2026-09-08 kitchen
+reconstruction failures, and it affects one diagnostic-subset pair
+(`P01-…095114_0001→0011`, annotation index 68 read as original frame 68 instead of 23) -- one of
+the two near-zero P01 pairs in the earlier reports was therefore partly this bug, not the method.
+
+**Fix (data handling only).** `annotation_to_original_index` in `scripts/run_scenediff_batch.py`
+maps an annotation index to the original video by `round(i * fps_orig / 30)`, clamped to the last
+frame. Ratios within 5% of 1 are treated as identity (clamp only), so the ~30 fps pairs keep their
+exact frames and continuity with every earlier SceneDiff run is preserved -- `closet_1_closet_2`
+still uses frame 298. The annotation index remains the query directory name and is what the
+evaluator receives, since GT masks are keyed in annotation space. **No threshold, config, matching
+logic, metric, pair list or aggregate definition changed.** `t1_idx` is identical to v1 for all
+250 pairs; only the extracted frame moves.
+
+**New frozen input:** `data/scenediff_benchmark/test250_queries_v2.json`, sha256 `c13aad0cd139eeb8…`,
+recording both `t1_idx` (annotation) and `t1_idx_original` (extraction). The affected-pair list is
+`data/scenediff_benchmark/test250_frame_fix_affected_pairs.json`.
+
+**Cache handling.** The artifact store does not hash the extracted frame, so stale outputs would
+have read as fresh. The 4 affected pairs already present in the results tree
+(`bathroom_3_bathroom_4`, `bathroom_9_bathroom_10`, `bedroom_18_bedroom_19`, `cabinet_1_cabinet_2`)
+were deleted, along with all chunk `.done` markers; unaffected pairs are reused as cache hits.
+
+**Unchanged:** everything else in this pre-registration, including the four declared aggregates,
+the metric, the pair list and its order, and the commitment that nothing is altered after results
+are seen.
+
 ---
 
 ## Results

@@ -90,8 +90,9 @@ def nested_reference_subset(n_available: int, n_views: int) -> list[int]:
 
 def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int,
                    queries_file: Path | None = None):
-    from run_scenediff_batch import (extract_frames, representative_frame_index,
-                                     resolve_original_video, sample_frame_indices)
+    from run_scenediff_batch import (annotation_to_original_index, extract_frames,
+                                     representative_frame_index, resolve_original_video,
+                                     sample_frame_indices)
     import cv2
 
     objects = pickle.loads((pair_dir / "segments.pkl").read_bytes())["objects"]
@@ -106,12 +107,20 @@ def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int,
     preset = json.loads(queries_file.read_text()).get(pair_dir.name) if queries_file.exists() else None
     t1_rep = int(preset["t1_idx"]) if preset else representative_frame_index(objects, "in_video2", "video2_frame_idx")
     video1, video2 = resolve_original_video(pair_dir, 1), resolve_original_video(pair_dir, 2)
+    # Annotation indices are in the 30 fps review-video space; original_video* is
+    # 10 fps for the P0x kitchen pairs and 60/120 fps for some varied ones (see
+    # annotation_to_original_index). Extract the ORIGINAL frame at the mapped
+    # index, but keep the annotation index as the query name and as what the
+    # evaluator receives, since GT masks are keyed in annotation space.
+    t1_extract = (int(preset["t1_idx_original"]) if preset and "t1_idx_original" in preset
+                  else annotation_to_original_index(t1_rep, video2)["original_idx"])
+    t0_rep_extract = annotation_to_original_index(t0_rep, video1)["original_idx"]
     cap = cv2.VideoCapture(str(video1)); n1 = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); cap.release()
     t0_indices = sample_frame_indices(n1, frames_per_video)
-    if t0_rep not in t0_indices:
-        t0_indices = sorted(t0_indices + [t0_rep])
+    if t0_rep_extract not in t0_indices:
+        t0_indices = sorted(t0_indices + [t0_rep_extract])
     t0_frames = extract_frames(video1, t0_indices, frames_root, "t0")
-    t1_frames = extract_frames(video2, [t1_rep], frames_root, "t1")
+    t1_frames = extract_frames(video2, [t1_extract], frames_root, "t1")
     return t0_frames, t1_frames[0], t0_indices, t1_rep
 
 
