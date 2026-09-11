@@ -1,0 +1,528 @@
+{
+ "7A_frame_mapping": [
+  {
+   "class": "10fps",
+   "pair": "P01-20240202-161354_0014_P01-20240202-161948_0013",
+   "annotation_idx": 257,
+   "original_fps": 10.0,
+   "mapped_idx": 86,
+   "corr_mapped": 0.8246885900492612,
+   "corr_unmapped_original_i": null,
+   "decode": "direct_seek"
+  },
+  {
+   "class": "10fps",
+   "pair": "P01-20240203-150506_0046_P01-20240203-150506_0047",
+   "annotation_idx": 49,
+   "original_fps": 10.0,
+   "mapped_idx": 16,
+   "corr_mapped": 0.9996112194965412,
+   "corr_unmapped_original_i": 0.29027985962488717,
+   "decode": "direct_seek"
+  },
+  {
+   "class": "30fps",
+   "pair": "bathroom_7_bathroom_8",
+   "annotation_idx": 112,
+   "original_fps": 30.0,
+   "mapped_idx": 112,
+   "corr_mapped": 0.963828255465713,
+   "corr_unmapped_original_i": 0.9638750975459641,
+   "decode": "direct_seek"
+  },
+  {
+   "class": "30fps",
+   "pair": "bathroom_9_bathroom_10",
+   "annotation_idx": 378,
+   "original_fps": 29.92,
+   "mapped_idx": 377,
+   "corr_mapped": 0.9828514253848073,
+   "corr_unmapped_original_i": null,
+   "decode": "direct_seek"
+  },
+  {
+   "class": "60fps",
+   "pair": "bedroom_18_bedroom_19",
+   "annotation_idx": 260,
+   "original_fps": 59.97,
+   "mapped_idx": 520,
+   "corr_mapped": 0.8539884570823819,
+   "corr_unmapped_original_i": 0.27441591472123433,
+   "decode": "direct_seek"
+  },
+  {
+   "class": "60fps",
+   "pair": "living_room_43_living_room_44",
+   "annotation_idx": 235,
+   "original_fps": 59.96,
+   "mapped_idx": 470,
+   "corr_mapped": 0.9222677371815831,
+   "corr_unmapped_original_i": 0.09203185400159315,
+   "decode": "direct_seek"
+  },
+  {
+   "class": "120fps",
+   "pair": "bathroom_3_bathroom_4",
+   "annotation_idx": 95,
+   "original_fps": 119.95,
+   "mapped_idx": 380,
+   "corr_mapped": 0.8791566463261653,
+   "corr_unmapped_original_i": 0.060444666123405086,
+   "decode": "direct_seek"
+  },
+  {
+   "class": "120fps",
+   "pair": "living_room_23_living_room_24",
+   "annotation_idx": 108,
+   "original_fps": 119.95,
+   "mapped_idx": 432,
+   "corr_mapped": 0.7699157717686169,
+   "corr_unmapped_original_i": 0.44770912012664776,
+   "decode": "direct_seek"
+  }
+ ],
+ "7B_gt_alignment": [
+  {
+   "pair": "P09-20240622-150155_0028_P09-20240622-150155_0034",
+   "t1_annotation_idx": 30,
+   "t1_original_idx": 10,
+   "gt_objects": [
+    [
+     0,
+     "moved_bucket",
+     30
+    ],
+    [
+     1,
+     "moved_bucket",
+     30
+    ],
+    [
+     2,
+     "moved_bucket",
+     30
+    ],
+    [
+     3,
+     "added",
+     30
+    ],
+    [
+     4,
+     "added",
+     30
+    ]
+   ],
+   "gt_pixels": 44899,
+   "frame_shape": [
+    1024,
+    1024
+   ],
+   "gt_shape": [
+    1024,
+    1024
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "P09-20240622-162302_0038_P09-20240622-162302_0040",
+   "t1_annotation_idx": 60,
+   "t1_original_idx": 20,
+   "gt_objects": [
+    [
+     0,
+     "moved_bucket",
+     63
+    ]
+   ],
+   "gt_pixels": 520,
+   "frame_shape": [
+    1024,
+    1024
+   ],
+   "gt_shape": [
+    1024,
+    1024
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "P09-20240622-154652_0020_P09-20240622-154652_0025",
+   "t1_annotation_idx": 0,
+   "t1_original_idx": 0,
+   "gt_objects": [
+    [
+     1,
+     "moved_bucket",
+     0
+    ],
+    [
+     2,
+     "moved_bucket",
+     0
+    ],
+    [
+     3,
+     "moved_bucket",
+     0
+    ],
+    [
+     4,
+     "added",
+     0
+    ]
+   ],
+   "gt_pixels": 17670,
+   "frame_shape": [
+    1024,
+    1024
+   ],
+   "gt_shape": [
+    1024,
+    1024
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "P09-20240621-093545_0088_P09-20240621-093545_0090",
+   "t1_annotation_idx": 30,
+   "t1_original_idx": 10,
+   "gt_objects": [
+    [
+     0,
+     "moved_bucket",
+     30
+    ],
+    [
+     1,
+     "added",
+     30
+    ]
+   ],
+   "gt_pixels": 13023,
+   "frame_shape": [
+    1024,
+    1024
+   ],
+   "gt_shape": [
+    1024,
+    1024
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "bedroom_1_bedroom_2",
+   "t1_annotation_idx": 0,
+   "t1_original_idx": 0,
+   "gt_objects": [
+    [
+     1,
+     "moved_bucket",
+     0
+    ]
+   ],
+   "gt_pixels": 16288,
+   "frame_shape": [
+    1920,
+    1080
+   ],
+   "gt_shape": [
+    1920,
+    1080
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "storage_1_storage_2",
+   "t1_annotation_idx": 120,
+   "t1_original_idx": 120,
+   "gt_objects": [
+    [
+     1,
+     "moved_bucket",
+     120
+    ]
+   ],
+   "gt_pixels": 83054,
+   "frame_shape": [
+    1280,
+    720
+   ],
+   "gt_shape": [
+    1280,
+    720
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "table_9_table_10",
+   "t1_annotation_idx": 0,
+   "t1_original_idx": 0,
+   "gt_objects": [
+    [
+     2,
+     "added",
+     0
+    ]
+   ],
+   "gt_pixels": 2752,
+   "frame_shape": [
+    1920,
+    1080
+   ],
+   "gt_shape": [
+    1920,
+    1080
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "P09-20240621-093545_0006_P09-20240621-093545_0008",
+   "t1_annotation_idx": 150,
+   "t1_original_idx": 50,
+   "gt_objects": [
+    [
+     2,
+     "moved_bucket",
+     150
+    ],
+    [
+     0,
+     "moved_bucket",
+     150
+    ],
+    [
+     3,
+     "moved_bucket",
+     150
+    ],
+    [
+     1,
+     "moved_bucket",
+     150
+    ],
+    [
+     5,
+     "added",
+     150
+    ],
+    [
+     4,
+     "moved_bucket",
+     150
+    ]
+   ],
+   "gt_pixels": 75472,
+   "frame_shape": [
+    1024,
+    1024
+   ],
+   "gt_shape": [
+    1024,
+    1024
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "P09-20240621-153208_0006_P09-20240621-153208_0010",
+   "t1_annotation_idx": 0,
+   "t1_original_idx": 0,
+   "gt_objects": [
+    [
+     0,
+     "added",
+     0
+    ],
+    [
+     1,
+     "added",
+     0
+    ],
+    [
+     2,
+     "added",
+     0
+    ]
+   ],
+   "gt_pixels": 34765,
+   "frame_shape": [
+    1024,
+    1024
+   ],
+   "gt_shape": [
+    1024,
+    1024
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "P09-20240621-093545_0080_P09-20240621-093545_0081",
+   "t1_annotation_idx": 0,
+   "t1_original_idx": 0,
+   "gt_objects": [
+    [
+     0,
+     "moved_bucket",
+     0
+    ]
+   ],
+   "gt_pixels": 14765,
+   "frame_shape": [
+    1024,
+    1024
+   ],
+   "gt_shape": [
+    1024,
+    1024
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "living_room_17_living_room_18",
+   "t1_annotation_idx": 90,
+   "t1_original_idx": 90,
+   "gt_objects": [
+    [
+     4,
+     "moved_bucket",
+     90
+    ]
+   ],
+   "gt_pixels": 71407,
+   "frame_shape": [
+    720,
+    1280
+   ],
+   "gt_shape": [
+    720,
+    1280
+   ],
+   "decode": "direct_seek"
+  },
+  {
+   "pair": "table_1_table_4",
+   "t1_annotation_idx": 180,
+   "t1_original_idx": 180,
+   "gt_objects": [
+    [
+     4,
+     "added",
+     180
+    ],
+    [
+     6,
+     "added",
+     180
+    ]
+   ],
+   "gt_pixels": 253636,
+   "frame_shape": [
+    1920,
+    1080
+   ],
+   "gt_shape": [
+    1920,
+    1080
+   ],
+   "decode": "direct_seek"
+  }
+ ],
+ "7C_pairing": [
+  {
+   "pair": "P09-20240622-150155_0050_P09-20240622-150155_0054",
+   "before_annotation_idx": 180,
+   "after_annotation_idx": 300,
+   "covisibility": 0.845312,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 58
+  },
+  {
+   "pair": "P09-20240621-153208_0006_P09-20240621-153208_0010",
+   "before_annotation_idx": 60,
+   "after_annotation_idx": 0,
+   "covisibility": 0.809247,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 4
+  },
+  {
+   "pair": "P09-20240621-093545_0061_P09-20240621-093545_0067",
+   "before_annotation_idx": 90,
+   "after_annotation_idx": 60,
+   "covisibility": 0.578653,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 5
+  },
+  {
+   "pair": "table_2_table_3",
+   "before_annotation_idx": 120,
+   "after_annotation_idx": 180,
+   "covisibility": 0.89662,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 103
+  },
+  {
+   "pair": "P09-20240621-093545_0069_P09-20240621-093545_0070",
+   "before_annotation_idx": 30,
+   "after_annotation_idx": 60,
+   "covisibility": 0.644415,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 23
+  },
+  {
+   "pair": "office_13_office_14",
+   "before_annotation_idx": 0,
+   "after_annotation_idx": 270,
+   "covisibility": 0.832976,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 45
+  },
+  {
+   "pair": "P09-20240621-093545_0133_P09-20240621-093545_0138",
+   "before_annotation_idx": 60,
+   "after_annotation_idx": 30,
+   "covisibility": 0.824147,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 24
+  },
+  {
+   "pair": "P09-20240622-194642_0002_P09-20240622-194642_0007",
+   "before_annotation_idx": 30,
+   "after_annotation_idx": 30,
+   "covisibility": 0.803968,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 54
+  },
+  {
+   "pair": "P09-20240621-093545_0041_P09-20240621-093545_0044",
+   "before_annotation_idx": 150,
+   "after_annotation_idx": 30,
+   "covisibility": 0.686167,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 24
+  },
+  {
+   "pair": "P09-20240622-150155_0021_P09-20240622-150155_0025",
+   "before_annotation_idx": 90,
+   "after_annotation_idx": 30,
+   "covisibility": 0.885532,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 23
+  },
+  {
+   "pair": "P09-20240622-150155_0011_P09-20240622-150155_0014",
+   "before_annotation_idx": 30,
+   "after_annotation_idx": 30,
+   "covisibility": 0.717877,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 19
+  },
+  {
+   "pair": "room_entrance_3_room_entrance_4",
+   "before_annotation_idx": 120,
+   "after_annotation_idx": 210,
+   "covisibility": 0.88088,
+   "above_threshold": true,
+   "n_selected_pairs_in_sequence": 41
+  }
+ ]
+}
