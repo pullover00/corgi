@@ -134,3 +134,72 @@ are seen.
 ## Results
 
 *(appended after the run; nothing above this line is edited afterwards)*
+
+**Run:** started 2026-09-10 23:39, finished 2026-09-11 09:49 (10 h 10 min), commit `80cf9a4`,
+config `b5a8eee5ae05675d…`, queries `c13aad0cd139eeb8…`. 240/250 pairs evaluated, 10 failures.
+Every failure was identified by name and index *before* it occurred (see below); no unforecast
+failure happened.
+
+### The four declared aggregates
+
+| aggregate | n | pooled IoU | P | R | F1 | mean IoU |
+|---|---:|---:|---:|---:|---:|---:|
+| All evaluated (official split) | 240 | 0.1240 | 0.1392 | 0.5319 | 0.2206 | 0.1418 |
+| Evaluable only (in-scope GT) | 197 | 0.1458 | 0.1673 | 0.5319 | 0.2545 | 0.1728 |
+| Held-out (minus 9 diagnostic pairs) | 231 | 0.1204 | 0.1351 | 0.5265 | 0.2150 | 0.1334 |
+| Held-out ∩ evaluable | 189 | 0.1416 | 0.1623 | 0.5265 | 0.2481 | 0.1631 |
+
+Pooled totals over all evaluated pairs: TP 9,995,584, FP 61,818,429, FN 8,794,966.
+43 evaluated pairs have empty in-scope GT (IoU 0 by construction, FP only); 58 score exactly 0.
+
+### The headline finding: the development subset was optimistic by ~2.7x
+
+The 9 diagnostic-subset pairs that fall in this split average **mean IoU 0.3574**,
+against **0.1334** for the 231 held-out pairs. The
+10-pair development number reported in `SCENEDIFF_OVERNIGHT_ABLATIONS.md` and
+`SCENEDIFF_REFINEMENT_REFERENCE_INTERACTION.md` (pooled 0.3287 for this same configuration) is
+therefore **not** representative of SceneDiff: the held-out pooled figure is **0.1204**. This is
+the expected consequence of a subset that was partly chosen by prior performance (2 best + 2
+worst of the earlier shipped30) and then used throughout development, and it is the reason this
+run exists. Per-pair diagnostic scores here reproduce the earlier ones closely
+(e.g. store_57 0.727, bedroom_28 0.685, closet_1 0.416), so the gap is subset composition, not
+a change in method behaviour.
+
+### Character of the errors at scale
+
+Recall holds up (0.5319) while precision collapses (0.1392):
+FP outnumbers TP 6.2:1. The method generally *finds* the changed object and then
+over-predicts across the rest of the scene — the ADDED/REMOVED false-positive dominance already
+measured at 86.3% of FP pixels on the diagnostic subset, now confirmed on 240 pairs. Shelf-heavy
+retail scenes are the clearest cases (e.g. `store_31_store_32`: recall 99.8% of 20,003 GT pixels,
+with 1.63M FP). Best pairs: table_15 0.971, kitchen_18 0.845, bathroom_9 0.815, bus_1 0.777.
+
+### Failures (10), all pre-identified
+
+Nine are OpenCV seek failures on videos whose later frames are unseekable although they decode
+sequentially — a pre-existing reader quirk in `extract_frames`, unrelated to the frame-index fix,
+and present in the frozen protocol. An exhaustive test of every sampled T0 index across all 250
+pairs predicted exactly this set of 9, and each failed at the predicted index:
+`living_room_37_living_room_38`, `living_room_39_living_room_40`,
+`P01-…184214_0032→0038`, `P01-…095114_0000→0001`, `P01-…120411_0001→0007`,
+`P02-…195833_0000→0004`, `P02-…111822_0048→0049`, `P04-…151722_0028→0033`,
+`P04-…162750_0007→0018`.
+The tenth, `workspace_1_workspace_2`, is an evaluator edge case: it has `in_video2` annotations
+but none whose masks decode near any candidate frame, so the query selector fell back to the
+positional rule while `load_query_gt`'s empty-GT path requires *no* `in_video2` objects at all.
+It is the only such pair in the split. Neither defect was fixed: both lie in code the
+pre-registration froze, and the options were reported to Tessa rather than acted on.
+
+### Caveats that stand
+
+- This is the restricted t1-space pixel metric, **not** SceneDiff's official multi-frame
+  point-in-box AP. Not comparable to the paper's numbers.
+- REMOVED objects are out of scope; 43 evaluated pairs can only contribute false positives.
+- Single machine (RTX 4090 Laptop, `vos_optimized: true`). The Blackwell SceneDiff PC produces
+  materially different numbers on identical inputs; these two sets must not be mixed.
+
+### Artifacts
+
+`results/scenediff_test250/SceneDiff/_experiments/scenediff_v10_no_dino_no_refine/summary_all.json` and `summary_all.md` (per-pair IoU/TP/FP/FN for all 250, with a
+`seen in dev` column); per-chunk logs and summaries under `results/scenediff_test250/SceneDiff/_experiments/scenediff_v10_no_dino_no_refine/logs/`.
+
