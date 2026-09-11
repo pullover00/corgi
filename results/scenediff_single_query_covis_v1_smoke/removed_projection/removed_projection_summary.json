@@ -1,0 +1,226 @@
+{
+ "n_queries": 5,
+ "status_counts": {
+  "ok": 5
+ },
+ "transform_verification": {
+  "accepted": 5,
+  "nn_residual_p95_rel_median": 7.836545998977859e-08
+ },
+ "pixel_before_frames": {
+  "pooled_iou": 0.11608941026165304,
+  "tp": 173735.0,
+  "fp": 495797.0,
+  "fn": 827030.0,
+  "precision": 0.2594872239116278,
+  "recall": 0.17360219432134416
+ },
+ "object_before_frames_iou05": {
+  "tp": 11,
+  "fp": 294,
+  "n_gt_regions": 97,
+  "precision": 0.036065573770491806,
+  "recall": 0.1134020618556701,
+  "f1": 0.05472636815920398
+ },
+ "per_scene": {
+  "P09-20240621-093545_0001_P09-20240621-093545_0004": {
+   "tp": 0.0,
+   "fp": 229348.0,
+   "fn": 85986.0,
+   "iou": 0.0,
+   "n_gt_regions": 17,
+   "n_detections": 61,
+   "region_tp": 0,
+   "region_fp": 61
+  },
+  "P09-20240621-093545_0006_P09-20240621-093545_0008": {
+   "tp": 0.0,
+   "fp": 1748.0,
+   "fn": 590126.0,
+   "iou": 0.0,
+   "n_gt_regions": 45,
+   "n_detections": 2,
+   "region_tp": 0,
+   "region_fp": 2
+  },
+  "airhockeytable_1_airhockeytable_2": {
+   "tp": 32267.0,
+   "fp": 225773.0,
+   "fn": 69777.0,
+   "iou": 0.09842991669132474,
+   "n_gt_regions": 10,
+   "n_detections": 192,
+   "region_tp": 6,
+   "region_fp": 186
+  },
+  "bathroom_11_bathroom_12": {
+   "tp": 37259.0,
+   "fp": 14734.0,
+   "fn": 46305.0,
+   "iou": 0.3790412826303689,
+   "n_gt_regions": 9,
+   "n_detections": 18,
+   "region_tp": 2,
+   "region_fp": 16
+  },
+  "bathroom_1_bathroom_2": {
+   "tp": 104209.0,
+   "fp": 24194.0,
+   "fn": 34836.0,
+   "iou": 0.6383829844583708,
+   "n_gt_regions": 16,
+   "n_detections": 32,
+   "region_tp": 3,
+   "region_fp": 29
+  }
+ },
+ "records": [
+  {
+   "pair": "P09-20240621-093545_0001_P09-20240621-093545_0004",
+   "t1_annotation_idx": 150,
+   "status": "ok",
+   "n_objects_projectable": 10,
+   "transform": {
+    "n_corr": 162,
+    "scale": 1.0092477185465174,
+    "fit_residual_med": 2.1493855423276072e-08,
+    "nn_residual_med_rel": 4.48990063657611e-08,
+    "nn_residual_p95_rel": 9.320108795908817e-08,
+    "extent": 0.6141762189765019,
+    "accepted": true
+   },
+   "n_frame_masks": 61,
+   "reference_annotation_frames": [
+    0,
+    18,
+    33,
+    51,
+    66,
+    84,
+    99,
+    117,
+    132,
+    151
+   ],
+   "n_gt_video1_masks_at_those_frames": 17
+  },
+  {
+   "pair": "P09-20240621-093545_0006_P09-20240621-093545_0008",
+   "t1_annotation_idx": 150,
+   "status": "ok",
+   "n_objects_projectable": 1,
+   "transform": {
+    "n_corr": 167,
+    "scale": 1.0645210665793228,
+    "fit_residual_med": 1.4864145308568855e-08,
+    "nn_residual_med_rel": 3.566624568999189e-08,
+    "nn_residual_p95_rel": 7.836545998977859e-08,
+    "extent": 0.5835748709248971,
+    "accepted": true
+   },
+   "n_frame_masks": 2,
+   "reference_annotation_frames": [
+    0,
+    9,
+    18,
+    28,
+    37,
+    43,
+    52,
+    61,
+    71,
+    80
+   ],
+   "n_gt_video1_masks_at_those_frames": 45
+  },
+  {
+   "pair": "airhockeytable_1_airhockeytable_2",
+   "t1_annotation_idx": 210,
+   "status": "ok",
+   "n_objects_projectable": 30,
+   "transform": {
+    "n_corr": 162,
+    "scale": 0.9878258431828456,
+    "fit_residual_med": 1.8328221525722352e-08,
+    "nn_residual_med_rel": 4.7793773161987866e-08,
+    "nn_residual_p95_rel": 1.487286772480111e-07,
+    "extent": 0.39912507797852936,
+    "accepted": true
+   },
+   "n_frame_masks": 192,
+   "reference_annotation_frames": [
+    0,
+    30,
+    61,
+    91,
+    122,
+    152,
+    183,
+    213,
+    244,
+    274
+   ],
+   "n_gt_video1_masks_at_those_frames": 10
+  },
+  {
+   "pair": "bathroom_11_bathroom_12",
+   "t1_annotation_idx": 330,
+   "status": "ok",
+   "n_objects_projectable": 5,
+   "transform": {
+    "n_corr": 165,
+    "scale": 0.9968845399314308,
+    "fit_residual_med": 2.099928352055168e-08,
+    "nn_residual_med_rel": 3.3351340717834576e-08,
+    "nn_residual_p95_rel": 7.581597968553297e-08,
+    "extent": 0.5950433480303983,
+    "accepted": true
+   },
+   "n_frame_masks": 18,
+   "reference_annotation_frames": [
+    0,
+    34,
+    68,
+    102,
+    136,
+    169,
+    203,
+    237,
+    271,
+    305
+   ],
+   "n_gt_video1_masks_at_those_frames": 9
+  },
+  {
+   "pair": "bathroom_1_bathroom_2",
+   "t1_annotation_idx": 240,
+   "status": "ok",
+   "n_objects_projectable": 12,
+   "transform": {
+    "n_corr": 161,
+    "scale": 0.9988449625884542,
+    "fit_residual_med": 2.5404018369943423e-08,
+    "nn_residual_med_rel": 2.8047746310126177e-08,
+    "nn_residual_p95_rel": 6.675638582606087e-08,
+    "extent": 0.8069175147185078,
+    "accepted": true
+   },
+   "n_frame_masks": 32,
+   "reference_annotation_frames": [
+    0,
+    30,
+    60,
+    89,
+    119,
+    149,
+    165,
+    178,
+    208,
+    238,
+    267
+   ],
+   "n_gt_video1_masks_at_those_frames": 16
+  }
+ ]
+}
