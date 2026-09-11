@@ -73,8 +73,27 @@ def main() -> int:
     # (tp+fn>0, i.e. some GT pixels exist) alongside the full split.
     evaluable = {k: v for k, v in rows.items() if (v.get("tp", 0) or 0) + (v.get("fn", 0) or 0) > 0}
     held_out_evaluable = {k: v for k, v in evaluable.items() if k not in seen}
+    # Per-category breakdown along the split file's OWN categories (varied = SD-V,
+    # kitchen = SD-K). Added 2026-09-11 at Tessa's request: descriptive, and the
+    # grouping is the benchmark's, not one chosen after seeing results.
+    cats = json.loads((BENCH / "splits/test_split.json").read_text())
+    by_cat = {}
+    for cat, members in cats.items():
+        m = set(members)
+        sel = {k: v for k, v in rows.items() if k in m}
+        sel_ev = {k: v for k, v in sel.items() if (v.get("tp", 0) or 0) + (v.get("fn", 0) or 0) > 0}
+        sel_ho = {k: v for k, v in sel.items() if k not in seen}
+        sel_ho_ev = {k: v for k, v in sel_ev.items() if k not in seen}
+        by_cat[cat] = {
+            "n_in_split": len(m), "n_missing": len([p_ for p_ in m if p_ not in rows]),
+            "all_evaluated": pooled(sel), "evaluable_only": pooled(sel_ev),
+            "held_out_excluding_diagnostic": pooled(sel_ho), "held_out_evaluable_only": pooled(sel_ho_ev),
+            "failed_or_missing": sorted(p_ for p_ in m if p_ not in rows),
+        }
+
     out = {
         "experiment": args.experiment, "root": str(args.root),
+        "by_category": by_cat,
         "n_pairs_in_split": len(pairs), "n_missing_outputs": len(missing), "missing": missing,
         "failed": failed,
         "all_evaluated": pooled(rows),
@@ -100,6 +119,14 @@ def main() -> int:
         lines.append(f"| {name} | {agg['n_evaluated']} | {fmt(agg['pooled_iou_t1_only'])} | {fmt(agg['pooled_precision'])} | "
                      f"{fmt(agg['pooled_recall'])} | {fmt(agg['pooled_f1'])} | {fmt(agg['mean_iou'])} | {agg['n_zero_iou']} | "
                      f"{agg['n_empty_gt']} | {fmt(agg['tp'])} | {fmt(agg['fp'])} | {fmt(agg['fn'])} |")
+    lines += ["", "## By split category (varied = SD-V, kitchen = SD-K)", "",
+              "| category | aggregate | n | pooled IoU | P | R | F1 | mean IoU |", "|---|---|---:|---:|---:|---:|---:|---:|"]
+    for cat, rec in by_cat.items():
+        for label, key in (("all evaluated", "all_evaluated"), ("evaluable only", "evaluable_only"),
+                           ("held-out", "held_out_excluding_diagnostic"), ("held-out ∩ evaluable", "held_out_evaluable_only")):
+            g = rec[key]
+            lines.append(f"| {cat} | {label} | {g['n_evaluated']} | {fmt(g['pooled_iou_t1_only'])} | {fmt(g['pooled_precision'])} | "
+                         f"{fmt(g['pooled_recall'])} | {fmt(g['pooled_f1'])} | {fmt(g['mean_iou'])} |")
     lines += ["", "| pair | query | IoU | TP | FP | FN | seen in dev |", "|---|---|---:|---:|---:|---:|---|"]
     for pair in pairs:
         r = rows.get(pair)

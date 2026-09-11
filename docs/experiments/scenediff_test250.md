@@ -190,6 +190,50 @@ positional rule while `load_query_gt`'s empty-GT path requires *no* `in_video2` 
 It is the only such pair in the split. Neither defect was fixed: both lie in code the
 pre-registration froze, and the options were reported to Tessa rather than acted on.
 
+### Breakdown by split category (SD-V / SD-K)
+
+Added 2026-09-11 on request. The grouping is the split file's own (`varied` = SD-V, 150 pairs;
+`kitchen` = SD-K, 100 pairs), not a post-hoc partition, and each of the four declared aggregates
+is reported within it.
+
+| category | aggregate | n | pooled IoU | P | R | F1 | mean IoU |
+|---|---|---:|---:|---:|---:|---:|---:|
+| SD-V (varied) | all evaluated | 147 | 0.1380 | 0.1594 | 0.5071 | 0.2425 | 0.1716 |
+| SD-V (varied) | evaluable only | 116 | 0.1670 | 0.1994 | 0.5071 | 0.2862 | 0.2174 |
+| SD-V (varied) | held-out | 140 | 0.1333 | 0.1539 | 0.4995 | 0.2353 | 0.1582 |
+| SD-V (varied) | held-out ∩ evaluable | 110 | 0.1614 | 0.1925 | 0.4995 | 0.2779 | 0.2013 |
+| SD-K (kitchen) | all evaluated | 93 | 0.0828 | 0.0858 | 0.7006 | 0.1529 | 0.0948 |
+| SD-K (kitchen) | evaluable only | 81 | 0.0898 | 0.0934 | 0.7006 | 0.1649 | 0.1088 |
+| SD-K (kitchen) | held-out | 91 | 0.0831 | 0.0861 | 0.7033 | 0.1534 | 0.0953 |
+| SD-K (kitchen) | held-out ∩ evaluable | 79 | 0.0902 | 0.0938 | 0.7033 | 0.1655 | 0.1098 |
+
+SD-V evaluated 147/150 (3 failures), SD-K 93/100 (7 failures — the seek quirk is concentrated in
+the P0x videos).
+
+**The two categories fail differently, and the aggregate hides it.**
+
+| | SD-V | SD-K |
+|---|---:|---:|
+| held-out pooled IoU | 0.1333 | 0.0831 |
+| pooled recall | 0.4995 | **0.7033** |
+| pooled precision | 0.1539 | **0.0861** |
+| FP : TP | 5.3 : 1 | **10.7 : 1** |
+| median GT pixels / evaluable pair | 85,158 | **20,627** |
+
+SD-K has the *higher* recall of the two — the method finds more of the annotated change in
+kitchen scenes — but its precision is roughly half SD-V's and it over-predicts twice as heavily.
+The proximate reason is scale: SD-K's changed objects are about a quarter the size of SD-V's
+(median 20.6k vs 85.2k GT pixels), so the same absolute volume of spurious prediction costs far
+more IoU. Reporting SD-K as simply "worse" would misdescribe it: it is not a detection failure
+but a precision failure on small targets.
+
+Best pairs: SD-V table_15 0.971, kitchen_18 0.845, bathroom_9 0.815, bus_1 0.777;
+SD-K P02-…120927_0014 0.687, P01-…150506_0050 0.644, P01-…152323_0002 0.444.
+
+Note the 9 diagnostic-subset pairs in this split are almost all SD-V (7 of 9), so the
+development-subset optimism documented above is mostly an SD-V effect; SD-K was barely
+represented during development (2 pairs, both near-zero).
+
 ### Caveats that stand
 
 - This is the restricted t1-space pixel metric, **not** SceneDiff's official multi-frame
