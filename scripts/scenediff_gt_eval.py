@@ -90,7 +90,7 @@ def _video2_frame_shape(pair_dir: Path, frame_idx: int) -> tuple[int, int]:
     return tuple(int(value) for value in frame.shape[:2])
 
 
-def load_query_gt(pair_dir: Path, t1_frame_idx: int, max_frame_distance: int = 15) -> QueryGT:
+def load_query_gt(pair_dir: Path, t1_frame_idx: int, max_frame_distance: int = 15, allow_empty_frame: bool = True) -> QueryGT:
     """Build image_t1-space GT for one query. Objects whose nearest available
     video2 frame is more than ``max_frame_distance`` away from
     ``t1_frame_idx`` are skipped (their footprint at our actual query frame
@@ -134,6 +134,14 @@ def load_query_gt(pair_dir: Path, t1_frame_idx: int, max_frame_distance: int = 1
         # Removed-only diagnostic: there is deliberately no in-scope T1
         # object.  Score every predicted pixel as background/FP instead of
         # treating the absence of video2 RLEs as an evaluator failure.
+        return QueryGT(_video2_frame_shape(pair_dir, t1_frame_idx))
+    if gt is None and allow_empty_frame:
+        # The pair has after-video objects, but none has a usable mask within
+        # max_frame_distance of THIS query frame -- they are simply not visible
+        # here. Under SceneDiff's own evaluator a frame with no annotation is an
+        # empty frame (every prediction is FP), not an error. Co-visibility-based
+        # query selection (2026-09-11) lands on such frames routinely, since it
+        # never consults the annotations.
         return QueryGT(_video2_frame_shape(pair_dir, t1_frame_idx))
     if gt is None:
         raise ValueError(f"no video2 objects with a usable frame near {t1_frame_idx} in {pair_dir}")
