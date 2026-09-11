@@ -1,0 +1,5682 @@
+{
+ "P01-20240202-110250_0005_P01-20240202-161354_0017": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 122,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240202-110250_0005_P01-20240202-161354_0017/original_video1.mp4",
+   "true_frame_count": 122
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 104,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240202-110250_0005_P01-20240202-161354_0017/original_video2.mp4",
+   "true_frame_count": 104
+  }
+ },
+ "P01-20240202-161354_0014_P01-20240202-161354_0017": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 65,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240202-161354_0014_P01-20240202-161354_0017/original_video1.mp4",
+   "true_frame_count": 65
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 104,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240202-161354_0014_P01-20240202-161354_0017/original_video2.mp4",
+   "true_frame_count": 104
+  }
+ },
+ "P01-20240202-161354_0014_P01-20240202-161948_0013": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 65,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240202-161354_0014_P01-20240202-161948_0013/original_video1.mp4",
+   "true_frame_count": 65
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 140,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240202-161354_0014_P01-20240202-161948_0013/original_video2.mp4",
+   "true_frame_count": 140
+  }
+ },
+ "P01-20240203-150506_0046_P01-20240203-150506_0047": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0046_P01-20240203-150506_0047/original_video1.mp4",
+   "true_frame_count": 37
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 50,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0046_P01-20240203-150506_0047/original_video2.mp4",
+   "true_frame_count": 50
+  }
+ },
+ "P01-20240203-150506_0050_P01-20240203-150506_0052": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 46,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0050_P01-20240203-150506_0052/original_video1.mp4",
+   "true_frame_count": 46
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0050_P01-20240203-150506_0052/original_video2.mp4",
+   "true_frame_count": 42
+  }
+ },
+ "P01-20240203-150506_0065_P01-20240203-150506_0068": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 51,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0065_P01-20240203-150506_0068/original_video1.mp4",
+   "true_frame_count": 51
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 150,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0065_P01-20240203-150506_0068/original_video2.mp4",
+   "true_frame_count": 150
+  }
+ },
+ "P01-20240203-150506_0069_P01-20240203-152323_0000": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 70,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0069_P01-20240203-152323_0000/original_video1.mp4",
+   "true_frame_count": 70
+  },
+  "video2": {
+   "fps": 9.8649,
+   "meta_frame_count": 146,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-150506_0069_P01-20240203-152323_0000/original_video2.mp4",
+   "true_frame_count": 95
+  }
+ },
+ "P01-20240203-152323_0002_P01-20240203-152956_0000": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-152323_0002_P01-20240203-152956_0000/original_video1.mp4",
+   "true_frame_count": 48
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 123,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-152323_0002_P01-20240203-152956_0000/original_video2.mp4",
+   "true_frame_count": 123
+  }
+ },
+ "P01-20240203-161757_0012_P01-20240203-161757_0014": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 34,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-161757_0012_P01-20240203-161757_0014/original_video1.mp4",
+   "true_frame_count": 34
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-161757_0012_P01-20240203-161757_0014/original_video2.mp4",
+   "true_frame_count": 48
+  }
+ },
+ "P01-20240203-184214_0000_P01-20240203-184214_0001": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0000_P01-20240203-184214_0001/original_video1.mp4",
+   "true_frame_count": 44
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 30,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0000_P01-20240203-184214_0001/original_video2.mp4",
+   "true_frame_count": 30
+  }
+ },
+ "P01-20240203-184214_0020_P01-20240203-184214_0027": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 31,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0020_P01-20240203-184214_0027/original_video1.mp4",
+   "true_frame_count": 31
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0020_P01-20240203-184214_0027/original_video2.mp4",
+   "true_frame_count": 43
+  }
+ },
+ "P01-20240203-184214_0030_P01-20240203-184214_0032": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 102,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0030_P01-20240203-184214_0032/original_video1.mp4",
+   "true_frame_count": 102
+  },
+  "video2": {
+   "fps": 9.661,
+   "meta_frame_count": 57,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0030_P01-20240203-184214_0032/original_video2.mp4",
+   "true_frame_count": 38
+  }
+ },
+ "P01-20240203-184214_0032_P01-20240203-184214_0038": {
+  "video1": {
+   "fps": 9.661,
+   "meta_frame_count": 57,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0032_P01-20240203-184214_0038/original_video1.mp4",
+   "true_frame_count": 38
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 57,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0032_P01-20240203-184214_0038/original_video2.mp4",
+   "true_frame_count": 57
+  }
+ },
+ "P01-20240203-184214_0038_P01-20240203-184214_0043": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 57,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0038_P01-20240203-184214_0043/original_video1.mp4",
+   "true_frame_count": 57
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0038_P01-20240203-184214_0043/original_video2.mp4",
+   "true_frame_count": 39
+  }
+ },
+ "P01-20240203-184214_0069_P01-20240203-184214_0070": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 30,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0069_P01-20240203-184214_0070/original_video1.mp4",
+   "true_frame_count": 30
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 62,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240203-184214_0069_P01-20240203-184214_0070/original_video2.mp4",
+   "true_frame_count": 62
+  }
+ },
+ "P01-20240204-095114_0000_P01-20240204-095114_0001": {
+  "video1": {
+   "fps": 9.898,
+   "meta_frame_count": 194,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0000_P01-20240204-095114_0001/original_video1.mp4",
+   "true_frame_count": 73
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 68,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0000_P01-20240204-095114_0001/original_video2.mp4",
+   "true_frame_count": 68
+  }
+ },
+ "P01-20240204-095114_0001_P01-20240204-095114_0011": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 68,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0001_P01-20240204-095114_0011/original_video1.mp4",
+   "true_frame_count": 68
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 90,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0001_P01-20240204-095114_0011/original_video2.mp4",
+   "true_frame_count": 90
+  }
+ },
+ "P01-20240204-095114_0014_P01-20240204-095114_0015": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 75,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0014_P01-20240204-095114_0015/original_video1.mp4",
+   "true_frame_count": 75
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 83,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0014_P01-20240204-095114_0015/original_video2.mp4",
+   "true_frame_count": 83
+  }
+ },
+ "P01-20240204-095114_0016_P01-20240204-120411_0000": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 118,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0016_P01-20240204-120411_0000/original_video1.mp4",
+   "true_frame_count": 118
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 113,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-095114_0016_P01-20240204-120411_0000/original_video2.mp4",
+   "true_frame_count": 113
+  }
+ },
+ "P01-20240204-120411_0001_P01-20240204-120411_0007": {
+  "video1": {
+   "fps": 9.9101,
+   "meta_frame_count": 68,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0001_P01-20240204-120411_0007/original_video1.mp4",
+   "true_frame_count": 58
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 46,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0001_P01-20240204-120411_0007/original_video2.mp4",
+   "true_frame_count": 46
+  }
+ },
+ "P01-20240204-120411_0017_P01-20240204-120411_0018": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 60,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0017_P01-20240204-120411_0018/original_video1.mp4",
+   "true_frame_count": 60
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 53,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0017_P01-20240204-120411_0018/original_video2.mp4",
+   "true_frame_count": 53
+  }
+ },
+ "P01-20240204-120411_0020_P01-20240204-120411_0022": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 41,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0020_P01-20240204-120411_0022/original_video1.mp4",
+   "true_frame_count": 41
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 66,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0020_P01-20240204-120411_0022/original_video2.mp4",
+   "true_frame_count": 66
+  }
+ },
+ "P01-20240204-120411_0024_P01-20240204-121042_0003": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0024_P01-20240204-121042_0003/original_video1.mp4",
+   "true_frame_count": 42
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 97,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-120411_0024_P01-20240204-121042_0003/original_video2.mp4",
+   "true_frame_count": 97
+  }
+ },
+ "P01-20240204-121042_0003_P01-20240204-121042_0004": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 97,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0003_P01-20240204-121042_0004/original_video1.mp4",
+   "true_frame_count": 97
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0003_P01-20240204-121042_0004/original_video2.mp4",
+   "true_frame_count": 39
+  }
+ },
+ "P01-20240204-121042_0004_P01-20240204-121042_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0004_P01-20240204-121042_0007/original_video1.mp4",
+   "true_frame_count": 39
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0004_P01-20240204-121042_0007/original_video2.mp4",
+   "true_frame_count": 48
+  }
+ },
+ "P01-20240204-121042_0025_P01-20240204-121042_0028": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 125,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0025_P01-20240204-121042_0028/original_video1.mp4",
+   "true_frame_count": 125
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 133,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0025_P01-20240204-121042_0028/original_video2.mp4",
+   "true_frame_count": 133
+  }
+ },
+ "P01-20240204-121042_0028_P01-20240204-121042_0029": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 133,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0028_P01-20240204-121042_0029/original_video1.mp4",
+   "true_frame_count": 133
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 31,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0028_P01-20240204-121042_0029/original_video2.mp4",
+   "true_frame_count": 31
+  }
+ },
+ "P01-20240204-121042_0031_P01-20240204-121042_0032": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 66,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0031_P01-20240204-121042_0032/original_video1.mp4",
+   "true_frame_count": 66
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 30,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0031_P01-20240204-121042_0032/original_video2.mp4",
+   "true_frame_count": 30
+  }
+ },
+ "P01-20240204-121042_0049_P01-20240204-121042_0052": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 165,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0049_P01-20240204-121042_0052/original_video1.mp4",
+   "true_frame_count": 165
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0049_P01-20240204-121042_0052/original_video2.mp4",
+   "true_frame_count": 44
+  }
+ },
+ "P01-20240204-121042_0056_P01-20240204-121042_0058": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 79,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0056_P01-20240204-121042_0058/original_video1.mp4",
+   "true_frame_count": 79
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 40,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0056_P01-20240204-121042_0058/original_video2.mp4",
+   "true_frame_count": 40
+  }
+ },
+ "P01-20240204-121042_0058_P01-20240204-121042_0060": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 40,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0058_P01-20240204-121042_0060/original_video1.mp4",
+   "true_frame_count": 40
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0058_P01-20240204-121042_0060/original_video2.mp4",
+   "true_frame_count": 35
+  }
+ },
+ "P01-20240204-121042_0073_P01-20240204-130448_0002": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 94,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0073_P01-20240204-130448_0002/original_video1.mp4",
+   "true_frame_count": 94
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-121042_0073_P01-20240204-130448_0002/original_video2.mp4",
+   "true_frame_count": 35
+  }
+ },
+ "P01-20240204-130448_0004_P01-20240204-130448_0002": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 254,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-130448_0004_P01-20240204-130448_0002/original_video1.mp4",
+   "true_frame_count": 254
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-130448_0004_P01-20240204-130448_0002/original_video2.mp4",
+   "true_frame_count": 35
+  }
+ },
+ "P01-20240204-130448_0007_P01-20240204-142301_0000": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 110,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-130448_0007_P01-20240204-142301_0000/original_video1.mp4",
+   "true_frame_count": 110
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 127,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-130448_0007_P01-20240204-142301_0000/original_video2.mp4",
+   "true_frame_count": 127
+  }
+ },
+ "P01-20240204-142301_0001_P01-20240204-142301_0003": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 224,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0001_P01-20240204-142301_0003/original_video1.mp4",
+   "true_frame_count": 224
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0001_P01-20240204-142301_0003/original_video2.mp4",
+   "true_frame_count": 42
+  }
+ },
+ "P01-20240204-142301_0003_P01-20240204-142301_0009": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0003_P01-20240204-142301_0009/original_video1.mp4",
+   "true_frame_count": 42
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0003_P01-20240204-142301_0009/original_video2.mp4",
+   "true_frame_count": 37
+  }
+ },
+ "P01-20240204-142301_0010_P01-20240204-142301_0014": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 88,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0010_P01-20240204-142301_0014/original_video1.mp4",
+   "true_frame_count": 88
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 67,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0010_P01-20240204-142301_0014/original_video2.mp4",
+   "true_frame_count": 67
+  }
+ },
+ "P01-20240204-142301_0014_P01-20240204-142301_0027": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 67,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0014_P01-20240204-142301_0027/original_video1.mp4",
+   "true_frame_count": 67
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 40,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0014_P01-20240204-142301_0027/original_video2.mp4",
+   "true_frame_count": 40
+  }
+ },
+ "P01-20240204-142301_0017_P01-20240204-142301_0020": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0017_P01-20240204-142301_0020/original_video1.mp4",
+   "true_frame_count": 43
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0017_P01-20240204-142301_0020/original_video2.mp4",
+   "true_frame_count": 39
+  }
+ },
+ "P01-20240204-142301_0029_P01-20240204-142301_0028": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0029_P01-20240204-142301_0028/original_video1.mp4",
+   "true_frame_count": 37
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P01-20240204-142301_0029_P01-20240204-142301_0028/original_video2.mp4",
+   "true_frame_count": 37
+  }
+ },
+ "P02-20240209-184316_0009_P02-20240209-184316_0011": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 47,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240209-184316_0009_P02-20240209-184316_0011/original_video1.mp4",
+   "true_frame_count": 47
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 49,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240209-184316_0009_P02-20240209-184316_0011/original_video2.mp4",
+   "true_frame_count": 49
+  }
+ },
+ "P02-20240210-113925_0000_P02-20240210-113925_0002": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 62,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240210-113925_0000_P02-20240210-113925_0002/original_video1.mp4",
+   "true_frame_count": 62
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240210-113925_0000_P02-20240210-113925_0002/original_video2.mp4",
+   "true_frame_count": 39
+  }
+ },
+ "P02-20240210-195833_0000_P02-20240210-195833_0004": {
+  "video1": {
+   "fps": 9.7872,
+   "meta_frame_count": 92,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240210-195833_0000_P02-20240210-195833_0004/original_video1.mp4",
+   "true_frame_count": 65
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 45,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240210-195833_0000_P02-20240210-195833_0004/original_video2.mp4",
+   "true_frame_count": 45
+  }
+ },
+ "P02-20240211-104948_0009_P02-20240211-104948_0023": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-104948_0009_P02-20240211-104948_0023/original_video1.mp4",
+   "true_frame_count": 43
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 56,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-104948_0009_P02-20240211-104948_0023/original_video2.mp4",
+   "true_frame_count": 56
+  }
+ },
+ "P02-20240211-104948_0012_P02-20240211-104948_0018": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 36,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-104948_0012_P02-20240211-104948_0018/original_video1.mp4",
+   "true_frame_count": 36
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 56,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-104948_0012_P02-20240211-104948_0018/original_video2.mp4",
+   "true_frame_count": 56
+  }
+ },
+ "P02-20240211-111219_0000_P02-20240211-111219_0003": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 55,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111219_0000_P02-20240211-111219_0003/original_video1.mp4",
+   "true_frame_count": 55
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 68,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111219_0000_P02-20240211-111219_0003/original_video2.mp4",
+   "true_frame_count": 68
+  }
+ },
+ "P02-20240211-111822_0005_P02-20240211-111822_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 46,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0005_P02-20240211-111822_0007/original_video1.mp4",
+   "true_frame_count": 46
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 65,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0005_P02-20240211-111822_0007/original_video2.mp4",
+   "true_frame_count": 65
+  }
+ },
+ "P02-20240211-111822_0010_P02-20240211-111822_0015": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0010_P02-20240211-111822_0015/original_video1.mp4",
+   "true_frame_count": 37
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 61,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0010_P02-20240211-111822_0015/original_video2.mp4",
+   "true_frame_count": 61
+  }
+ },
+ "P02-20240211-111822_0020_P02-20240211-111822_0024": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 59,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0020_P02-20240211-111822_0024/original_video1.mp4",
+   "true_frame_count": 59
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0020_P02-20240211-111822_0024/original_video2.mp4",
+   "true_frame_count": 37
+  }
+ },
+ "P02-20240211-111822_0027_P02-20240211-111822_0029": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0027_P02-20240211-111822_0029/original_video1.mp4",
+   "true_frame_count": 42
+  },
+  "video2": {
+   "fps": 9.9415,
+   "meta_frame_count": 80,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0027_P02-20240211-111822_0029/original_video2.mp4",
+   "true_frame_count": 79
+  }
+ },
+ "P02-20240211-111822_0031_P02-20240211-111822_0034": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 34,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0031_P02-20240211-111822_0034/original_video1.mp4",
+   "true_frame_count": 34
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0031_P02-20240211-111822_0034/original_video2.mp4",
+   "true_frame_count": 39
+  }
+ },
+ "P02-20240211-111822_0035_P02-20240211-111822_0036": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 33,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0035_P02-20240211-111822_0036/original_video1.mp4",
+   "true_frame_count": 33
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 34,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0035_P02-20240211-111822_0036/original_video2.mp4",
+   "true_frame_count": 34
+  }
+ },
+ "P02-20240211-111822_0040_P02-20240211-111822_0043": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 64,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0040_P02-20240211-111822_0043/original_video1.mp4",
+   "true_frame_count": 64
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 55,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0040_P02-20240211-111822_0043/original_video2.mp4",
+   "true_frame_count": 55
+  }
+ },
+ "P02-20240211-111822_0044_P02-20240211-111822_0045": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 64,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0044_P02-20240211-111822_0045/original_video1.mp4",
+   "true_frame_count": 64
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 33,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0044_P02-20240211-111822_0045/original_video2.mp4",
+   "true_frame_count": 33
+  }
+ },
+ "P02-20240211-111822_0048_P02-20240211-111822_0049": {
+  "video1": {
+   "fps": 9.6491,
+   "meta_frame_count": 55,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0048_P02-20240211-111822_0049/original_video1.mp4",
+   "true_frame_count": 49
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 49,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0048_P02-20240211-111822_0049/original_video2.mp4",
+   "true_frame_count": 49
+  }
+ },
+ "P02-20240211-111822_0060_P02-20240211-111822_0064": {
+  "video1": {
+   "fps": 9.8329,
+   "meta_frame_count": 73,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0060_P02-20240211-111822_0064/original_video1.mp4",
+   "true_frame_count": 73
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 52,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-111822_0060_P02-20240211-111822_0064/original_video2.mp4",
+   "true_frame_count": 52
+  }
+ },
+ "P02-20240211-115653_0004_P02-20240211-115653_0005": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 36,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-115653_0004_P02-20240211-115653_0005/original_video1.mp4",
+   "true_frame_count": 36
+  },
+  "video2": {
+   "fps": 9.872,
+   "meta_frame_count": 96,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-115653_0004_P02-20240211-115653_0005/original_video2.mp4",
+   "true_frame_count": 64
+  }
+ },
+ "P02-20240211-120927_0002_P02-20240211-120927_0004": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 53,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-120927_0002_P02-20240211-120927_0004/original_video1.mp4",
+   "true_frame_count": 53
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 31,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-120927_0002_P02-20240211-120927_0004/original_video2.mp4",
+   "true_frame_count": 31
+  }
+ },
+ "P02-20240211-120927_0006_P02-20240211-120927_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 52,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-120927_0006_P02-20240211-120927_0007/original_video1.mp4",
+   "true_frame_count": 52
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 50,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-120927_0006_P02-20240211-120927_0007/original_video2.mp4",
+   "true_frame_count": 50
+  }
+ },
+ "P02-20240211-120927_0014_P02-20240211-120927_0027": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 30,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-120927_0014_P02-20240211-120927_0027/original_video1.mp4",
+   "true_frame_count": 30
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-120927_0014_P02-20240211-120927_0027/original_video2.mp4",
+   "true_frame_count": 43
+  }
+ },
+ "P02-20240211-141313_0016_P02-20240211-141313_0018": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 71,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-141313_0016_P02-20240211-141313_0018/original_video1.mp4",
+   "true_frame_count": 71
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-141313_0016_P02-20240211-141313_0018/original_video2.mp4",
+   "true_frame_count": 44
+  }
+ },
+ "P02-20240211-141313_0022_P02-20240211-141313_0028": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-141313_0022_P02-20240211-141313_0028/original_video1.mp4",
+   "true_frame_count": 43
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 58,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-141313_0022_P02-20240211-141313_0028/original_video2.mp4",
+   "true_frame_count": 58
+  }
+ },
+ "P02-20240211-141313_0028_P02-20240211-141313_0032": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 58,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-141313_0028_P02-20240211-141313_0032/original_video1.mp4",
+   "true_frame_count": 58
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-141313_0028_P02-20240211-141313_0032/original_video2.mp4",
+   "true_frame_count": 43
+  }
+ },
+ "P02-20240211-175138_0002_P02-20240211-175138_0006": {
+  "video1": {
+   "fps": 9.8639,
+   "meta_frame_count": 78,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0002_P02-20240211-175138_0006/original_video1.mp4",
+   "true_frame_count": 78
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0002_P02-20240211-175138_0006/original_video2.mp4",
+   "true_frame_count": 42
+  }
+ },
+ "P02-20240211-175138_0024_P02-20240211-175138_0025": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 34,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0024_P02-20240211-175138_0025/original_video1.mp4",
+   "true_frame_count": 34
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 34,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0024_P02-20240211-175138_0025/original_video2.mp4",
+   "true_frame_count": 34
+  }
+ },
+ "P02-20240211-175138_0026_P02-20240211-175138_0028": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0026_P02-20240211-175138_0028/original_video1.mp4",
+   "true_frame_count": 35
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 58,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0026_P02-20240211-175138_0028/original_video2.mp4",
+   "true_frame_count": 58
+  }
+ },
+ "P02-20240211-175138_0031_P02-20240211-175138_0035": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0031_P02-20240211-175138_0035/original_video1.mp4",
+   "true_frame_count": 48
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0031_P02-20240211-175138_0035/original_video2.mp4",
+   "true_frame_count": 35
+  }
+ },
+ "P02-20240211-175138_0036_P02-20240211-175138_0037": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 47,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0036_P02-20240211-175138_0037/original_video1.mp4",
+   "true_frame_count": 47
+  },
+  "video2": {
+   "fps": 9.9284,
+   "meta_frame_count": 47,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-175138_0036_P02-20240211-175138_0037/original_video2.mp4",
+   "true_frame_count": 46
+  }
+ },
+ "P02-20240211-182630_0002_P02-20240211-182630_0011": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 67,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-182630_0002_P02-20240211-182630_0011/original_video1.mp4",
+   "true_frame_count": 67
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-182630_0002_P02-20240211-182630_0011/original_video2.mp4",
+   "true_frame_count": 42
+  }
+ },
+ "P02-20240211-182630_0011_P02-20240211-182630_0016": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-182630_0011_P02-20240211-182630_0016/original_video1.mp4",
+   "true_frame_count": 42
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P02-20240211-182630_0011_P02-20240211-182630_0016/original_video2.mp4",
+   "true_frame_count": 35
+  }
+ },
+ "P04-20240413-142619_0011_P04-20240413-142619_0012": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0011_P04-20240413-142619_0012/original_video1.mp4",
+   "true_frame_count": 42
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 55,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0011_P04-20240413-142619_0012/original_video2.mp4",
+   "true_frame_count": 55
+  }
+ },
+ "P04-20240413-142619_0013_P04-20240413-142619_0015": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 62,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0013_P04-20240413-142619_0015/original_video1.mp4",
+   "true_frame_count": 62
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 50,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0013_P04-20240413-142619_0015/original_video2.mp4",
+   "true_frame_count": 50
+  }
+ },
+ "P04-20240413-142619_0015_P04-20240413-142619_0018": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 50,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0015_P04-20240413-142619_0018/original_video1.mp4",
+   "true_frame_count": 50
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 31,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0015_P04-20240413-142619_0018/original_video2.mp4",
+   "true_frame_count": 31
+  }
+ },
+ "P04-20240413-142619_0024_P04-20240413-142619_0025": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 40,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0024_P04-20240413-142619_0025/original_video1.mp4",
+   "true_frame_count": 40
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-142619_0024_P04-20240413-142619_0025/original_video2.mp4",
+   "true_frame_count": 32
+  }
+ },
+ "P04-20240413-145245_0001_P04-20240413-145245_0002": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 66,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0001_P04-20240413-145245_0002/original_video1.mp4",
+   "true_frame_count": 66
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 30,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0001_P04-20240413-145245_0002/original_video2.mp4",
+   "true_frame_count": 30
+  }
+ },
+ "P04-20240413-145245_0004_P04-20240413-145245_0005": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 83,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0004_P04-20240413-145245_0005/original_video1.mp4",
+   "true_frame_count": 83
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 53,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0004_P04-20240413-145245_0005/original_video2.mp4",
+   "true_frame_count": 53
+  }
+ },
+ "P04-20240413-145245_0006_P04-20240413-145245_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 58,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0006_P04-20240413-145245_0007/original_video1.mp4",
+   "true_frame_count": 58
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 54,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0006_P04-20240413-145245_0007/original_video2.mp4",
+   "true_frame_count": 54
+  }
+ },
+ "P04-20240413-145245_0010_P04-20240413-145245_0012": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 138,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0010_P04-20240413-145245_0012/original_video1.mp4",
+   "true_frame_count": 138
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-145245_0010_P04-20240413-145245_0012/original_video2.mp4",
+   "true_frame_count": 48
+  }
+ },
+ "P04-20240413-151722_0013_P04-20240413-151722_0014": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 58,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0013_P04-20240413-151722_0014/original_video1.mp4",
+   "true_frame_count": 58
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 70,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0013_P04-20240413-151722_0014/original_video2.mp4",
+   "true_frame_count": 70
+  }
+ },
+ "P04-20240413-151722_0016_P04-20240413-151722_0018": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 86,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0016_P04-20240413-151722_0018/original_video1.mp4",
+   "true_frame_count": 86
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0016_P04-20240413-151722_0018/original_video2.mp4",
+   "true_frame_count": 44
+  }
+ },
+ "P04-20240413-151722_0028_P04-20240413-151722_0033": {
+  "video1": {
+   "fps": 9.935,
+   "meta_frame_count": 87,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0028_P04-20240413-151722_0033/original_video1.mp4",
+   "true_frame_count": 86
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 86,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0028_P04-20240413-151722_0033/original_video2.mp4",
+   "true_frame_count": 86
+  }
+ },
+ "P04-20240413-151722_0035_P04-20240413-151722_0037": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 71,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0035_P04-20240413-151722_0037/original_video1.mp4",
+   "true_frame_count": 71
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 31,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0035_P04-20240413-151722_0037/original_video2.mp4",
+   "true_frame_count": 31
+  }
+ },
+ "P04-20240413-151722_0039_P04-20240413-151722_0040": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 90,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0039_P04-20240413-151722_0040/original_video1.mp4",
+   "true_frame_count": 90
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 68,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240413-151722_0039_P04-20240413-151722_0040/original_video2.mp4",
+   "true_frame_count": 66
+  }
+ },
+ "P04-20240414-064514_0002_P04-20240414-064514_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 50,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0002_P04-20240414-064514_0007/original_video1.mp4",
+   "true_frame_count": 50
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0002_P04-20240414-064514_0007/original_video2.mp4",
+   "true_frame_count": 44
+  }
+ },
+ "P04-20240414-064514_0007_P04-20240414-064514_0012": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0007_P04-20240414-064514_0012/original_video1.mp4",
+   "true_frame_count": 44
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 125,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0007_P04-20240414-064514_0012/original_video2.mp4",
+   "true_frame_count": 125
+  }
+ },
+ "P04-20240414-064514_0012_P04-20240414-064514_0014": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 125,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0012_P04-20240414-064514_0014/original_video1.mp4",
+   "true_frame_count": 125
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 77,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0012_P04-20240414-064514_0014/original_video2.mp4",
+   "true_frame_count": 77
+  }
+ },
+ "P04-20240414-064514_0020_P04-20240414-064514_0021": {
+  "video1": {
+   "fps": 9.6331,
+   "meta_frame_count": 33,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0020_P04-20240414-064514_0021/original_video1.mp4",
+   "true_frame_count": 33
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-064514_0020_P04-20240414-064514_0021/original_video2.mp4",
+   "true_frame_count": 48
+  }
+ },
+ "P04-20240414-065311_0001_P04-20240414-065311_0003": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0001_P04-20240414-065311_0003/original_video1.mp4",
+   "true_frame_count": 35
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 38,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0001_P04-20240414-065311_0003/original_video2.mp4",
+   "true_frame_count": 38
+  }
+ },
+ "P04-20240414-065311_0003_P04-20240414-065311_0005": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 38,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0003_P04-20240414-065311_0005/original_video1.mp4",
+   "true_frame_count": 38
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 53,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0003_P04-20240414-065311_0005/original_video2.mp4",
+   "true_frame_count": 53
+  }
+ },
+ "P04-20240414-065311_0005_P04-20240414-065311_0012": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 53,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0005_P04-20240414-065311_0012/original_video1.mp4",
+   "true_frame_count": 53
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 103,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0005_P04-20240414-065311_0012/original_video2.mp4",
+   "true_frame_count": 103
+  }
+ },
+ "P04-20240414-065311_0014_P04-20240414-065311_0015": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0014_P04-20240414-065311_0015/original_video1.mp4",
+   "true_frame_count": 44
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 31,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0014_P04-20240414-065311_0015/original_video2.mp4",
+   "true_frame_count": 31
+  }
+ },
+ "P04-20240414-065311_0016_P04-20240414-065311_0019": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 53,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0016_P04-20240414-065311_0019/original_video1.mp4",
+   "true_frame_count": 53
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 50,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0016_P04-20240414-065311_0019/original_video2.mp4",
+   "true_frame_count": 50
+  }
+ },
+ "P04-20240414-065311_0020_P04-20240414-065311_0022": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 61,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0020_P04-20240414-065311_0022/original_video1.mp4",
+   "true_frame_count": 61
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 35,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-065311_0020_P04-20240414-065311_0022/original_video2.mp4",
+   "true_frame_count": 35
+  }
+ },
+ "P04-20240414-072251_0007_P04-20240414-072251_0009": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 58,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-072251_0007_P04-20240414-072251_0009/original_video1.mp4",
+   "true_frame_count": 58
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 132,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-072251_0007_P04-20240414-072251_0009/original_video2.mp4",
+   "true_frame_count": 132
+  }
+ },
+ "P04-20240414-072251_0009_P04-20240414-072251_0013": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 132,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-072251_0009_P04-20240414-072251_0013/original_video1.mp4",
+   "true_frame_count": 132
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-072251_0009_P04-20240414-072251_0013/original_video2.mp4",
+   "true_frame_count": 32
+  }
+ },
+ "P04-20240414-162242_0000_P04-20240414-162242_0002": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 91,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162242_0000_P04-20240414-162242_0002/original_video1.mp4",
+   "true_frame_count": 91
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 34,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162242_0000_P04-20240414-162242_0002/original_video2.mp4",
+   "true_frame_count": 34
+  }
+ },
+ "P04-20240414-162242_0000_P04-20240414-162242_0008": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 91,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162242_0000_P04-20240414-162242_0008/original_video1.mp4",
+   "true_frame_count": 91
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 55,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162242_0000_P04-20240414-162242_0008/original_video2.mp4",
+   "true_frame_count": 55
+  }
+ },
+ "P04-20240414-162750_0005_P04-20240414-162750_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 41,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162750_0005_P04-20240414-162750_0007/original_video1.mp4",
+   "true_frame_count": 41
+  },
+  "video2": {
+   "fps": 9.8681,
+   "meta_frame_count": 51,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162750_0005_P04-20240414-162750_0007/original_video2.mp4",
+   "true_frame_count": 50
+  }
+ },
+ "P04-20240414-162750_0007_P04-20240414-162750_0018": {
+  "video1": {
+   "fps": 9.8681,
+   "meta_frame_count": 51,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162750_0007_P04-20240414-162750_0018/original_video1.mp4",
+   "true_frame_count": 50
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162750_0007_P04-20240414-162750_0018/original_video2.mp4",
+   "true_frame_count": 39
+  }
+ },
+ "P04-20240414-162750_0018_P04-20240414-162750_0020": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162750_0018_P04-20240414-162750_0020/original_video1.mp4",
+   "true_frame_count": 39
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 103,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P04-20240414-162750_0018_P04-20240414-162750_0020/original_video2.mp4",
+   "true_frame_count": 103
+  }
+ },
+ "P09-20240621-093545_0001_P09-20240621-093545_0004": {
+  "video1": {
+   "fps": 9.9652,
+   "meta_frame_count": 162,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0001_P09-20240621-093545_0004/original_video1.mp4",
+   "true_frame_count": 51
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 66,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0001_P09-20240621-093545_0004/original_video2.mp4",
+   "true_frame_count": 66
+  }
+ },
+ "P09-20240621-093545_0006_P09-20240621-093545_0008": {
+  "video1": {
+   "fps": 9.7617,
+   "meta_frame_count": 28,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0006_P09-20240621-093545_0008/original_video1.mp4",
+   "true_frame_count": 27
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 57,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0006_P09-20240621-093545_0008/original_video2.mp4",
+   "true_frame_count": 57
+  }
+ },
+ "P09-20240621-093545_0022_P09-20240621-093545_0023": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 79,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0022_P09-20240621-093545_0023/original_video1.mp4",
+   "true_frame_count": 79
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0022_P09-20240621-093545_0023/original_video2.mp4",
+   "true_frame_count": 43
+  }
+ },
+ "P09-20240621-093545_0025_P09-20240621-093545_0032": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 74,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0025_P09-20240621-093545_0032/original_video1.mp4",
+   "true_frame_count": 74
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 36,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0025_P09-20240621-093545_0032/original_video2.mp4",
+   "true_frame_count": 36
+  }
+ },
+ "P09-20240621-093545_0041_P09-20240621-093545_0044": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 77,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0041_P09-20240621-093545_0044/original_video1.mp4",
+   "true_frame_count": 77
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 30,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0041_P09-20240621-093545_0044/original_video2.mp4",
+   "true_frame_count": 30
+  }
+ },
+ "P09-20240621-093545_0045_P09-20240621-093545_0046": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0045_P09-20240621-093545_0046/original_video1.mp4",
+   "true_frame_count": 42
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0045_P09-20240621-093545_0046/original_video2.mp4",
+   "true_frame_count": 32
+  }
+ },
+ "P09-20240621-093545_0047_P09-20240621-093545_0048": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 38,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0047_P09-20240621-093545_0048/original_video1.mp4",
+   "true_frame_count": 38
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 51,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0047_P09-20240621-093545_0048/original_video2.mp4",
+   "true_frame_count": 51
+  }
+ },
+ "P09-20240621-093545_0051_P09-20240621-093545_0052": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 55,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0051_P09-20240621-093545_0052/original_video1.mp4",
+   "true_frame_count": 53
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0051_P09-20240621-093545_0052/original_video2.mp4",
+   "true_frame_count": 44
+  }
+ },
+ "P09-20240621-093545_0055_P09-20240621-093545_0057": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 46,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0055_P09-20240621-093545_0057/original_video1.mp4",
+   "true_frame_count": 46
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 83,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0055_P09-20240621-093545_0057/original_video2.mp4",
+   "true_frame_count": 83
+  }
+ },
+ "P09-20240621-093545_0061_P09-20240621-093545_0067": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 47,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0061_P09-20240621-093545_0067/original_video1.mp4",
+   "true_frame_count": 47
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 40,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0061_P09-20240621-093545_0067/original_video2.mp4",
+   "true_frame_count": 26
+  }
+ },
+ "P09-20240621-093545_0069_P09-20240621-093545_0070": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0069_P09-20240621-093545_0070/original_video1.mp4",
+   "true_frame_count": 48
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 72,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0069_P09-20240621-093545_0070/original_video2.mp4",
+   "true_frame_count": 72
+  }
+ },
+ "P09-20240621-093545_0072_P09-20240621-093545_0073": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 67,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0072_P09-20240621-093545_0073/original_video1.mp4",
+   "true_frame_count": 67
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 102,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0072_P09-20240621-093545_0073/original_video2.mp4",
+   "true_frame_count": 102
+  }
+ },
+ "P09-20240621-093545_0080_P09-20240621-093545_0081": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 55,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0080_P09-20240621-093545_0081/original_video1.mp4",
+   "true_frame_count": 55
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 34,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0080_P09-20240621-093545_0081/original_video2.mp4",
+   "true_frame_count": 34
+  }
+ },
+ "P09-20240621-093545_0082_P09-20240621-093545_0084": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 57,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0082_P09-20240621-093545_0084/original_video1.mp4",
+   "true_frame_count": 57
+  },
+  "video2": {
+   "fps": 9.9441,
+   "meta_frame_count": 167,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0082_P09-20240621-093545_0084/original_video2.mp4",
+   "true_frame_count": 44
+  }
+ },
+ "P09-20240621-093545_0086_P09-20240621-093545_0087": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 107,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0086_P09-20240621-093545_0087/original_video1.mp4",
+   "true_frame_count": 107
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 36,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0086_P09-20240621-093545_0087/original_video2.mp4",
+   "true_frame_count": 36
+  }
+ },
+ "P09-20240621-093545_0088_P09-20240621-093545_0090": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 39,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0088_P09-20240621-093545_0090/original_video1.mp4",
+   "true_frame_count": 39
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0088_P09-20240621-093545_0090/original_video2.mp4",
+   "true_frame_count": 32
+  }
+ },
+ "P09-20240621-093545_0091_P09-20240621-093545_0092": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 63,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0091_P09-20240621-093545_0092/original_video1.mp4",
+   "true_frame_count": 63
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 45,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0091_P09-20240621-093545_0092/original_video2.mp4",
+   "true_frame_count": 45
+  }
+ },
+ "P09-20240621-093545_0093_P09-20240621-093545_0094": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 77,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0093_P09-20240621-093545_0094/original_video1.mp4",
+   "true_frame_count": 77
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 38,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0093_P09-20240621-093545_0094/original_video2.mp4",
+   "true_frame_count": 38
+  }
+ },
+ "P09-20240621-093545_0120_P09-20240621-093545_0127": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0120_P09-20240621-093545_0127/original_video1.mp4",
+   "true_frame_count": 48
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0120_P09-20240621-093545_0127/original_video2.mp4",
+   "true_frame_count": 46
+  }
+ },
+ "P09-20240621-093545_0130_P09-20240621-093545_0131": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 33,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0130_P09-20240621-093545_0131/original_video1.mp4",
+   "true_frame_count": 33
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 56,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0130_P09-20240621-093545_0131/original_video2.mp4",
+   "true_frame_count": 56
+  }
+ },
+ "P09-20240621-093545_0133_P09-20240621-093545_0138": {
+  "video1": {
+   "fps": 9.8288,
+   "meta_frame_count": 69,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0133_P09-20240621-093545_0138/original_video1.mp4",
+   "true_frame_count": 41
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 94,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0133_P09-20240621-093545_0138/original_video2.mp4",
+   "true_frame_count": 94
+  }
+ },
+ "P09-20240621-093545_0140_P09-20240621-093545_0143": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 68,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0140_P09-20240621-093545_0143/original_video1.mp4",
+   "true_frame_count": 68
+  },
+  "video2": {
+   "fps": 9.8551,
+   "meta_frame_count": 136,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-093545_0140_P09-20240621-093545_0143/original_video2.mp4",
+   "true_frame_count": 95
+  }
+ },
+ "P09-20240621-153208_0002_P09-20240621-153208_0004": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 69,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0002_P09-20240621-153208_0004/original_video1.mp4",
+   "true_frame_count": 69
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0002_P09-20240621-153208_0004/original_video2.mp4",
+   "true_frame_count": 37
+  }
+ },
+ "P09-20240621-153208_0006_P09-20240621-153208_0010": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 33,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0006_P09-20240621-153208_0010/original_video1.mp4",
+   "true_frame_count": 33
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 61,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0006_P09-20240621-153208_0010/original_video2.mp4",
+   "true_frame_count": 61
+  }
+ },
+ "P09-20240621-153208_0013_P09-20240621-153208_0015": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 167,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0013_P09-20240621-153208_0015/original_video1.mp4",
+   "true_frame_count": 167
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 86,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0013_P09-20240621-153208_0015/original_video2.mp4",
+   "true_frame_count": 86
+  }
+ },
+ "P09-20240621-153208_0017_P09-20240621-153208_0019": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 98,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0017_P09-20240621-153208_0019/original_video1.mp4",
+   "true_frame_count": 98
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 89,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0017_P09-20240621-153208_0019/original_video2.mp4",
+   "true_frame_count": 89
+  }
+ },
+ "P09-20240621-153208_0020_P09-20240621-153208_0024": {
+  "video1": {
+   "fps": 9.8138,
+   "meta_frame_count": 28,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0020_P09-20240621-153208_0024/original_video1.mp4",
+   "true_frame_count": 27
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 37,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0020_P09-20240621-153208_0024/original_video2.mp4",
+   "true_frame_count": 35
+  }
+ },
+ "P09-20240621-153208_0026_P09-20240621-153208_0030": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0026_P09-20240621-153208_0030/original_video1.mp4",
+   "true_frame_count": 32
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 85,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0026_P09-20240621-153208_0030/original_video2.mp4",
+   "true_frame_count": 85
+  }
+ },
+ "P09-20240621-153208_0034_P09-20240621-153208_0038": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 109,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0034_P09-20240621-153208_0038/original_video1.mp4",
+   "true_frame_count": 109
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 77,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0034_P09-20240621-153208_0038/original_video2.mp4",
+   "true_frame_count": 77
+  }
+ },
+ "P09-20240621-153208_0041_P09-20240621-153208_0045": {
+  "video1": {
+   "fps": 9.8361,
+   "meta_frame_count": 120,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0041_P09-20240621-153208_0045/original_video1.mp4",
+   "true_frame_count": 61
+  },
+  "video2": {
+   "fps": 9.6604,
+   "meta_frame_count": 46,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0041_P09-20240621-153208_0045/original_video2.mp4",
+   "true_frame_count": 46
+  }
+ },
+ "P09-20240621-153208_0046_P09-20240621-153208_0051": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0046_P09-20240621-153208_0051/original_video1.mp4",
+   "true_frame_count": 44
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 50,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0046_P09-20240621-153208_0051/original_video2.mp4",
+   "true_frame_count": 50
+  }
+ },
+ "P09-20240621-153208_0052_P09-20240621-153208_0053": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0052_P09-20240621-153208_0053/original_video1.mp4",
+   "true_frame_count": 32
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240621-153208_0052_P09-20240621-153208_0053/original_video2.mp4",
+   "true_frame_count": 32
+  }
+ },
+ "P09-20240622-150155_0004_P09-20240622-150155_0006": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 82,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0004_P09-20240622-150155_0006/original_video1.mp4",
+   "true_frame_count": 82
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 77,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0004_P09-20240622-150155_0006/original_video2.mp4",
+   "true_frame_count": 77
+  }
+ },
+ "P09-20240622-150155_0011_P09-20240622-150155_0014": {
+  "video1": {
+   "fps": 9.5238,
+   "meta_frame_count": 40,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0011_P09-20240622-150155_0014/original_video1.mp4",
+   "true_frame_count": 36
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 42,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0011_P09-20240622-150155_0014/original_video2.mp4",
+   "true_frame_count": 42
+  }
+ },
+ "P09-20240622-150155_0015_P09-20240622-150155_0016": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0015_P09-20240622-150155_0016/original_video1.mp4",
+   "true_frame_count": 43
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 59,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0015_P09-20240622-150155_0016/original_video2.mp4",
+   "true_frame_count": 59
+  }
+ },
+ "P09-20240622-150155_0017_P09-20240622-150155_0020": {
+  "video1": {
+   "fps": 9.7754,
+   "meta_frame_count": 51,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0017_P09-20240622-150155_0020/original_video1.mp4",
+   "true_frame_count": 51
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 82,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0017_P09-20240622-150155_0020/original_video2.mp4",
+   "true_frame_count": 82
+  }
+ },
+ "P09-20240622-150155_0021_P09-20240622-150155_0025": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 72,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0021_P09-20240622-150155_0025/original_video1.mp4",
+   "true_frame_count": 72
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 47,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0021_P09-20240622-150155_0025/original_video2.mp4",
+   "true_frame_count": 47
+  }
+ },
+ "P09-20240622-150155_0028_P09-20240622-150155_0034": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 33,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0028_P09-20240622-150155_0034/original_video1.mp4",
+   "true_frame_count": 33
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 73,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0028_P09-20240622-150155_0034/original_video2.mp4",
+   "true_frame_count": 73
+  }
+ },
+ "P09-20240622-150155_0047_P09-20240622-150155_0049": {
+  "video1": {
+   "fps": 9.6667,
+   "meta_frame_count": 58,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0047_P09-20240622-150155_0049/original_video1.mp4",
+   "true_frame_count": 46
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 52,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0047_P09-20240622-150155_0049/original_video2.mp4",
+   "true_frame_count": 52
+  }
+ },
+ "P09-20240622-150155_0050_P09-20240622-150155_0054": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 65,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0050_P09-20240622-150155_0054/original_video1.mp4",
+   "true_frame_count": 65
+  },
+  "video2": {
+   "fps": 9.9607,
+   "meta_frame_count": 105,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0050_P09-20240622-150155_0054/original_video2.mp4",
+   "true_frame_count": 104
+  }
+ },
+ "P09-20240622-150155_0058_P09-20240622-150155_0060": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 38,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0058_P09-20240622-150155_0060/original_video1.mp4",
+   "true_frame_count": 38
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 84,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-150155_0058_P09-20240622-150155_0060/original_video2.mp4",
+   "true_frame_count": 84
+  }
+ },
+ "P09-20240622-154652_0005_P09-20240622-154652_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 41,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-154652_0005_P09-20240622-154652_0007/original_video1.mp4",
+   "true_frame_count": 41
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 53,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-154652_0005_P09-20240622-154652_0007/original_video2.mp4",
+   "true_frame_count": 53
+  }
+ },
+ "P09-20240622-154652_0008_P09-20240622-154652_0014": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 44,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-154652_0008_P09-20240622-154652_0014/original_video1.mp4",
+   "true_frame_count": 44
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 54,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-154652_0008_P09-20240622-154652_0014/original_video2.mp4",
+   "true_frame_count": 54
+  }
+ },
+ "P09-20240622-154652_0020_P09-20240622-154652_0025": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 68,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-154652_0020_P09-20240622-154652_0025/original_video1.mp4",
+   "true_frame_count": 68
+  },
+  "video2": {
+   "fps": 9.5556,
+   "meta_frame_count": 43,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-154652_0020_P09-20240622-154652_0025/original_video2.mp4",
+   "true_frame_count": 26
+  }
+ },
+ "P09-20240622-162302_0014_P09-20240622-162302_0017": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 46,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0014_P09-20240622-162302_0017/original_video1.mp4",
+   "true_frame_count": 46
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 48,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0014_P09-20240622-162302_0017/original_video2.mp4",
+   "true_frame_count": 48
+  }
+ },
+ "P09-20240622-162302_0023_P09-20240622-162302_0025": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 79,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0023_P09-20240622-162302_0025/original_video1.mp4",
+   "true_frame_count": 79
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0023_P09-20240622-162302_0025/original_video2.mp4",
+   "true_frame_count": 32
+  }
+ },
+ "P09-20240622-162302_0034_P09-20240622-162302_0036": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 84,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0034_P09-20240622-162302_0036/original_video1.mp4",
+   "true_frame_count": 84
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 32,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0034_P09-20240622-162302_0036/original_video2.mp4",
+   "true_frame_count": 32
+  }
+ },
+ "P09-20240622-162302_0038_P09-20240622-162302_0040": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 47,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0038_P09-20240622-162302_0040/original_video1.mp4",
+   "true_frame_count": 47
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 38,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0038_P09-20240622-162302_0040/original_video2.mp4",
+   "true_frame_count": 38
+  }
+ },
+ "P09-20240622-162302_0046_P09-20240622-162302_0047": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 46,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0046_P09-20240622-162302_0047/original_video1.mp4",
+   "true_frame_count": 44
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 101,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0046_P09-20240622-162302_0047/original_video2.mp4",
+   "true_frame_count": 101
+  }
+ },
+ "P09-20240622-162302_0052_P09-20240622-162302_0055": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 80,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0052_P09-20240622-162302_0055/original_video1.mp4",
+   "true_frame_count": 80
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 31,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0052_P09-20240622-162302_0055/original_video2.mp4",
+   "true_frame_count": 31
+  }
+ },
+ "P09-20240622-162302_0057_P09-20240622-162302_0059": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 45,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0057_P09-20240622-162302_0059/original_video1.mp4",
+   "true_frame_count": 45
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 84,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0057_P09-20240622-162302_0059/original_video2.mp4",
+   "true_frame_count": 84
+  }
+ },
+ "P09-20240622-162302_0060_P09-20240622-162302_0061": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 68,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0060_P09-20240622-162302_0061/original_video1.mp4",
+   "true_frame_count": 68
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 261,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-162302_0060_P09-20240622-162302_0061/original_video2.mp4",
+   "true_frame_count": 261
+  }
+ },
+ "P09-20240622-194642_0002_P09-20240622-194642_0007": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 82,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-194642_0002_P09-20240622-194642_0007/original_video1.mp4",
+   "true_frame_count": 82
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 79,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-194642_0002_P09-20240622-194642_0007/original_video2.mp4",
+   "true_frame_count": 79
+  }
+ },
+ "P09-20240622-194642_0010_P09-20240622-194642_0014": {
+  "video1": {
+   "fps": 9.6886,
+   "meta_frame_count": 43,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-194642_0010_P09-20240622-194642_0014/original_video1.mp4",
+   "true_frame_count": 43
+  },
+  "video2": {
+   "fps": 10.0,
+   "meta_frame_count": 58,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-194642_0010_P09-20240622-194642_0014/original_video2.mp4",
+   "true_frame_count": 58
+  }
+ },
+ "P09-20240622-194642_0018_P09-20240622-194642_0025": {
+  "video1": {
+   "fps": 10.0,
+   "meta_frame_count": 108,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-194642_0018_P09-20240622-194642_0025/original_video1.mp4",
+   "true_frame_count": 108
+  },
+  "video2": {
+   "fps": 9.759,
+   "meta_frame_count": 81,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/P09-20240622-194642_0018_P09-20240622-194642_0025/original_video2.mp4",
+   "true_frame_count": 75
+  }
+ },
+ "airhockeytable_1_airhockeytable_2": {
+  "video1": {
+   "fps": 29.9945,
+   "meta_frame_count": 275,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/airhockeytable_1_airhockeytable_2/original_video1.MOV",
+   "true_frame_count": 275
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 228,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/airhockeytable_1_airhockeytable_2/original_video2.MOV",
+   "true_frame_count": 228
+  }
+ },
+ "bathroom_11_bathroom_12": {
+  "video1": {
+   "fps": 59.9607,
+   "meta_frame_count": 610,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_11_bathroom_12/original_video1.MOV",
+   "true_frame_count": 610
+  },
+  "video2": {
+   "fps": 59.9562,
+   "meta_frame_count": 685,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_11_bathroom_12/original_video2.MOV",
+   "true_frame_count": 685
+  }
+ },
+ "bathroom_1_bathroom_2": {
+  "video1": {
+   "fps": 59.9552,
+   "meta_frame_count": 535,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_1_bathroom_2/original_video1.MOV",
+   "true_frame_count": 535
+  },
+  "video2": {
+   "fps": 59.9579,
+   "meta_frame_count": 569,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_1_bathroom_2/original_video2.MOV",
+   "true_frame_count": 569
+  }
+ },
+ "bathroom_3_bathroom_4": {
+  "video1": {
+   "fps": 119.9485,
+   "meta_frame_count": 1164,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_3_bathroom_4/original_video1.MOV",
+   "true_frame_count": 1164
+  },
+  "video2": {
+   "fps": 119.9488,
+   "meta_frame_count": 1055,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_3_bathroom_4/original_video2.MOV",
+   "true_frame_count": 1055
+  }
+ },
+ "bathroom_5_bathroom_6": {
+  "video1": {
+   "fps": 119.9493,
+   "meta_frame_count": 1301,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_5_bathroom_6/original_video1.MOV",
+   "true_frame_count": 1301
+  },
+  "video2": {
+   "fps": 119.9466,
+   "meta_frame_count": 1460,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_5_bathroom_6/original_video2.MOV",
+   "true_frame_count": 1460
+  }
+ },
+ "bathroom_7_bathroom_8": {
+  "video1": {
+   "fps": 29.9938,
+   "meta_frame_count": 242,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_7_bathroom_8/original_video1.MOV",
+   "true_frame_count": 242
+  },
+  "video2": {
+   "fps": 29.9952,
+   "meta_frame_count": 314,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_7_bathroom_8/original_video2.MOV",
+   "true_frame_count": 314
+  }
+ },
+ "bathroom_9_bathroom_10": {
+  "video1": {
+   "fps": 29.9367,
+   "meta_frame_count": 473,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_9_bathroom_10/original_video1.mp4",
+   "true_frame_count": 473
+  },
+  "video2": {
+   "fps": 29.9208,
+   "meta_frame_count": 378,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bathroom_9_bathroom_10/original_video2.mp4",
+   "true_frame_count": 378
+  }
+ },
+ "bed_1_bed_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 120,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bed_1_bed_2/original_video1.mov",
+   "true_frame_count": 120
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 119,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bed_1_bed_2/original_video2.mov",
+   "true_frame_count": 119
+  }
+ },
+ "bed_3_bed_4": {
+  "video1": {
+   "fps": 30.012,
+   "meta_frame_count": 125,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bed_3_bed_4/original_video1.mov",
+   "true_frame_count": 125
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 103,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bed_3_bed_4/original_video2.mov",
+   "true_frame_count": 103
+  }
+ },
+ "bedroom_10_bedroom_11": {
+  "video1": {
+   "fps": 29.9953,
+   "meta_frame_count": 321,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_10_bedroom_11/original_video1.MOV",
+   "true_frame_count": 321
+  },
+  "video2": {
+   "fps": 29.9954,
+   "meta_frame_count": 325,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_10_bedroom_11/original_video2.MOV",
+   "true_frame_count": 325
+  }
+ },
+ "bedroom_12_bedroom_13": {
+  "video1": {
+   "fps": 29.994,
+   "meta_frame_count": 248,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_12_bedroom_13/original_video1.MOV",
+   "true_frame_count": 248
+  },
+  "video2": {
+   "fps": 29.9931,
+   "meta_frame_count": 216,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_12_bedroom_13/original_video2.MOV",
+   "true_frame_count": 216
+  }
+ },
+ "bedroom_14_bedroom_15": {
+  "video1": {
+   "fps": 30.0651,
+   "meta_frame_count": 231,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_14_bedroom_15/original_video1.MOV",
+   "true_frame_count": 231
+  },
+  "video2": {
+   "fps": 29.9941,
+   "meta_frame_count": 253,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_14_bedroom_15/original_video2.MOV",
+   "true_frame_count": 253
+  }
+ },
+ "bedroom_16_bedroom_17": {
+  "video1": {
+   "fps": 29.9927,
+   "meta_frame_count": 205,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_16_bedroom_17/original_video1.MOV",
+   "true_frame_count": 205
+  },
+  "video2": {
+   "fps": 29.9942,
+   "meta_frame_count": 259,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_16_bedroom_17/original_video2.MOV",
+   "true_frame_count": 259
+  }
+ },
+ "bedroom_18_bedroom_19": {
+  "video1": {
+   "fps": 119.9516,
+   "meta_frame_count": 1611,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_18_bedroom_19/original_video1.MOV",
+   "true_frame_count": 1611
+  },
+  "video2": {
+   "fps": 59.9727,
+   "meta_frame_count": 878,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_18_bedroom_19/original_video2.MOV",
+   "true_frame_count": 878
+  }
+ },
+ "bedroom_1_bedroom_2": {
+  "video1": {
+   "fps": 29.9799,
+   "meta_frame_count": 372,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_1_bedroom_2/original_video1.MOV",
+   "true_frame_count": 372
+  },
+  "video2": {
+   "fps": 29.9785,
+   "meta_frame_count": 418,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_1_bedroom_2/original_video2.MOV",
+   "true_frame_count": 418
+  }
+ },
+ "bedroom_20_bedroom_21": {
+  "video1": {
+   "fps": 29.9953,
+   "meta_frame_count": 317,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_20_bedroom_21/original_video1.MOV",
+   "true_frame_count": 317
+  },
+  "video2": {
+   "fps": 29.9952,
+   "meta_frame_count": 315,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_20_bedroom_21/original_video2.MOV",
+   "true_frame_count": 315
+  }
+ },
+ "bedroom_22_bedroom_23": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 262,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_22_bedroom_23/original_video1.MOV",
+   "true_frame_count": 262
+  },
+  "video2": {
+   "fps": 29.9953,
+   "meta_frame_count": 322,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_22_bedroom_23/original_video2.MOV",
+   "true_frame_count": 322
+  }
+ },
+ "bedroom_24_bedroom_25": {
+  "video1": {
+   "fps": 29.9865,
+   "meta_frame_count": 111,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_24_bedroom_25/original_video1.mov",
+   "true_frame_count": 111
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 126,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_24_bedroom_25/original_video2.mov",
+   "true_frame_count": 126
+  }
+ },
+ "bedroom_26_bedroom_27": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 73,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_26_bedroom_27/original_video1.mov",
+   "true_frame_count": 73
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 112,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_26_bedroom_27/original_video2.mov",
+   "true_frame_count": 112
+  }
+ },
+ "bedroom_28_bedroom_29": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 209,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_28_bedroom_29/original_video1.mp4",
+   "true_frame_count": 209
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 232,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_28_bedroom_29/original_video2.mp4",
+   "true_frame_count": 232
+  }
+ },
+ "bedroom_2_bedroom_3": {
+  "video1": {
+   "fps": 29.9785,
+   "meta_frame_count": 418,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_2_bedroom_3/original_video1.MOV",
+   "true_frame_count": 418
+  },
+  "video2": {
+   "fps": 29.9778,
+   "meta_frame_count": 337,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_2_bedroom_3/original_video2.MOV",
+   "true_frame_count": 337
+  }
+ },
+ "bedroom_2_bedroom_4": {
+  "video1": {
+   "fps": 29.9785,
+   "meta_frame_count": 418,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_2_bedroom_4/original_video1.MOV",
+   "true_frame_count": 418
+  },
+  "video2": {
+   "fps": 29.978,
+   "meta_frame_count": 341,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_2_bedroom_4/original_video2.MOV",
+   "true_frame_count": 341
+  }
+ },
+ "bedroom_30_bedroom_31": {
+  "video1": {
+   "fps": 29.9872,
+   "meta_frame_count": 117,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_30_bedroom_31/original_video1.mov",
+   "true_frame_count": 117
+  },
+  "video2": {
+   "fps": 29.9854,
+   "meta_frame_count": 103,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_30_bedroom_31/original_video2.mov",
+   "true_frame_count": 103
+  }
+ },
+ "bedroom_32_bedroom_33": {
+  "video1": {
+   "fps": 29.9463,
+   "meta_frame_count": 558,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_32_bedroom_33/original_video1.MOV",
+   "true_frame_count": 558
+  },
+  "video2": {
+   "fps": 29.8844,
+   "meta_frame_count": 517,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_32_bedroom_33/original_video2.MOV",
+   "true_frame_count": 517
+  }
+ },
+ "bedroom_34_bedroom_35": {
+  "video1": {
+   "fps": 29.9275,
+   "meta_frame_count": 413,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_34_bedroom_35/original_video1.MOV",
+   "true_frame_count": 413
+  },
+  "video2": {
+   "fps": 29.9401,
+   "meta_frame_count": 500,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_34_bedroom_35/original_video2.MOV",
+   "true_frame_count": 500
+  }
+ },
+ "bedroom_36_bedroom_37": {
+  "video1": {
+   "fps": 29.9096,
+   "meta_frame_count": 331,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_36_bedroom_37/original_video1.MOV",
+   "true_frame_count": 331
+  },
+  "video2": {
+   "fps": 29.8235,
+   "meta_frame_count": 338,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_36_bedroom_37/original_video2.MOV",
+   "true_frame_count": 338
+  }
+ },
+ "bedroom_3_bedroom_5": {
+  "video1": {
+   "fps": 29.9778,
+   "meta_frame_count": 337,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_3_bedroom_5/original_video1.MOV",
+   "true_frame_count": 337
+  },
+  "video2": {
+   "fps": 29.9803,
+   "meta_frame_count": 305,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_3_bedroom_5/original_video2.MOV",
+   "true_frame_count": 305
+  }
+ },
+ "bedroom_4_bedroom_5": {
+  "video1": {
+   "fps": 29.978,
+   "meta_frame_count": 341,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_4_bedroom_5/original_video1.MOV",
+   "true_frame_count": 341
+  },
+  "video2": {
+   "fps": 29.9803,
+   "meta_frame_count": 305,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_4_bedroom_5/original_video2.MOV",
+   "true_frame_count": 305
+  }
+ },
+ "bedroom_6_bedroom_7": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 207,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_6_bedroom_7/original_video1.MOV",
+   "true_frame_count": 207
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 189,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_6_bedroom_7/original_video2.MOV",
+   "true_frame_count": 189
+  }
+ },
+ "bedroom_8_bedroom_9": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 144,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_8_bedroom_9/original_video1.MOV",
+   "true_frame_count": 144
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 139,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bedroom_8_bedroom_9/original_video2.MOV",
+   "true_frame_count": 139
+  }
+ },
+ "billiards_room_1_billiards_room_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 253,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/billiards_room_1_billiards_room_2/original_video1.MOV",
+   "true_frame_count": 253
+  },
+  "video2": {
+   "fps": 29.9948,
+   "meta_frame_count": 287,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/billiards_room_1_billiards_room_2/original_video2.MOV",
+   "true_frame_count": 287
+  }
+ },
+ "billiards_room_3_billiards_room_4": {
+  "video1": {
+   "fps": 29.9958,
+   "meta_frame_count": 356,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/billiards_room_3_billiards_room_4/original_video1.MOV",
+   "true_frame_count": 356
+  },
+  "video2": {
+   "fps": 29.9957,
+   "meta_frame_count": 351,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/billiards_room_3_billiards_room_4/original_video2.MOV",
+   "true_frame_count": 351
+  }
+ },
+ "billiards_room_5_billiards_room_6": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 264,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/billiards_room_5_billiards_room_6/original_video1.MOV",
+   "true_frame_count": 264
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 307,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/billiards_room_5_billiards_room_6/original_video2.MOV",
+   "true_frame_count": 307
+  }
+ },
+ "building_entry_1_building_entry_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 259,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/building_entry_1_building_entry_2/original_video1.MOV",
+   "true_frame_count": 259
+  },
+  "video2": {
+   "fps": 29.9946,
+   "meta_frame_count": 276,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/building_entry_1_building_entry_2/original_video2.MOV",
+   "true_frame_count": 276
+  }
+ },
+ "bus_1_bus_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 235,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bus_1_bus_2/original_video1.MOV",
+   "true_frame_count": 235
+  },
+  "video2": {
+   "fps": 29.9964,
+   "meta_frame_count": 415,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/bus_1_bus_2/original_video2.MOV",
+   "true_frame_count": 415
+  }
+ },
+ "cabinet_1_cabinet_2": {
+  "video1": {
+   "fps": 59.9485,
+   "meta_frame_count": 466,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/cabinet_1_cabinet_2/original_video1.MOV",
+   "true_frame_count": 466
+  },
+  "video2": {
+   "fps": 59.9422,
+   "meta_frame_count": 622,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/cabinet_1_cabinet_2/original_video2.MOV",
+   "true_frame_count": 622
+  }
+ },
+ "cabinet_3_cabinet_4": {
+  "video1": {
+   "fps": 29.995,
+   "meta_frame_count": 298,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/cabinet_3_cabinet_4/original_video1.MOV",
+   "true_frame_count": 298
+  },
+  "video2": {
+   "fps": 29.9959,
+   "meta_frame_count": 369,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/cabinet_3_cabinet_4/original_video2.MOV",
+   "true_frame_count": 369
+  }
+ },
+ "cabinet_5_cabinet_6": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 214,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/cabinet_5_cabinet_6/original_video1.MOV",
+   "true_frame_count": 214
+  },
+  "video2": {
+   "fps": 29.996,
+   "meta_frame_count": 376,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/cabinet_5_cabinet_6/original_video2.MOV",
+   "true_frame_count": 376
+  }
+ },
+ "closet_1_closet_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 275,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/closet_1_closet_2/original_video1.mp4",
+   "true_frame_count": 275
+  },
+  "video2": {
+   "fps": 29.9187,
+   "meta_frame_count": 368,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/closet_1_closet_2/original_video2.mp4",
+   "true_frame_count": 368
+  }
+ },
+ "coffee_table_1_coffee_table_2": {
+  "video1": {
+   "fps": 29.9773,
+   "meta_frame_count": 198,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/coffee_table_1_coffee_table_2/original_video1.MOV",
+   "true_frame_count": 198
+  },
+  "video2": {
+   "fps": 29.9772,
+   "meta_frame_count": 263,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/coffee_table_1_coffee_table_2/original_video2.MOV",
+   "true_frame_count": 263
+  }
+ },
+ "computer_lab_1_computer_lab_2": {
+  "video1": {
+   "fps": 29.9941,
+   "meta_frame_count": 255,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/computer_lab_1_computer_lab_2/original_video1.MOV",
+   "true_frame_count": 255
+  },
+  "video2": {
+   "fps": 29.9948,
+   "meta_frame_count": 288,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/computer_lab_1_computer_lab_2/original_video2.MOV",
+   "true_frame_count": 288
+  }
+ },
+ "dinning_hall_1_dinning_hall_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 232,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/dinning_hall_1_dinning_hall_2/original_video1.MOV",
+   "true_frame_count": 232
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 218,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/dinning_hall_1_dinning_hall_2/original_video2.MOV",
+   "true_frame_count": 218
+  }
+ },
+ "dinning_hall_3_dinning_hall_4": {
+  "video1": {
+   "fps": 29.9933,
+   "meta_frame_count": 224,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/dinning_hall_3_dinning_hall_4/original_video1.MOV",
+   "true_frame_count": 224
+  },
+  "video2": {
+   "fps": 29.9956,
+   "meta_frame_count": 344,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/dinning_hall_3_dinning_hall_4/original_video2.MOV",
+   "true_frame_count": 344
+  }
+ },
+ "dinning_hall_5_dinning_hall_6": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 275,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/dinning_hall_5_dinning_hall_6/original_video1.MOV",
+   "true_frame_count": 275
+  },
+  "video2": {
+   "fps": 30.0557,
+   "meta_frame_count": 270,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/dinning_hall_5_dinning_hall_6/original_video2.MOV",
+   "true_frame_count": 270
+  }
+ },
+ "game_room_1_game_room_2": {
+  "video1": {
+   "fps": 29.9939,
+   "meta_frame_count": 246,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/game_room_1_game_room_2/original_video1.MOV",
+   "true_frame_count": 246
+  },
+  "video2": {
+   "fps": 29.9944,
+   "meta_frame_count": 268,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/game_room_1_game_room_2/original_video2.MOV",
+   "true_frame_count": 268
+  }
+ },
+ "game_room_3_game_room_4": {
+  "video1": {
+   "fps": 30.0041,
+   "meta_frame_count": 367,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/game_room_3_game_room_4/original_video1.MOV",
+   "true_frame_count": 367
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 274,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/game_room_3_game_room_4/original_video2.MOV",
+   "true_frame_count": 274
+  }
+ },
+ "gas_station_1_gas_station_2": {
+  "video1": {
+   "fps": 29.9169,
+   "meta_frame_count": 360,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gas_station_1_gas_station_2/original_video1.mp4",
+   "true_frame_count": 360
+  },
+  "video2": {
+   "fps": 29.9032,
+   "meta_frame_count": 309,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gas_station_1_gas_station_2/original_video2.mp4",
+   "true_frame_count": 309
+  }
+ },
+ "gas_station_3_gas_station_4": {
+  "video1": {
+   "fps": 29.9032,
+   "meta_frame_count": 309,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gas_station_3_gas_station_4/original_video1.mp4",
+   "true_frame_count": 309
+  },
+  "video2": {
+   "fps": 29.8696,
+   "meta_frame_count": 229,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gas_station_3_gas_station_4/original_video2.mp4",
+   "true_frame_count": 229
+  }
+ },
+ "gym_1_gym_2": {
+  "video1": {
+   "fps": 29.9948,
+   "meta_frame_count": 286,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_1_gym_2/original_video1.MOV",
+   "true_frame_count": 286
+  },
+  "video2": {
+   "fps": 29.9953,
+   "meta_frame_count": 322,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_1_gym_2/original_video2.MOV",
+   "true_frame_count": 322
+  }
+ },
+ "gym_3_gym_4": {
+  "video1": {
+   "fps": 29.9938,
+   "meta_frame_count": 243,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_3_gym_4/original_video1.MOV",
+   "true_frame_count": 243
+  },
+  "video2": {
+   "fps": 29.9929,
+   "meta_frame_count": 212,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_3_gym_4/original_video2.MOV",
+   "true_frame_count": 212
+  }
+ },
+ "gym_5_gym_6": {
+  "video1": {
+   "fps": 29.995,
+   "meta_frame_count": 302,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_5_gym_6/original_video1.MOV",
+   "true_frame_count": 302
+  },
+  "video2": {
+   "fps": 29.9944,
+   "meta_frame_count": 268,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_5_gym_6/original_video2.MOV",
+   "true_frame_count": 268
+  }
+ },
+ "gym_7_gym_8": {
+  "video1": {
+   "fps": 29.9961,
+   "meta_frame_count": 386,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_7_gym_8/original_video1.MOV",
+   "true_frame_count": 386
+  },
+  "video2": {
+   "fps": 29.9967,
+   "meta_frame_count": 461,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_7_gym_8/original_video2.MOV",
+   "true_frame_count": 461
+  }
+ },
+ "gym_9_gym_10": {
+  "video1": {
+   "fps": 29.9947,
+   "meta_frame_count": 283,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_9_gym_10/original_video1.MOV",
+   "true_frame_count": 283
+  },
+  "video2": {
+   "fps": 29.9968,
+   "meta_frame_count": 472,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/gym_9_gym_10/original_video2.MOV",
+   "true_frame_count": 472
+  }
+ },
+ "hallway_1_hallway_2": {
+  "video1": {
+   "fps": 30.1184,
+   "meta_frame_count": 198,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/hallway_1_hallway_2/original_video1.mp4",
+   "true_frame_count": 198
+  },
+  "video2": {
+   "fps": 30.084,
+   "meta_frame_count": 297,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/hallway_1_hallway_2/original_video2.mp4",
+   "true_frame_count": 297
+  }
+ },
+ "hallway_3_hallway_4": {
+  "video1": {
+   "fps": 29.9946,
+   "meta_frame_count": 280,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/hallway_3_hallway_4/original_video1.MOV",
+   "true_frame_count": 280
+  },
+  "video2": {
+   "fps": 29.995,
+   "meta_frame_count": 302,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/hallway_3_hallway_4/original_video2.MOV",
+   "true_frame_count": 302
+  }
+ },
+ "kitchen_10_kitchen_11": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 246,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_10_kitchen_11/original_video1.MOV",
+   "true_frame_count": 246
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 230,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_10_kitchen_11/original_video2.MOV",
+   "true_frame_count": 230
+  }
+ },
+ "kitchen_12_kitchen_13": {
+  "video1": {
+   "fps": 119.9479,
+   "meta_frame_count": 1037,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_12_kitchen_13/original_video1.MOV",
+   "true_frame_count": 1037
+  },
+  "video2": {
+   "fps": 119.95,
+   "meta_frame_count": 1438,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_12_kitchen_13/original_video2.MOV",
+   "true_frame_count": 1438
+  }
+ },
+ "kitchen_14_kitchen_15": {
+  "video1": {
+   "fps": 29.699,
+   "meta_frame_count": 296,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_14_kitchen_15/original_video1.mp4",
+   "true_frame_count": 296
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 246,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_14_kitchen_15/original_video2.mp4",
+   "true_frame_count": 246
+  }
+ },
+ "kitchen_16_kitchen_17": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 219,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_16_kitchen_17/original_video1.mp4",
+   "true_frame_count": 219
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 248,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_16_kitchen_17/original_video2.mp4",
+   "true_frame_count": 248
+  }
+ },
+ "kitchen_18_kitchen_19": {
+  "video1": {
+   "fps": 29.8338,
+   "meta_frame_count": 359,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_18_kitchen_19/original_video1.mp4",
+   "true_frame_count": 359
+  },
+  "video2": {
+   "fps": 29.9597,
+   "meta_frame_count": 743,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_18_kitchen_19/original_video2.mp4",
+   "true_frame_count": 743
+  }
+ },
+ "kitchen_1_kitchen_2": {
+  "video1": {
+   "fps": 29.9803,
+   "meta_frame_count": 304,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_1_kitchen_2/original_video1.MOV",
+   "true_frame_count": 304
+  },
+  "video2": {
+   "fps": 29.9766,
+   "meta_frame_count": 385,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_1_kitchen_2/original_video2.MOV",
+   "true_frame_count": 385
+  }
+ },
+ "kitchen_1_kitchen_3": {
+  "video1": {
+   "fps": 29.9803,
+   "meta_frame_count": 304,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_1_kitchen_3/original_video1.MOV",
+   "true_frame_count": 304
+  },
+  "video2": {
+   "fps": 29.9786,
+   "meta_frame_count": 280,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_1_kitchen_3/original_video2.MOV",
+   "true_frame_count": 280
+  }
+ },
+ "kitchen_20_kitchen_21": {
+  "video1": {
+   "fps": 29.9145,
+   "meta_frame_count": 350,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_20_kitchen_21/original_video1.mp4",
+   "true_frame_count": 350
+  },
+  "video2": {
+   "fps": 29.9346,
+   "meta_frame_count": 458,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_20_kitchen_21/original_video2.mp4",
+   "true_frame_count": 458
+  }
+ },
+ "kitchen_22_kitchen_23": {
+  "video1": {
+   "fps": 59.9536,
+   "meta_frame_count": 388,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_22_kitchen_23/original_video1.MOV",
+   "true_frame_count": 388
+  },
+  "video2": {
+   "fps": 59.9586,
+   "meta_frame_count": 580,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_22_kitchen_23/original_video2.MOV",
+   "true_frame_count": 580
+  }
+ },
+ "kitchen_24_kitchen_25": {
+  "video1": {
+   "fps": 59.9634,
+   "meta_frame_count": 491,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_24_kitchen_25/original_video1.MOV",
+   "true_frame_count": 491
+  },
+  "video2": {
+   "fps": 59.9531,
+   "meta_frame_count": 511,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_24_kitchen_25/original_video2.MOV",
+   "true_frame_count": 511
+  }
+ },
+ "kitchen_26_kitchen_27": {
+  "video1": {
+   "fps": 29.925,
+   "meta_frame_count": 399,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_26_kitchen_27/original_video1.MOV",
+   "true_frame_count": 399
+  },
+  "video2": {
+   "fps": 29.9307,
+   "meta_frame_count": 432,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_26_kitchen_27/original_video2.MOV",
+   "true_frame_count": 432
+  }
+ },
+ "kitchen_28_kitchen_29": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 181,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_28_kitchen_29/original_video1.mov",
+   "true_frame_count": 181
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 178,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_28_kitchen_29/original_video2.mov",
+   "true_frame_count": 178
+  }
+ },
+ "kitchen_2_kitchen_3": {
+  "video1": {
+   "fps": 29.9766,
+   "meta_frame_count": 385,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_2_kitchen_3/original_video1.MOV",
+   "true_frame_count": 385
+  },
+  "video2": {
+   "fps": 29.9786,
+   "meta_frame_count": 280,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_2_kitchen_3/original_video2.MOV",
+   "true_frame_count": 280
+  }
+ },
+ "kitchen_2_kitchen_4": {
+  "video1": {
+   "fps": 29.9766,
+   "meta_frame_count": 385,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_2_kitchen_4/original_video1.MOV",
+   "true_frame_count": 385
+  },
+  "video2": {
+   "fps": 29.9765,
+   "meta_frame_count": 319,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_2_kitchen_4/original_video2.MOV",
+   "true_frame_count": 319
+  }
+ },
+ "kitchen_30_kitchen_31": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 138,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_30_kitchen_31/original_video1.mov",
+   "true_frame_count": 138
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 198,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_30_kitchen_31/original_video2.mov",
+   "true_frame_count": 198
+  }
+ },
+ "kitchen_3_kitchen_4": {
+  "video1": {
+   "fps": 29.9786,
+   "meta_frame_count": 280,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_3_kitchen_4/original_video1.MOV",
+   "true_frame_count": 280
+  },
+  "video2": {
+   "fps": 29.9765,
+   "meta_frame_count": 319,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_3_kitchen_4/original_video2.MOV",
+   "true_frame_count": 319
+  }
+ },
+ "kitchen_3_kitchen_5": {
+  "video1": {
+   "fps": 29.9786,
+   "meta_frame_count": 280,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_3_kitchen_5/original_video1.MOV",
+   "true_frame_count": 280
+  },
+  "video2": {
+   "fps": 29.9781,
+   "meta_frame_count": 410,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_3_kitchen_5/original_video2.MOV",
+   "true_frame_count": 410
+  }
+ },
+ "kitchen_4_kitchen_5": {
+  "video1": {
+   "fps": 29.9765,
+   "meta_frame_count": 319,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_4_kitchen_5/original_video1.MOV",
+   "true_frame_count": 319
+  },
+  "video2": {
+   "fps": 29.9781,
+   "meta_frame_count": 410,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_4_kitchen_5/original_video2.MOV",
+   "true_frame_count": 410
+  }
+ },
+ "kitchen_6_kitchen_7": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 219,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_6_kitchen_7/original_video1.mp4",
+   "true_frame_count": 219
+  },
+  "video2": {
+   "fps": 29.8235,
+   "meta_frame_count": 338,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_6_kitchen_7/original_video2.mp4",
+   "true_frame_count": 338
+  }
+ },
+ "kitchen_8_kitchen_9": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 382,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_8_kitchen_9/original_video1.MOV",
+   "true_frame_count": 382
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 383,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/kitchen_8_kitchen_9/original_video2.MOV",
+   "true_frame_count": 383
+  }
+ },
+ "laundry_room_1_laundry_room_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 272,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_1_laundry_room_2/original_video1.mp4",
+   "true_frame_count": 272
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 281,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_1_laundry_room_2/original_video2.mp4",
+   "true_frame_count": 281
+  }
+ },
+ "laundry_room_3_laundry_room_4": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 216,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_3_laundry_room_4/original_video1.MOV",
+   "true_frame_count": 216
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 186,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_3_laundry_room_4/original_video2.MOV",
+   "true_frame_count": 186
+  }
+ },
+ "laundry_room_5_laundry_room_6": {
+  "video1": {
+   "fps": 29.9928,
+   "meta_frame_count": 419,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_5_laundry_room_6/original_video1.MOV",
+   "true_frame_count": 419
+  },
+  "video2": {
+   "fps": 29.9928,
+   "meta_frame_count": 416,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_5_laundry_room_6/original_video2.MOV",
+   "true_frame_count": 416
+  }
+ },
+ "laundry_room_7_laundry_room_8": {
+  "video1": {
+   "fps": 29.9943,
+   "meta_frame_count": 264,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_7_laundry_room_8/original_video1.MOV",
+   "true_frame_count": 264
+  },
+  "video2": {
+   "fps": 29.9947,
+   "meta_frame_count": 284,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/laundry_room_7_laundry_room_8/original_video2.MOV",
+   "true_frame_count": 284
+  }
+ },
+ "living_room_11_living_room_12": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 159,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_11_living_room_12/original_video1.MOV",
+   "true_frame_count": 159
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 211,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_11_living_room_12/original_video2.MOV",
+   "true_frame_count": 211
+  }
+ },
+ "living_room_13_living_room_14": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 182,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_13_living_room_14/original_video1.MOV",
+   "true_frame_count": 182
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 169,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_13_living_room_14/original_video2.MOV",
+   "true_frame_count": 169
+  }
+ },
+ "living_room_15_living_room_16": {
+  "video1": {
+   "fps": 29.9003,
+   "meta_frame_count": 296,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_15_living_room_16/original_video1.mov",
+   "true_frame_count": 296
+  },
+  "video2": {
+   "fps": 29.9094,
+   "meta_frame_count": 330,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_15_living_room_16/original_video2.MOV",
+   "true_frame_count": 330
+  }
+ },
+ "living_room_17_living_room_18": {
+  "video1": {
+   "fps": 29.9185,
+   "meta_frame_count": 367,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_17_living_room_18/original_video1.MOV",
+   "true_frame_count": 367
+  },
+  "video2": {
+   "fps": 29.9185,
+   "meta_frame_count": 367,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_17_living_room_18/original_video2.MOV",
+   "true_frame_count": 367
+  }
+ },
+ "living_room_19_living_room_20": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 215,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_19_living_room_20/original_video1.MOV",
+   "true_frame_count": 215
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 359,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_19_living_room_20/original_video2.MOV",
+   "true_frame_count": 359
+  }
+ },
+ "living_room_1_living_room_2": {
+  "video1": {
+   "fps": 29.9206,
+   "meta_frame_count": 281,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_1_living_room_2/original_video1.mp4",
+   "true_frame_count": 281
+  },
+  "video2": {
+   "fps": 30.0224,
+   "meta_frame_count": 341,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_1_living_room_2/original_video2.mp4",
+   "true_frame_count": 341
+  }
+ },
+ "living_room_21_living_room_22": {
+  "video1": {
+   "fps": 59.9692,
+   "meta_frame_count": 779,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_21_living_room_22/original_video1.MOV",
+   "true_frame_count": 779
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 383,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_21_living_room_22/original_video2.MOV",
+   "true_frame_count": 383
+  }
+ },
+ "living_room_23_living_room_24": {
+  "video1": {
+   "fps": 119.9503,
+   "meta_frame_count": 845,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_23_living_room_24/original_video1.MOV",
+   "true_frame_count": 845
+  },
+  "video2": {
+   "fps": 119.9501,
+   "meta_frame_count": 961,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_23_living_room_24/original_video2.MOV",
+   "true_frame_count": 961
+  }
+ },
+ "living_room_25_living_room_26": {
+  "video1": {
+   "fps": 119.9514,
+   "meta_frame_count": 1358,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_25_living_room_26/original_video1.MOV",
+   "true_frame_count": 1358
+  },
+  "video2": {
+   "fps": 119.9498,
+   "meta_frame_count": 1313,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_25_living_room_26/original_video2.MOV",
+   "true_frame_count": 1313
+  }
+ },
+ "living_room_27_living_room_28": {
+  "video1": {
+   "fps": 119.9504,
+   "meta_frame_count": 1331,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_27_living_room_28/original_video1.MOV",
+   "true_frame_count": 1331
+  },
+  "video2": {
+   "fps": 119.9495,
+   "meta_frame_count": 1424,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_27_living_room_28/original_video2.MOV",
+   "true_frame_count": 1424
+  }
+ },
+ "living_room_29_living_room_30": {
+  "video1": {
+   "fps": 59.9449,
+   "meta_frame_count": 435,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_29_living_room_30/original_video1.MOV",
+   "true_frame_count": 435
+  },
+  "video2": {
+   "fps": 59.9366,
+   "meta_frame_count": 662,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_29_living_room_30/original_video2.MOV",
+   "true_frame_count": 662
+  }
+ },
+ "living_room_31_living_room_32": {
+  "video1": {
+   "fps": 59.9346,
+   "meta_frame_count": 458,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_31_living_room_32/original_video1.MOV",
+   "true_frame_count": 458
+  },
+  "video2": {
+   "fps": 59.9321,
+   "meta_frame_count": 618,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_31_living_room_32/original_video2.MOV",
+   "true_frame_count": 618
+  }
+ },
+ "living_room_33_living_room_34": {
+  "video1": {
+   "fps": 29.9902,
+   "meta_frame_count": 153,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_33_living_room_34/original_video1.mov",
+   "true_frame_count": 153
+  },
+  "video2": {
+   "fps": 29.9835,
+   "meta_frame_count": 91,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_33_living_room_34/original_video2.mov",
+   "true_frame_count": 91
+  }
+ },
+ "living_room_35_living_room_36": {
+  "video1": {
+   "fps": 30.0655,
+   "meta_frame_count": 335,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_35_living_room_36/original_video1.mp4",
+   "true_frame_count": 335
+  },
+  "video2": {
+   "fps": 30.0459,
+   "meta_frame_count": 364,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_35_living_room_36/original_video2.mp4",
+   "true_frame_count": 364
+  }
+ },
+ "living_room_37_living_room_38": {
+  "video1": {
+   "fps": 29.8707,
+   "meta_frame_count": 231,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_37_living_room_38/original_video1.mp4",
+   "true_frame_count": 231
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 282,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_37_living_room_38/original_video2.mp4",
+   "true_frame_count": 282
+  }
+ },
+ "living_room_39_living_room_40": {
+  "video1": {
+   "fps": 29.7778,
+   "meta_frame_count": 268,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_39_living_room_40/original_video1.mp4",
+   "true_frame_count": 268
+  },
+  "video2": {
+   "fps": 29.7952,
+   "meta_frame_count": 291,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_39_living_room_40/original_video2.mp4",
+   "true_frame_count": 291
+  }
+ },
+ "living_room_3_living_room_4": {
+  "video1": {
+   "fps": 29.9507,
+   "meta_frame_count": 608,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_3_living_room_4/original_video1.mp4",
+   "true_frame_count": 608
+  },
+  "video2": {
+   "fps": 29.8698,
+   "meta_frame_count": 459,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_3_living_room_4/original_video2.mp4",
+   "true_frame_count": 459
+  }
+ },
+ "living_room_41_living_room_42": {
+  "video1": {
+   "fps": 28.7643,
+   "meta_frame_count": 213,
+   "metadata_overreports": true,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_41_living_room_42/original_video1.mov",
+   "true_frame_count": 205
+  },
+  "video2": {
+   "fps": 29.9766,
+   "meta_frame_count": 385,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_41_living_room_42/original_video2.MOV",
+   "true_frame_count": 385
+  }
+ },
+ "living_room_43_living_room_44": {
+  "video1": {
+   "fps": 59.9579,
+   "meta_frame_count": 427,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_43_living_room_44/original_video1.MOV",
+   "true_frame_count": 427
+  },
+  "video2": {
+   "fps": 59.9626,
+   "meta_frame_count": 642,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_43_living_room_44/original_video2.MOV",
+   "true_frame_count": 642
+  }
+ },
+ "living_room_45_living_room_46": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 188,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_45_living_room_46/original_video1.mov",
+   "true_frame_count": 188
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 191,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_45_living_room_46/original_video2.mov",
+   "true_frame_count": 191
+  }
+ },
+ "living_room_47_living_room_48": {
+  "video1": {
+   "fps": 59.9371,
+   "meta_frame_count": 857,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_47_living_room_48/original_video1.MOV",
+   "true_frame_count": 857
+  },
+  "video2": {
+   "fps": 59.936,
+   "meta_frame_count": 562,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_47_living_room_48/original_video2.MOV",
+   "true_frame_count": 562
+  }
+ },
+ "living_room_49_living_room_50": {
+  "video1": {
+   "fps": 29.9887,
+   "meta_frame_count": 133,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_49_living_room_50/original_video1.mov",
+   "true_frame_count": 133
+  },
+  "video2": {
+   "fps": 29.989,
+   "meta_frame_count": 136,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_49_living_room_50/original_video2.mov",
+   "true_frame_count": 136
+  }
+ },
+ "living_room_5_living_room_6": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 228,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_5_living_room_6/original_video1.mp4",
+   "true_frame_count": 228
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 203,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_5_living_room_6/original_video2.mp4",
+   "true_frame_count": 203
+  }
+ },
+ "living_room_7_living_room_8": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 289,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_7_living_room_8/original_video1.MOV",
+   "true_frame_count": 289
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 280,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_7_living_room_8/original_video2.MOV",
+   "true_frame_count": 280
+  }
+ },
+ "living_room_9_living_room_10": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 255,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_9_living_room_10/original_video1.MOV",
+   "true_frame_count": 255
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 240,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/living_room_9_living_room_10/original_video2.MOV",
+   "true_frame_count": 240
+  }
+ },
+ "livingroom_1_livingroom_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 239,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/livingroom_1_livingroom_2/original_video1.MOV",
+   "true_frame_count": 239
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 227,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/livingroom_1_livingroom_2/original_video2.MOV",
+   "true_frame_count": 227
+  }
+ },
+ "lounge_11_lounge_12": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 341,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_11_lounge_12/original_video1.MOV",
+   "true_frame_count": 341
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 394,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_11_lounge_12/original_video2.MOV",
+   "true_frame_count": 394
+  }
+ },
+ "lounge_13_lounge_14": {
+  "video1": {
+   "fps": 29.9951,
+   "meta_frame_count": 303,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_13_lounge_14/original_video1.MOV",
+   "true_frame_count": 303
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 285,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_13_lounge_14/original_video2.MOV",
+   "true_frame_count": 285
+  }
+ },
+ "lounge_15_lounge_16": {
+  "video1": {
+   "fps": 29.9794,
+   "meta_frame_count": 510,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_15_lounge_16/original_video1.MOV",
+   "true_frame_count": 510
+  },
+  "video2": {
+   "fps": 29.9791,
+   "meta_frame_count": 574,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_15_lounge_16/original_video2.MOV",
+   "true_frame_count": 574
+  }
+ },
+ "lounge_17_lounge_18": {
+  "video1": {
+   "fps": 59.9217,
+   "meta_frame_count": 536,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_17_lounge_18/original_video1.MOV",
+   "true_frame_count": 536
+  },
+  "video2": {
+   "fps": 59.9263,
+   "meta_frame_count": 569,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_17_lounge_18/original_video2.MOV",
+   "true_frame_count": 569
+  }
+ },
+ "lounge_1_lounge_2": {
+  "video1": {
+   "fps": 29.9962,
+   "meta_frame_count": 395,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_1_lounge_2/original_video1.MOV",
+   "true_frame_count": 395
+  },
+  "video2": {
+   "fps": 29.9961,
+   "meta_frame_count": 383,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_1_lounge_2/original_video2.MOV",
+   "true_frame_count": 383
+  }
+ },
+ "lounge_3_lounge_4": {
+  "video1": {
+   "fps": 29.9959,
+   "meta_frame_count": 365,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_3_lounge_4/original_video1.MOV",
+   "true_frame_count": 365
+  },
+  "video2": {
+   "fps": 29.9959,
+   "meta_frame_count": 368,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_3_lounge_4/original_video2.MOV",
+   "true_frame_count": 368
+  }
+ },
+ "lounge_5_lounge_6": {
+  "video1": {
+   "fps": 29.9796,
+   "meta_frame_count": 294,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_5_lounge_6/original_video1.MOV",
+   "true_frame_count": 294
+  },
+  "video2": {
+   "fps": 29.9792,
+   "meta_frame_count": 361,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_5_lounge_6/original_video2.MOV",
+   "true_frame_count": 361
+  }
+ },
+ "lounge_7_lounge_8": {
+  "video1": {
+   "fps": 29.9952,
+   "meta_frame_count": 310,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_7_lounge_8/original_video1.MOV",
+   "true_frame_count": 310
+  },
+  "video2": {
+   "fps": 29.993,
+   "meta_frame_count": 215,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_7_lounge_8/original_video2.MOV",
+   "true_frame_count": 215
+  }
+ },
+ "lounge_9_lounge_10": {
+  "video1": {
+   "fps": 29.9932,
+   "meta_frame_count": 443,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_9_lounge_10/original_video1.MOV",
+   "true_frame_count": 443
+  },
+  "video2": {
+   "fps": 29.9936,
+   "meta_frame_count": 469,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/lounge_9_lounge_10/original_video2.MOV",
+   "true_frame_count": 469
+  }
+ },
+ "mailroom_1_mailroom_2": {
+  "video1": {
+   "fps": 29.9944,
+   "meta_frame_count": 266,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/mailroom_1_mailroom_2/original_video1.MOV",
+   "true_frame_count": 266
+  },
+  "video2": {
+   "fps": 29.993,
+   "meta_frame_count": 215,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/mailroom_1_mailroom_2/original_video2.MOV",
+   "true_frame_count": 215
+  }
+ },
+ "mailroom_3_mailroom_4": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 161,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/mailroom_3_mailroom_4/original_video1.MOV",
+   "true_frame_count": 161
+  },
+  "video2": {
+   "fps": 29.9958,
+   "meta_frame_count": 357,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/mailroom_3_mailroom_4/original_video2.MOV",
+   "true_frame_count": 357
+  }
+ },
+ "office_11_office_12": {
+  "video1": {
+   "fps": 59.9609,
+   "meta_frame_count": 613,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_11_office_12/original_video1.MOV",
+   "true_frame_count": 613
+  },
+  "video2": {
+   "fps": 59.9632,
+   "meta_frame_count": 652,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_11_office_12/original_video2.MOV",
+   "true_frame_count": 652
+  }
+ },
+ "office_13_office_14": {
+  "video1": {
+   "fps": 59.9573,
+   "meta_frame_count": 421,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_13_office_14/original_video1.MOV",
+   "true_frame_count": 421
+  },
+  "video2": {
+   "fps": 59.9561,
+   "meta_frame_count": 546,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_13_office_14/original_video2.MOV",
+   "true_frame_count": 546
+  }
+ },
+ "office_15_office_16": {
+  "video1": {
+   "fps": 59.9616,
+   "meta_frame_count": 624,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_15_office_16/original_video1.MOV",
+   "true_frame_count": 624
+  },
+  "video2": {
+   "fps": 59.9613,
+   "meta_frame_count": 619,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_15_office_16/original_video2.MOV",
+   "true_frame_count": 619
+  }
+ },
+ "office_17_office_18": {
+  "video1": {
+   "fps": 59.9632,
+   "meta_frame_count": 489,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_17_office_18/original_video1.MOV",
+   "true_frame_count": 489
+  },
+  "video2": {
+   "fps": 59.9607,
+   "meta_frame_count": 458,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_17_office_18/original_video2.MOV",
+   "true_frame_count": 458
+  }
+ },
+ "office_19_office_20": {
+  "video1": {
+   "fps": 59.9582,
+   "meta_frame_count": 718,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_19_office_20/original_video1.MOV",
+   "true_frame_count": 718
+  },
+  "video2": {
+   "fps": 59.9531,
+   "meta_frame_count": 511,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_19_office_20/original_video2.MOV",
+   "true_frame_count": 511
+  }
+ },
+ "office_1_office_2": {
+  "video1": {
+   "fps": 29.9775,
+   "meta_frame_count": 267,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_1_office_2/original_video1.MOV",
+   "true_frame_count": 267
+  },
+  "video2": {
+   "fps": 29.9786,
+   "meta_frame_count": 350,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_1_office_2/original_video2.MOV",
+   "true_frame_count": 350
+  }
+ },
+ "office_21_office_22": {
+  "video1": {
+   "fps": 59.958,
+   "meta_frame_count": 428,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_21_office_22/original_video1.MOV",
+   "true_frame_count": 428
+  },
+  "video2": {
+   "fps": 59.954,
+   "meta_frame_count": 521,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_21_office_22/original_video2.MOV",
+   "true_frame_count": 521
+  }
+ },
+ "office_3_office_4": {
+  "video1": {
+   "fps": 29.981,
+   "meta_frame_count": 237,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_3_office_4/original_video1.MOV",
+   "true_frame_count": 237
+  },
+  "video2": {
+   "fps": 29.9791,
+   "meta_frame_count": 287,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_3_office_4/original_video2.MOV",
+   "true_frame_count": 287
+  }
+ },
+ "office_5_office_6": {
+  "video1": {
+   "fps": 29.9947,
+   "meta_frame_count": 282,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_5_office_6/original_video1.MOV",
+   "true_frame_count": 282
+  },
+  "video2": {
+   "fps": 29.9943,
+   "meta_frame_count": 265,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_5_office_6/original_video2.MOV",
+   "true_frame_count": 265
+  }
+ },
+ "office_7_office_8": {
+  "video1": {
+   "fps": 59.9631,
+   "meta_frame_count": 487,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_7_office_8/original_video1.MOV",
+   "true_frame_count": 487
+  },
+  "video2": {
+   "fps": 59.9584,
+   "meta_frame_count": 577,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_7_office_8/original_video2.MOV",
+   "true_frame_count": 577
+  }
+ },
+ "office_9_office_10": {
+  "video1": {
+   "fps": 59.9593,
+   "meta_frame_count": 589,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_9_office_10/original_video1.MOV",
+   "true_frame_count": 589
+  },
+  "video2": {
+   "fps": 59.9568,
+   "meta_frame_count": 555,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/office_9_office_10/original_video2.MOV",
+   "true_frame_count": 555
+  }
+ },
+ "outdoor_stair_1_outdoor_stair_2": {
+  "video1": {
+   "fps": 29.996,
+   "meta_frame_count": 377,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/outdoor_stair_1_outdoor_stair_2/original_video1.MOV",
+   "true_frame_count": 377
+  },
+  "video2": {
+   "fps": 29.9952,
+   "meta_frame_count": 313,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/outdoor_stair_1_outdoor_stair_2/original_video2.MOV",
+   "true_frame_count": 313
+  }
+ },
+ "parking_lot_1_parking_lot_2": {
+  "video1": {
+   "fps": 29.9964,
+   "meta_frame_count": 421,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/parking_lot_1_parking_lot_2/original_video1.MOV",
+   "true_frame_count": 421
+  },
+  "video2": {
+   "fps": 29.9954,
+   "meta_frame_count": 324,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/parking_lot_1_parking_lot_2/original_video2.MOV",
+   "true_frame_count": 324
+  }
+ },
+ "parking_lot_3_parking_lot_4": {
+  "video1": {
+   "fps": 29.9494,
+   "meta_frame_count": 592,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/parking_lot_3_parking_lot_4/original_video1.mp4",
+   "true_frame_count": 592
+  },
+  "video2": {
+   "fps": 29.9215,
+   "meta_frame_count": 381,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/parking_lot_3_parking_lot_4/original_video2.mp4",
+   "true_frame_count": 381
+  }
+ },
+ "post_office_1_post_office_2": {
+  "video1": {
+   "fps": 29.9943,
+   "meta_frame_count": 262,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/post_office_1_post_office_2/original_video1.MOV",
+   "true_frame_count": 262
+  },
+  "video2": {
+   "fps": 29.9945,
+   "meta_frame_count": 274,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/post_office_1_post_office_2/original_video2.MOV",
+   "true_frame_count": 274
+  }
+ },
+ "post_office_3_post_office_4": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 234,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/post_office_3_post_office_4/original_video1.MOV",
+   "true_frame_count": 234
+  },
+  "video2": {
+   "fps": 29.9965,
+   "meta_frame_count": 432,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/post_office_3_post_office_4/original_video2.MOV",
+   "true_frame_count": 432
+  }
+ },
+ "post_office_5_post_office_6": {
+  "video1": {
+   "fps": 29.9954,
+   "meta_frame_count": 329,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/post_office_5_post_office_6/original_video1.MOV",
+   "true_frame_count": 329
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 244,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/post_office_5_post_office_6/original_video2.MOV",
+   "true_frame_count": 244
+  }
+ },
+ "poster_1_poster_2": {
+  "video1": {
+   "fps": 59.9609,
+   "meta_frame_count": 460,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/poster_1_poster_2/original_video1.MOV",
+   "true_frame_count": 460
+  },
+  "video2": {
+   "fps": 59.956,
+   "meta_frame_count": 545,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/poster_1_poster_2/original_video2.MOV",
+   "true_frame_count": 545
+  }
+ },
+ "recreation_room_1_recreation_room_2": {
+  "video1": {
+   "fps": 29.9935,
+   "meta_frame_count": 229,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/recreation_room_1_recreation_room_2/original_video1.MOV",
+   "true_frame_count": 229
+  },
+  "video2": {
+   "fps": 29.9931,
+   "meta_frame_count": 217,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/recreation_room_1_recreation_room_2/original_video2.MOV",
+   "true_frame_count": 217
+  }
+ },
+ "restaurant_1_restaurant_2": {
+  "video1": {
+   "fps": 59.966,
+   "meta_frame_count": 353,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_1_restaurant_2/original_video1.MOV",
+   "true_frame_count": 353
+  },
+  "video2": {
+   "fps": 59.9264,
+   "meta_frame_count": 407,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_1_restaurant_2/original_video2.MOV",
+   "true_frame_count": 407
+  }
+ },
+ "restaurant_3_restaurant_4": {
+  "video1": {
+   "fps": 29.978,
+   "meta_frame_count": 136,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_3_restaurant_4/original_video1.MOV",
+   "true_frame_count": 136
+  },
+  "video2": {
+   "fps": 29.9756,
+   "meta_frame_count": 184,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_3_restaurant_4/original_video2.MOV",
+   "true_frame_count": 184
+  }
+ },
+ "restaurant_5_restaurant_6": {
+  "video1": {
+   "fps": 59.9576,
+   "meta_frame_count": 424,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_5_restaurant_6/original_video1.MOV",
+   "true_frame_count": 424
+  },
+  "video2": {
+   "fps": 59.9655,
+   "meta_frame_count": 348,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_5_restaurant_6/original_video2.MOV",
+   "true_frame_count": 348
+  }
+ },
+ "restaurant_7_restaurant_8": {
+  "video1": {
+   "fps": 29.877,
+   "meta_frame_count": 243,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_7_restaurant_8/original_video1.mp4",
+   "true_frame_count": 243
+  },
+  "video2": {
+   "fps": 29.0,
+   "meta_frame_count": 321,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/restaurant_7_restaurant_8/original_video2.mp4",
+   "true_frame_count": 321
+  }
+ },
+ "room_entrance_1_room_entrance_2": {
+  "video1": {
+   "fps": 29.8955,
+   "meta_frame_count": 286,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_1_room_entrance_2/original_video1.mp4",
+   "true_frame_count": 286
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 359,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_1_room_entrance_2/original_video2.mp4",
+   "true_frame_count": 359
+  }
+ },
+ "room_entrance_3_room_entrance_4": {
+  "video1": {
+   "fps": 29.8936,
+   "meta_frame_count": 281,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_3_room_entrance_4/original_video1.mp4",
+   "true_frame_count": 281
+  },
+  "video2": {
+   "fps": 29.8893,
+   "meta_frame_count": 270,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_3_room_entrance_4/original_video2.mp4",
+   "true_frame_count": 270
+  }
+ },
+ "room_entrance_5_room_entrance_6": {
+  "video1": {
+   "fps": 59.9537,
+   "meta_frame_count": 518,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_5_room_entrance_6/original_video1.MOV",
+   "true_frame_count": 518
+  },
+  "video2": {
+   "fps": 59.9597,
+   "meta_frame_count": 595,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_5_room_entrance_6/original_video2.MOV",
+   "true_frame_count": 595
+  }
+ },
+ "room_entrance_7_room_entrance_8": {
+  "video1": {
+   "fps": 59.9589,
+   "meta_frame_count": 438,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_7_room_entrance_8/original_video1.MOV",
+   "true_frame_count": 438
+  },
+  "video2": {
+   "fps": 59.9542,
+   "meta_frame_count": 524,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_7_room_entrance_8/original_video2.MOV",
+   "true_frame_count": 524
+  }
+ },
+ "room_entrance_9_room_entrance_10": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 163,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_9_room_entrance_10/original_video1.mov",
+   "true_frame_count": 163
+  },
+  "video2": {
+   "fps": 30.0084,
+   "meta_frame_count": 178,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/room_entrance_9_room_entrance_10/original_video2.mov",
+   "true_frame_count": 178
+  }
+ },
+ "storage_1_storage_2": {
+  "video1": {
+   "fps": 29.9003,
+   "meta_frame_count": 300,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/storage_1_storage_2/original_video1.mp4",
+   "true_frame_count": 300
+  },
+  "video2": {
+   "fps": 29.9211,
+   "meta_frame_count": 379,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/storage_1_storage_2/original_video2.mp4",
+   "true_frame_count": 379
+  }
+ },
+ "store_11_store_12": {
+  "video1": {
+   "fps": 29.994,
+   "meta_frame_count": 249,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_11_store_12/original_video1.MOV",
+   "true_frame_count": 249
+  },
+  "video2": {
+   "fps": 29.9942,
+   "meta_frame_count": 257,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_11_store_12/original_video2.MOV",
+   "true_frame_count": 257
+  }
+ },
+ "store_13_store_14": {
+  "video1": {
+   "fps": 29.9948,
+   "meta_frame_count": 286,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_13_store_14/original_video1.MOV",
+   "true_frame_count": 286
+  },
+  "video2": {
+   "fps": 29.9956,
+   "meta_frame_count": 341,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_13_store_14/original_video2.MOV",
+   "true_frame_count": 341
+  }
+ },
+ "store_15_store_16": {
+  "video1": {
+   "fps": 29.9935,
+   "meta_frame_count": 231,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_15_store_16/original_video1.MOV",
+   "true_frame_count": 231
+  },
+  "video2": {
+   "fps": 29.9949,
+   "meta_frame_count": 294,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_15_store_16/original_video2.MOV",
+   "true_frame_count": 294
+  }
+ },
+ "store_17_store_18": {
+  "video1": {
+   "fps": 29.992,
+   "meta_frame_count": 377,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_17_store_18/original_video1.MOV",
+   "true_frame_count": 377
+  },
+  "video2": {
+   "fps": 29.9864,
+   "meta_frame_count": 220,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_17_store_18/original_video2.MOV",
+   "true_frame_count": 220
+  }
+ },
+ "store_19_store_20": {
+  "video1": {
+   "fps": 29.9945,
+   "meta_frame_count": 271,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_19_store_20/original_video1.MOV",
+   "true_frame_count": 271
+  },
+  "video2": {
+   "fps": 29.9944,
+   "meta_frame_count": 267,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_19_store_20/original_video2.MOV",
+   "true_frame_count": 267
+  }
+ },
+ "store_1_store_2": {
+  "video1": {
+   "fps": 29.8544,
+   "meta_frame_count": 205,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_1_store_2/original_video1.mp4",
+   "true_frame_count": 205
+  },
+  "video2": {
+   "fps": 29.876,
+   "meta_frame_count": 241,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_1_store_2/original_video2.mp4",
+   "true_frame_count": 241
+  }
+ },
+ "store_21_store_22": {
+  "video1": {
+   "fps": 29.9947,
+   "meta_frame_count": 285,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_21_store_22/original_video1.MOV",
+   "true_frame_count": 285
+  },
+  "video2": {
+   "fps": 29.9961,
+   "meta_frame_count": 381,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_21_store_22/original_video2.MOV",
+   "true_frame_count": 381
+  }
+ },
+ "store_23_store_24": {
+  "video1": {
+   "fps": 29.9942,
+   "meta_frame_count": 258,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_23_store_24/original_video1.MOV",
+   "true_frame_count": 258
+  },
+  "video2": {
+   "fps": 29.9948,
+   "meta_frame_count": 291,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_23_store_24/original_video2.MOV",
+   "true_frame_count": 291
+  }
+ },
+ "store_25_store_26": {
+  "video1": {
+   "fps": 29.9947,
+   "meta_frame_count": 285,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_25_store_26/original_video1.MOV",
+   "true_frame_count": 285
+  },
+  "video2": {
+   "fps": 29.9929,
+   "meta_frame_count": 425,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_25_store_26/original_video2.MOV",
+   "true_frame_count": 425
+  }
+ },
+ "store_27_store_28": {
+  "video1": {
+   "fps": 29.9948,
+   "meta_frame_count": 288,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_27_store_28/original_video1.MOV",
+   "true_frame_count": 288
+  },
+  "video2": {
+   "fps": 29.9942,
+   "meta_frame_count": 257,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_27_store_28/original_video2.MOV",
+   "true_frame_count": 257
+  }
+ },
+ "store_29_store_30": {
+  "video1": {
+   "fps": 29.995,
+   "meta_frame_count": 302,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_29_store_30/original_video1.MOV",
+   "true_frame_count": 302
+  },
+  "video2": {
+   "fps": 29.9949,
+   "meta_frame_count": 294,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_29_store_30/original_video2.MOV",
+   "true_frame_count": 294
+  }
+ },
+ "store_31_store_32": {
+  "video1": {
+   "fps": 29.9939,
+   "meta_frame_count": 246,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_31_store_32/original_video1.MOV",
+   "true_frame_count": 246
+  },
+  "video2": {
+   "fps": 29.9942,
+   "meta_frame_count": 257,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_31_store_32/original_video2.MOV",
+   "true_frame_count": 257
+  }
+ },
+ "store_33_store_34": {
+  "video1": {
+   "fps": 29.994,
+   "meta_frame_count": 248,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_33_store_34/original_video1.MOV",
+   "true_frame_count": 248
+  },
+  "video2": {
+   "fps": 29.9939,
+   "meta_frame_count": 246,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_33_store_34/original_video2.MOV",
+   "true_frame_count": 246
+  }
+ },
+ "store_35_store_36": {
+  "video1": {
+   "fps": 29.9929,
+   "meta_frame_count": 212,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_35_store_36/original_video1.MOV",
+   "true_frame_count": 212
+  },
+  "video2": {
+   "fps": 29.9945,
+   "meta_frame_count": 273,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_35_store_36/original_video2.MOV",
+   "true_frame_count": 273
+  }
+ },
+ "store_37_store_38": {
+  "video1": {
+   "fps": 29.9938,
+   "meta_frame_count": 241,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_37_store_38/original_video1.MOV",
+   "true_frame_count": 241
+  },
+  "video2": {
+   "fps": 29.9936,
+   "meta_frame_count": 233,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_37_store_38/original_video2.MOV",
+   "true_frame_count": 233
+  }
+ },
+ "store_39_store_40": {
+  "video1": {
+   "fps": 29.9936,
+   "meta_frame_count": 235,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_39_store_40/original_video1.MOV",
+   "true_frame_count": 235
+  },
+  "video2": {
+   "fps": 29.9938,
+   "meta_frame_count": 240,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_39_store_40/original_video2.MOV",
+   "true_frame_count": 240
+  }
+ },
+ "store_3_store_4": {
+  "video1": {
+   "fps": 29.879,
+   "meta_frame_count": 247,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_3_store_4/original_video1.mp4",
+   "true_frame_count": 247
+  },
+  "video2": {
+   "fps": 29.879,
+   "meta_frame_count": 247,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_3_store_4/original_video2.mp4",
+   "true_frame_count": 247
+  }
+ },
+ "store_41_store_42": {
+  "video1": {
+   "fps": 29.9939,
+   "meta_frame_count": 245,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_41_store_42/original_video1.MOV",
+   "true_frame_count": 245
+  },
+  "video2": {
+   "fps": 29.996,
+   "meta_frame_count": 372,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_41_store_42/original_video2.MOV",
+   "true_frame_count": 372
+  }
+ },
+ "store_43_store_44": {
+  "video1": {
+   "fps": 29.9937,
+   "meta_frame_count": 239,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_43_store_44/original_video1.mov",
+   "true_frame_count": 239
+  },
+  "video2": {
+   "fps": 29.9943,
+   "meta_frame_count": 265,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_43_store_44/original_video2.mov",
+   "true_frame_count": 265
+  }
+ },
+ "store_45_store_46": {
+  "video1": {
+   "fps": 29.9947,
+   "meta_frame_count": 282,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_45_store_46/original_video1.MOV",
+   "true_frame_count": 282
+  },
+  "video2": {
+   "fps": 29.9946,
+   "meta_frame_count": 278,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_45_store_46/original_video2.MOV",
+   "true_frame_count": 278
+  }
+ },
+ "store_47_store_48": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 229,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_47_store_48/original_video1.MOV",
+   "true_frame_count": 229
+  },
+  "video2": {
+   "fps": 29.9947,
+   "meta_frame_count": 284,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_47_store_48/original_video2.MOV",
+   "true_frame_count": 284
+  }
+ },
+ "store_49_store_50": {
+  "video1": {
+   "fps": 29.9942,
+   "meta_frame_count": 260,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_49_store_50/original_video1.MOV",
+   "true_frame_count": 260
+  },
+  "video2": {
+   "fps": 29.9955,
+   "meta_frame_count": 330,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_49_store_50/original_video2.MOV",
+   "true_frame_count": 330
+  }
+ },
+ "store_51_store_52": {
+  "video1": {
+   "fps": 29.9946,
+   "meta_frame_count": 280,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_51_store_52/original_video1.MOV",
+   "true_frame_count": 280
+  },
+  "video2": {
+   "fps": 29.995,
+   "meta_frame_count": 297,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_51_store_52/original_video2.MOV",
+   "true_frame_count": 297
+  }
+ },
+ "store_53_store_54": {
+  "video1": {
+   "fps": 29.9942,
+   "meta_frame_count": 258,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_53_store_54/original_video1.MOV",
+   "true_frame_count": 258
+  },
+  "video2": {
+   "fps": 29.9948,
+   "meta_frame_count": 291,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_53_store_54/original_video2.MOV",
+   "true_frame_count": 291
+  }
+ },
+ "store_55_store_56": {
+  "video1": {
+   "fps": 29.8585,
+   "meta_frame_count": 211,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_55_store_56/original_video1.mp4",
+   "true_frame_count": 211
+  },
+  "video2": {
+   "fps": 29.869,
+   "meta_frame_count": 228,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_55_store_56/original_video2.mp4",
+   "true_frame_count": 228
+  }
+ },
+ "store_57_store_58": {
+  "video1": {
+   "fps": 29.9956,
+   "meta_frame_count": 341,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_57_store_58/original_video1.MOV",
+   "true_frame_count": 341
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 213,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_57_store_58/original_video2.MOV",
+   "true_frame_count": 213
+  }
+ },
+ "store_59_store_60": {
+  "video1": {
+   "fps": 29.9045,
+   "meta_frame_count": 313,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_59_store_60/original_video1.mp4",
+   "true_frame_count": 313
+  },
+  "video2": {
+   "fps": 29.8026,
+   "meta_frame_count": 302,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_59_store_60/original_video2.mp4",
+   "true_frame_count": 302
+  }
+ },
+ "store_5_store_6": {
+  "video1": {
+   "fps": 29.8578,
+   "meta_frame_count": 210,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_5_store_6/original_video1.mp4",
+   "true_frame_count": 210
+  },
+  "video2": {
+   "fps": 29.875,
+   "meta_frame_count": 239,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_5_store_6/original_video2.mp4",
+   "true_frame_count": 239
+  }
+ },
+ "store_61_store_62": {
+  "video1": {
+   "fps": 29.9941,
+   "meta_frame_count": 256,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_61_store_62/original_video1.mov",
+   "true_frame_count": 256
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 236,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_61_store_62/original_video2.MOV",
+   "true_frame_count": 236
+  }
+ },
+ "store_63_store_64": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 201,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_63_store_64/original_video1.MOV",
+   "true_frame_count": 201
+  },
+  "video2": {
+   "fps": 29.9954,
+   "meta_frame_count": 326,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_63_store_64/original_video2.MOV",
+   "true_frame_count": 326
+  }
+ },
+ "store_7_store_8": {
+  "video1": {
+   "fps": 29.9967,
+   "meta_frame_count": 458,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_7_store_8/original_video1.MOV",
+   "true_frame_count": 458
+  },
+  "video2": {
+   "fps": 29.9968,
+   "meta_frame_count": 474,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_7_store_8/original_video2.MOV",
+   "true_frame_count": 474
+  }
+ },
+ "store_9_store_10": {
+  "video1": {
+   "fps": 29.9942,
+   "meta_frame_count": 258,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_9_store_10/original_video1.MOV",
+   "true_frame_count": 258
+  },
+  "video2": {
+   "fps": 29.9938,
+   "meta_frame_count": 240,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/store_9_store_10/original_video2.MOV",
+   "true_frame_count": 240
+  }
+ },
+ "street_1_street_2": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 253,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_1_street_2/original_video1.mp4",
+   "true_frame_count": 253
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 254,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_1_street_2/original_video2.mp4",
+   "true_frame_count": 254
+  }
+ },
+ "street_3_street_4": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 129,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_3_street_4/original_video1.MOV",
+   "true_frame_count": 129
+  },
+  "video2": {
+   "fps": 29.9913,
+   "meta_frame_count": 173,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_3_street_4/original_video2.MOV",
+   "true_frame_count": 173
+  }
+ },
+ "street_5_street_6": {
+  "video1": {
+   "fps": 29.9944,
+   "meta_frame_count": 270,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_5_street_6/original_video1.MOV",
+   "true_frame_count": 270
+  },
+  "video2": {
+   "fps": 29.9958,
+   "meta_frame_count": 357,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_5_street_6/original_video2.MOV",
+   "true_frame_count": 357
+  }
+ },
+ "street_7_street_8": {
+  "video1": {
+   "fps": 29.9942,
+   "meta_frame_count": 260,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_7_street_8/original_video1.MOV",
+   "true_frame_count": 260
+  },
+  "video2": {
+   "fps": 29.9962,
+   "meta_frame_count": 390,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/street_7_street_8/original_video2.MOV",
+   "true_frame_count": 390
+  }
+ },
+ "study_1_study_2": {
+  "video1": {
+   "fps": 29.9952,
+   "meta_frame_count": 311,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/study_1_study_2/original_video1.MOV",
+   "true_frame_count": 311
+  },
+  "video2": {
+   "fps": 29.9954,
+   "meta_frame_count": 327,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/study_1_study_2/original_video2.MOV",
+   "true_frame_count": 327
+  }
+ },
+ "study_3_study_4": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 149,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/study_3_study_4/original_video1.mov",
+   "true_frame_count": 149
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 105,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/study_3_study_4/original_video2.mov",
+   "true_frame_count": 105
+  }
+ },
+ "study_5_study_6": {
+  "video1": {
+   "fps": 29.9861,
+   "meta_frame_count": 108,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/study_5_study_6/original_video1.mov",
+   "true_frame_count": 108
+  },
+  "video2": {
+   "fps": 29.9824,
+   "meta_frame_count": 85,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/study_5_study_6/original_video2.mov",
+   "true_frame_count": 85
+  }
+ },
+ "table_11_table_12": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 379,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_11_table_12/original_video1.mp4",
+   "true_frame_count": 379
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 423,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_11_table_12/original_video2.mp4",
+   "true_frame_count": 423
+  }
+ },
+ "table_13_table_14": {
+  "video1": {
+   "fps": 29.9873,
+   "meta_frame_count": 236,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_13_table_14/original_video1.MOV",
+   "true_frame_count": 236
+  },
+  "video2": {
+   "fps": 29.9915,
+   "meta_frame_count": 177,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_13_table_14/original_video2.MOV",
+   "true_frame_count": 177
+  }
+ },
+ "table_15_table_16": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 155,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_15_table_16/original_video1.mov",
+   "true_frame_count": 155
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 188,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_15_table_16/original_video2.mov",
+   "true_frame_count": 188
+  }
+ },
+ "table_17_table_18": {
+  "video1": {
+   "fps": 59.9616,
+   "meta_frame_count": 624,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_17_table_18/original_video1.MOV",
+   "true_frame_count": 624
+  },
+  "video2": {
+   "fps": 59.9613,
+   "meta_frame_count": 620,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_17_table_18/original_video2.MOV",
+   "true_frame_count": 620
+  }
+ },
+ "table_19_table_20": {
+  "video1": {
+   "fps": 29.8429,
+   "meta_frame_count": 190,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_19_table_20/original_video1.mp4",
+   "true_frame_count": 190
+  },
+  "video2": {
+   "fps": 29.9096,
+   "meta_frame_count": 331,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_19_table_20/original_video2.mp4",
+   "true_frame_count": 331
+  }
+ },
+ "table_1_table_2": {
+  "video1": {
+   "fps": 29.9796,
+   "meta_frame_count": 367,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_1_table_2/original_video1.MOV",
+   "true_frame_count": 367
+  },
+  "video2": {
+   "fps": 29.9771,
+   "meta_frame_count": 327,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_1_table_2/original_video2.MOV",
+   "true_frame_count": 327
+  }
+ },
+ "table_1_table_3": {
+  "video1": {
+   "fps": 29.9796,
+   "meta_frame_count": 367,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_1_table_3/original_video1.MOV",
+   "true_frame_count": 367
+  },
+  "video2": {
+   "fps": 29.9768,
+   "meta_frame_count": 323,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_1_table_3/original_video2.MOV",
+   "true_frame_count": 323
+  }
+ },
+ "table_1_table_4": {
+  "video1": {
+   "fps": 29.9796,
+   "meta_frame_count": 367,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_1_table_4/original_video1.MOV",
+   "true_frame_count": 367
+  },
+  "video2": {
+   "fps": 29.9761,
+   "meta_frame_count": 313,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_1_table_4/original_video2.MOV",
+   "true_frame_count": 313
+  }
+ },
+ "table_21_table_22": {
+  "video1": {
+   "fps": 59.9217,
+   "meta_frame_count": 612,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_21_table_22/original_video1.MOV",
+   "true_frame_count": 612
+  },
+  "video2": {
+   "fps": 59.9237,
+   "meta_frame_count": 550,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_21_table_22/original_video2.MOV",
+   "true_frame_count": 550
+  }
+ },
+ "table_23_table_24": {
+  "video1": {
+   "fps": 29.9038,
+   "meta_frame_count": 311,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_23_table_24/original_video1.mp4",
+   "true_frame_count": 311
+  },
+  "video2": {
+   "fps": 29.8814,
+   "meta_frame_count": 252,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_23_table_24/original_video2.mp4",
+   "true_frame_count": 252
+  }
+ },
+ "table_2_table_3": {
+  "video1": {
+   "fps": 29.9771,
+   "meta_frame_count": 327,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_2_table_3/original_video1.MOV",
+   "true_frame_count": 327
+  },
+  "video2": {
+   "fps": 29.9768,
+   "meta_frame_count": 323,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_2_table_3/original_video2.MOV",
+   "true_frame_count": 323
+  }
+ },
+ "table_3_table_4": {
+  "video1": {
+   "fps": 29.9768,
+   "meta_frame_count": 323,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_3_table_4/original_video1.MOV",
+   "true_frame_count": 323
+  },
+  "video2": {
+   "fps": 29.9761,
+   "meta_frame_count": 313,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_3_table_4/original_video2.MOV",
+   "true_frame_count": 313
+  }
+ },
+ "table_5_table_6": {
+  "video1": {
+   "fps": 30.0071,
+   "meta_frame_count": 194,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_5_table_6/original_video1.mp4",
+   "true_frame_count": 194
+  },
+  "video2": {
+   "fps": 29.965,
+   "meta_frame_count": 160,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_5_table_6/original_video2.mp4",
+   "true_frame_count": 160
+  }
+ },
+ "table_7_table_8": {
+  "video1": {
+   "fps": 59.9267,
+   "meta_frame_count": 409,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_7_table_8/original_video1.MOV",
+   "true_frame_count": 409
+  },
+  "video2": {
+   "fps": 59.9201,
+   "meta_frame_count": 375,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_7_table_8/original_video2.MOV",
+   "true_frame_count": 375
+  }
+ },
+ "table_9_table_10": {
+  "video1": {
+   "fps": 30.0,
+   "meta_frame_count": 330,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_9_table_10/original_video1.MOV",
+   "true_frame_count": 330
+  },
+  "video2": {
+   "fps": 30.0,
+   "meta_frame_count": 392,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/table_9_table_10/original_video2.MOV",
+   "true_frame_count": 392
+  }
+ },
+ "workspace_1_workspace_2": {
+  "video1": {
+   "fps": 29.9769,
+   "meta_frame_count": 324,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/workspace_1_workspace_2/original_video1.MOV",
+   "true_frame_count": 324
+  },
+  "video2": {
+   "fps": 29.9775,
+   "meta_frame_count": 266,
+   "metadata_overreports": false,
+   "path": "/home/tessa/change_pipeline/data/scenediff_benchmark/data/workspace_1_workspace_2/original_video2.MOV",
+   "true_frame_count": 266
+  }
+ }
+}

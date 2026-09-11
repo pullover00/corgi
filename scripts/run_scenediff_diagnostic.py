@@ -115,7 +115,8 @@ def prepare_frames(pair_dir: Path, frames_root: Path, frames_per_video: int,
     t1_extract = (int(preset["t1_idx_original"]) if preset and "t1_idx_original" in preset
                   else annotation_to_original_index(t1_rep, video2)["original_idx"])
     t0_rep_extract = annotation_to_original_index(t0_rep, video1)["original_idx"]
-    cap = cv2.VideoCapture(str(video1)); n1 = int(cap.get(cv2.CAP_PROP_FRAME_COUNT)); cap.release()
+    from run_scenediff_batch import video_meta
+    n1, _ = video_meta(video1)   # TRUE decodable count -- metadata overreports on 32 videos
     t0_indices = sample_frame_indices(n1, frames_per_video)
     if t0_rep_extract not in t0_indices:
         t0_indices = sorted(t0_indices + [t0_rep_extract])

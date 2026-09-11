@@ -52,14 +52,42 @@ def sample_frame_indices(frame_count, num_samples):
 VIS_FPS = 30.0  # video1.mp4 / video2.mp4 -- the review videos the annotations index -- are 30 fps
 
 
+_FRAME_COUNT_CACHE = None
+
+
+def _frame_count_cache():
+    """Lazy-load scripts/scenediff_frame_counts.py's cache of TRUE frame counts."""
+    global _FRAME_COUNT_CACHE
+    if _FRAME_COUNT_CACHE is None:
+        path = REPO / "data/scenediff_benchmark/frame_counts.json"
+        raw = json.loads(path.read_text()) if path.exists() else {}
+        _FRAME_COUNT_CACHE = {}
+        for rec in raw.values():
+            for entry in rec.values():
+                _FRAME_COUNT_CACHE[str(Path(entry["path"]).resolve())] = entry
+    return _FRAME_COUNT_CACHE
+
+
 def video_meta(path):
-    """(frame_count, fps) for a video, without applying orientation."""
+    """(frame_count, fps) for a video, without applying orientation.
+
+    The count is the TRUE decodable frame count where it is known: cv2's
+    CAP_PROP_FRAME_COUNT overreports on 32 of the 710 SceneDiff videos (one
+    claims 194 frames and decodes 73), and an index taken from it can name a
+    frame that does not exist. Corroborated by the review video --
+    true * 30 / fps matches video{1,2}.mp4's length within a few frames while
+    the metadata count does not. Falls back to metadata for videos absent from
+    the cache.
+    """
     import cv2
 
+    cached = _frame_count_cache().get(str(Path(path).resolve()))
     capture = cv2.VideoCapture(str(path))
     n = int(capture.get(cv2.CAP_PROP_FRAME_COUNT))
     fps = float(capture.get(cv2.CAP_PROP_FPS))
     capture.release()
+    if cached is not None:
+        n = int(cached["true_frame_count"])
     return n, fps
 
 
@@ -98,7 +126,50 @@ def resolve_original_video(pair_dir: Path, video_number: int) -> Path:
     raise FileNotFoundError(f"no {prefix}.(mp4|mov|MOV) found in {pair_dir}")
 
 
-def extract_frames(video_path, indices, out_dir, prefix):
+def read_frame_robust(video_path, index, capture=None):
+    """Return (frame_bgr, how) for an EXACT frame index, or (None, "failed").
+
+    ``how`` is "direct_seek" or "sequential_fallback".
+
+    Nine of the 250 test-split videos (2026-09-11) have a broken seek index over
+    their later portion: CAP_PROP_POS_FRAMES lands nowhere and read() returns
+    False, although the same frames decode fine when the file is read straight
+    through. The fallback reopens the file and decodes forward to exactly the
+    requested index. It NEVER substitutes a neighbouring frame -- if the video
+    ends before the index is reached, this returns None and the caller fails
+    loudly, because a silently-substituted frame would be scored against ground
+    truth for a different moment.
+    """
+    import cv2
+
+    own = capture is None
+    if own:
+        capture = cv2.VideoCapture(str(video_path))
+        capture.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1)
+    try:
+        capture.set(cv2.CAP_PROP_POS_FRAMES, index)
+        ok, frame = capture.read()
+        if ok:
+            return frame, "direct_seek"
+    finally:
+        if own:
+            capture.release()
+
+    sequential = cv2.VideoCapture(str(video_path))
+    sequential.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1)
+    try:
+        for position in range(index + 1):
+            ok, frame = sequential.read()
+            if not ok:
+                return None, "failed"
+            if position == index:
+                return frame, "sequential_fallback"
+    finally:
+        sequential.release()
+    return None, "failed"
+
+
+def extract_frames(video_path, indices, out_dir, prefix, decode_log=None):
     import cv2
     from PIL import Image
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -107,10 +178,11 @@ def extract_frames(video_path, indices, out_dir, prefix):
     capture.set(cv2.CAP_PROP_ORIENTATION_AUTO, 1)
     try:
         for index in indices:
-            capture.set(cv2.CAP_PROP_POS_FRAMES, index)
-            ok, frame_bgr = capture.read()
-            if not ok:
+            frame_bgr, how = read_frame_robust(video_path, index, capture=capture)
+            if frame_bgr is None:
                 raise RuntimeError(f"could not read frame {index} from {video_path}")
+            if decode_log is not None:
+                decode_log.append({"video": str(video_path), "index": int(index), "how": how})
             out_path = out_dir / f"{prefix}_{index:05d}.png"
             Image.fromarray(frame_bgr[:, :, ::-1]).save(out_path)
             paths.append(out_path)
