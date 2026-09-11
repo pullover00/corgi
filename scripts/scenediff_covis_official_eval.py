@@ -110,6 +110,7 @@ def main() -> int:
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--iou-threshold", type=float, default=0.5)
     ap.add_argument("--max-length", type=int, default=1024)
+    ap.add_argument("--split", choices=("val", "test"), default=None, help="for the official CLI's --splits; default: manifest's split")
     args = ap.parse_args()
 
     E = load_official()
@@ -163,7 +164,7 @@ def main() -> int:
             s_tp += float((p & g).sum()); s_fp += float((p & ~g).sum()); s_fn += float((~p & g).sum())
         tp += s_tp; fp += s_fp; fn += s_fn
         per_scene[scene] = {"tp": s_tp, "fp": s_fp, "fn": s_fn, "iou": s_tp / (s_tp + s_fp + s_fn) if s_tp + s_fp + s_fn else None,
-                            "n_gt_regions": len(gt_objs), "n_detections": len(dets)}
+                            "n_gt_regions": len(gt_objs), "n_detections": len(dets), "target_hw": [int(H), int(W)]}
         pd = {k: v for k, v in pred_data.items() if k not in ("H", "W")}
         for k, v in pd.items():
             v["label"] = 1 if ("video_1" in v and "video_2" in v) else 0
@@ -198,14 +199,16 @@ def main() -> int:
 
     # ---- cross-check: the official CLI on the same files ----
     cli_out = args.out_dir / "official_cli_result.txt"
-    cmd = [sys.executable, str(SCENE_DIFF / "scripts/evaluate_multiview.py"), "--pred_dir", str(pred_root),
-           "--gt_dir", str(gt_root), "--video_dir", str(BENCH / "data"), "--output_path", str(cli_out),
-           "--resample_rate", "30", "--iou_threshold", str(args.iou_threshold), "--visualize", "False"]
+    cmd = [sys.executable, str(SCENE_DIFF / "scripts/evaluate_multiview.py"), "--pred_dir", str(pred_root.resolve()),
+           "--gt_dir", str(gt_root.resolve()), "--video_dir", str(BENCH / "data"), "--output_path", str(cli_out.resolve()),
+           "--resample_rate", "30", "--iou_threshold", str(args.iou_threshold), "--visualize", "False",
+           "--splits", args.split or man["_meta"].get("split", "all"), "--sets", "all"]
+    # main() opens data/scenediff_benchmark/splits/*.json RELATIVE to the cwd; that layout exists in this repo
     stub = "import sys,types\nfor n in ('faiss','open3d','torch_scatter'): sys.modules.setdefault(n, types.ModuleType(n))\n"
     runner = args.out_dir / "_run_official_cli.py"
     runner.write_text(stub + f"sys.path.insert(0, {str(SCENE_DIFF / 'scripts')!r}); sys.path.insert(0, {str(SCENE_DIFF)!r})\n"
                       f"sys.argv = {cmd[1:]!r}\nimport runpy; runpy.run_path({str(SCENE_DIFF / 'scripts/evaluate_multiview.py')!r}, run_name='__main__')\n")
-    res = subprocess.run([sys.executable, str(runner)], capture_output=True, text=True, cwd=str(SCENE_DIFF))
+    res = subprocess.run([sys.executable, str(runner.resolve())], capture_output=True, text=True, cwd=str(REPO))
     (args.out_dir / "official_cli_stdout.txt").write_text(res.stdout + "\n--- stderr ---\n" + res.stderr)
     cli_lines = [l for l in res.stdout.splitlines() if "Metric" in l]
 

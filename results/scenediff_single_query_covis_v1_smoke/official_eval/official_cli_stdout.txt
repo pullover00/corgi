@@ -1,0 +1,36 @@
+
+Evaluating 5 scenes
+Not predicted: 100 scenes
+
+Processing scene: airhockeytable_1_airhockeytable_2
+
+Processing scene: bathroom_11_bathroom_12
+
+Processing scene: bathroom_1_bathroom_2
+
+Processing scene: P09-20240621-093545_0001_P09-20240621-093545_0004
+
+Processing scene: P09-20240621-093545_0006_P09-20240621-093545_0008
+
+================================================================================
+EVALUATION RESULTS
+================================================================================
+Number of scenes: 5
+IoU threshold: 0.5
+
+Metric 1: px/im IoU (merged masks, all views): 0.1156
+  TP: 87703, FP: 651515, FN: 19256
+
+Metric 2: obj/im AP (IoU-based matching): 0.0275
+
+Metric 3a: obj/sc AP (without class requirement): 0.0144
+Metric 3b: obj/sc AP (with class requirement): 0.0015
+
+Detection Statistics:
+  True Positives: 6
+  False Positives: 132
+  False Negatives: 15
+================================================================================
+
+
+--- stderr ---

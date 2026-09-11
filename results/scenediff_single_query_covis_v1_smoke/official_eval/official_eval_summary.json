@@ -1,0 +1,178 @@
+{
+ "n_scenes_scored": 5,
+ "n_queries": 5,
+ "n_queries_no_prediction": 0,
+ "n_queries_not_exported": 0,
+ "predicted_objects_by_label": {
+  "added": 80,
+  "removed": 26,
+  "moved": 0,
+  "replaced": 32
+ },
+ "pixel": {
+  "pooled_iou": 0.11563085880333407,
+  "tp": 87703.0,
+  "fp": 651515.0,
+  "fn": 19256.0,
+  "precision": 0.11864294430059874,
+  "recall": 0.8199683991061996
+ },
+ "object_iou05": {
+  "tp": 6,
+  "fp": 132,
+  "n_gt_regions": 11,
+  "precision": 0.043478260869565216,
+  "recall": 0.5454545454545454,
+  "f1": 0.08053691275167786,
+  "official_per_frame_ap_constant_confidence": 0.03991130820399112
+ },
+ "official_metrics_raw": {
+  "global_iou": 0.11563085880333407,
+  "per_frame_ap": 0.03991130820399112,
+  "per_scene_ap_without_class": 0.020905923344947733,
+  "per_scene_ap_with_class": 0.003072196620583717,
+  "tp": 6.0,
+  "fp": 132.0,
+  "fn": 15.0,
+  "global_view_tp": 87703.0,
+  "global_view_fp": 651515.0,
+  "global_view_fn": 19256.0
+ },
+ "per_scene": {
+  "P09-20240621-093545_0001_P09-20240621-093545_0004": {
+   "tp": 26343.0,
+   "fp": 404897.0,
+   "fn": 53.0,
+   "iou": 0.061079127182680916,
+   "n_gt_regions": 3,
+   "n_detections": 41,
+   "target_hw": [
+    1024,
+    1024
+   ],
+   "region_tp": 1,
+   "region_fp": 40
+  },
+  "P09-20240621-093545_0006_P09-20240621-093545_0008": {
+   "tp": 58211.0,
+   "fp": 134389.0,
+   "fn": 17261.0,
+   "iou": 0.2773788364679478,
+   "n_gt_regions": 6,
+   "n_detections": 29,
+   "target_hw": [
+    1024,
+    1024
+   ],
+   "region_tp": 4,
+   "region_fp": 25
+  },
+  "airhockeytable_1_airhockeytable_2": {
+   "tp": 358.0,
+   "fp": 23135.0,
+   "fn": 35.0,
+   "iou": 0.015215912954777287,
+   "n_gt_regions": 1,
+   "n_detections": 37,
+   "target_hw": [
+    576,
+    1024
+   ],
+   "region_tp": 1,
+   "region_fp": 36
+  },
+  "bathroom_11_bathroom_12": {
+   "tp": 0.0,
+   "fp": 25176.0,
+   "fn": 0.0,
+   "iou": 0.0,
+   "n_gt_regions": 0,
+   "n_detections": 7,
+   "target_hw": [
+    1024,
+    572
+   ],
+   "region_tp": 0,
+   "region_fp": 7
+  },
+  "bathroom_1_bathroom_2": {
+   "tp": 2791.0,
+   "fp": 63918.0,
+   "fn": 1907.0,
+   "iou": 0.04067564416462632,
+   "n_gt_regions": 1,
+   "n_detections": 24,
+   "target_hw": [
+    576,
+    1024
+   ],
+   "region_tp": 0,
+   "region_fp": 24
+  }
+ },
+ "exports": [
+  {
+   "pair": "P09-20240621-093545_0001_P09-20240621-093545_0004",
+   "t1_annotation_idx": 150,
+   "resampled_idx": 5,
+   "exported": true,
+   "n_objects": 41,
+   "by_label": {
+    "removed": 7,
+    "added": 31,
+    "replaced": 3
+   },
+   "no_prediction": false
+  },
+  {
+   "pair": "P09-20240621-093545_0006_P09-20240621-093545_0008",
+   "t1_annotation_idx": 150,
+   "resampled_idx": 5,
+   "exported": true,
+   "n_objects": 29,
+   "by_label": {
+    "added": 28,
+    "replaced": 1
+   },
+   "no_prediction": false
+  },
+  {
+   "pair": "airhockeytable_1_airhockeytable_2",
+   "t1_annotation_idx": 210,
+   "resampled_idx": 7,
+   "exported": true,
+   "n_objects": 37,
+   "by_label": {
+    "removed": 10,
+    "added": 7,
+    "replaced": 20
+   },
+   "no_prediction": false
+  },
+  {
+   "pair": "bathroom_11_bathroom_12",
+   "t1_annotation_idx": 330,
+   "resampled_idx": 11,
+   "exported": true,
+   "n_objects": 7,
+   "by_label": {
+    "removed": 5,
+    "added": 2
+   },
+   "no_prediction": false
+  },
+  {
+   "pair": "bathroom_1_bathroom_2",
+   "t1_annotation_idx": 240,
+   "resampled_idx": 8,
+   "exported": true,
+   "n_objects": 24,
+   "by_label": {
+    "removed": 4,
+    "added": 12,
+    "replaced": 8
+   },
+   "no_prediction": false
+  }
+ ]
+}
