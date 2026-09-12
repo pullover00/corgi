@@ -222,7 +222,19 @@ def main() -> int:
         if fails:
             print(f"  {exp}: {len(fails)} pairs could not be scored: {fails[:3]}", flush=True)
 
-    json.dump({"provenance": provenance, "summaries": all_summaries}, open(out_root / "summary.json", "w"), indent=2)
+    # Merge into any existing summary so packaging arms one at a time (e.g. the gate arm after the
+    # baselines) accumulates rather than overwrites; an arm re-run replaces only its own entries.
+    summary_path = out_root / "summary.json"
+    merged = {"provenance": {"arms": {}}, "summaries": {}}
+    if summary_path.exists():
+        try:
+            merged = json.loads(summary_path.read_text())
+        except json.JSONDecodeError:
+            pass
+    merged["provenance"] = {**merged.get("provenance", {}), **{k: v for k, v in provenance.items() if k != "arms"},
+                            "arms": {**merged.get("provenance", {}).get("arms", {}), **provenance["arms"]}}
+    merged["summaries"] = {**merged.get("summaries", {}), **all_summaries}
+    json.dump(merged, open(summary_path, "w"), indent=2)
     with open(out_root / "README.md", "w") as fh:
         fh.write(__doc__)
         fh.write("\n\nFiles: per_pair_<arm>_replacement_{off,on}.csv (one row per pair), summary.json (pooled, partitioned, per-class), "
