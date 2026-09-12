@@ -129,7 +129,8 @@ def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, expe
                        skip_refine: bool, inventory_source_experiment: str | None = None,
                        dump_inventory: bool = False, reference_views: int | None = None,
                        refine_worker_dir: Path | None = None,
-                       queries_file: Path | None = None) -> dict | None:
+                       queries_file: Path | None = None,
+                       movable_mask_root: Path | None = None) -> dict | None:
     import numpy as np
     from PIL import Image
     from ocmask_pipeline.reconstruction import localize_and_render_query, reconstruct_reference_scene
@@ -257,6 +258,14 @@ def reconstruct_stages(pair: str, pair_dir: Path, root: Path, config: dict, expe
         if not (inventory_dir / "bundle.pkl").exists():
             raise FileNotFoundError(f"missing replay inventory bundle: {inventory_dir / 'bundle.pkl'}")
         entry["load_inventory_from"] = str(inventory_dir)
+    if movable_mask_root is not None:
+        # Movable-object gate input (scripts/scenediff_movable_masks.py output). Fail
+        # loudly rather than skip: with the flag on but no mask, the gate is a silent
+        # no-op for that query and the run would masquerade as an ungated baseline.
+        mask_path = movable_mask_root / pair / query / "movable_union.npy"
+        if not mask_path.exists():
+            raise FileNotFoundError(f"movable-object mask missing for {pair}/{query}: {mask_path}")
+        entry["movable_object_mask"] = str(mask_path)
     return {"pair": pair, "query": query, "t1_idx": t1_idx, "entry": entry, "own": own, "shared": shared}
 
 
@@ -300,6 +309,9 @@ def main() -> int:
     ap.add_argument("--queries-file", type=Path, default=None,
                     help="JSON of fixed t1 query frames per pair (scenediff_select_query_frames.py output); "
                          "defaults to <benchmark-root>/diagnostic_subset_queries.json")
+    ap.add_argument("--movable-mask-root", type=Path, default=None,
+                    help="scenediff_movable_masks.py output root; adds <root>/<pair>/<query>/movable_union.npy "
+                         "to each detect-manifest entry as movable_object_mask (required for every query when set)")
     ap.add_argument("--through", choices=("refine", "detect"), default="detect",
                     help="'refine' stops after the shared reconstruction/render/refine stages -- lets the "
                          "base-independent GPU work run before the detect-side variant is decided")
@@ -317,6 +329,7 @@ def main() -> int:
         "reference_views": args.reference_views, "inventory_source_experiment": args.inventory_source_experiment,
         "queries_file": str(args.queries_file) if args.queries_file else None,
         "pair_ids_file": str(args.pair_ids_file),
+        "movable_mask_root": str(args.movable_mask_root) if args.movable_mask_root else None,
     }, indent=2))
 
     pairs = [l.strip() for l in args.pair_ids_file.read_text().splitlines() if l.strip()]
@@ -331,6 +344,7 @@ def main() -> int:
                 inventory_source_experiment=args.inventory_source_experiment,
                 dump_inventory=args.dump_inventory, reference_views=args.reference_views,
                 refine_worker_dir=args.refine_worker_dir, queries_file=args.queries_file,
+                movable_mask_root=args.movable_mask_root,
             )
             if item:
                 items.append(item)
