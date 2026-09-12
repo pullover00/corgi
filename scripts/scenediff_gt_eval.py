@@ -79,15 +79,25 @@ def _video2_frame_shape(pair_dir: Path, frame_idx: int) -> tuple[int, int]:
     candidates = sorted(pair_dir.glob("original_video2.*")) or sorted(pair_dir.glob("video2.*"))
     if not candidates:
         raise FileNotFoundError(f"no video2 file in {pair_dir}")
+    # Only the canvas SHAPE is needed here, and every frame of one video shares
+    # it -- so read it from the stream metadata instead of seeking to and
+    # decoding ``frame_idx``. The seek+decode form failed on 13/250 P1 pairs
+    # (all of them this empty-GT path; every one decoded fine when retried in
+    # isolation), i.e. a transient OpenCV decode hiccup under load in a path
+    # with no retry, not bad data. Metadata cannot hiccup that way; decoding
+    # frame 0 is the fallback for containers that report 0 there.
     capture = cv2.VideoCapture(str(candidates[0]))
     try:
-        capture.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
-        ok, frame = capture.read()
+        height = int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        width = int(capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+        if height <= 0 or width <= 0:
+            ok, frame = capture.read()
+            if not ok or frame is None:
+                raise ValueError(f"could not determine video2 frame shape in {pair_dir} (metadata empty, frame 0 undecodable)")
+            height, width = (int(value) for value in frame.shape[:2])
     finally:
         capture.release()
-    if not ok or frame is None:
-        raise ValueError(f"could not decode video2 frame {frame_idx} in {pair_dir}")
-    return tuple(int(value) for value in frame.shape[:2])
+    return (height, width)
 
 
 def load_query_gt(pair_dir: Path, t1_frame_idx: int, max_frame_distance: int = 15, allow_empty_frame: bool = True) -> QueryGT:
