@@ -55,6 +55,10 @@ def main() -> int:
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--prompts", nargs="+", default=DEFAULT_PROMPTS)
     ap.add_argument("--confidence-threshold", type=float, default=0.5)
+    ap.add_argument("--render-t0-source", choices=("render", "refine"), default="render",
+                    help="which render_t0 to prompt on: shared/render (raw, for a refine-OFF run) or "
+                         "shared/refine (DI2FIX-refined, for a refine-ON run -- the method builds the whitelist "
+                         "on the same frames detection sees). image_t1 always comes from shared/render.")
     ap.add_argument("--pairs-file", type=Path, default=None, help="restrict to these pair ids (one per line)")
     ap.add_argument("--limit", type=int, default=None, help="stop after N queries (smoke tests)")
     args = ap.parse_args()
@@ -90,13 +94,15 @@ def main() -> int:
                 if args.limit is not None and n_done >= args.limit:
                     break
                 render_dir = qdir / "shared" / "render"
-                if not (render_dir / "image_t1.png").exists() or not (render_dir / "render_t0.png").exists():
+                t0_dir = qdir / "shared" / args.render_t0_source
+                frame_paths = {"image_t1": render_dir / "image_t1.png", "render_t0": t0_dir / "render_t0.png"}
+                if not all(p.exists() for p in frame_paths.values()):
                     continue
                 out_dir = args.out / pair_dir.name / qdir.name
                 out_dir.mkdir(parents=True, exist_ok=True)
                 union = None
                 for frame, suffix in frames.items():
-                    image = np.asarray(Image.open(render_dir / f"{frame}.png").convert("RGB"))
+                    image = np.asarray(Image.open(frame_paths[frame]).convert("RGB"))
                     H, W = image.shape[:2]
                     if union is None:
                         union = np.zeros((H, W), dtype=bool)
