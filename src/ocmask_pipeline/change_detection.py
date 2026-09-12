@@ -293,6 +293,15 @@ class ThreeImageSettings:
     ceiling_sky_prompts: tuple[str, ...] = ("ceiling", "sky")
     # Same majority-overlap semantics as maximum_above_horizon_fraction.
     maximum_ceiling_sky_fraction: float = 0.5
+    # Positive counterpart of the ceiling/sky filter (2026-09-12 experiment,
+    # default OFF): keep a decided change object only if at least
+    # minimum_movable_object_fraction of its mask lies inside an externally
+    # supplied union of SAM3 grounded-text detections for MOVABLE objects
+    # (items, doors/drawers of cupboards -- never tables/shelves/structure),
+    # computed on both render_t0 and image_t1 so REMOVED objects (which
+    # exist only in render_t0) can pass. Off => byte-identical behaviour.
+    enable_movable_object_gate: bool = False
+    minimum_movable_object_fraction: float = 0.5
     # PASLCD-specific precision safeguard (roadmap item 6): GOLDILOCS's own
     # dominant precision mechanism is a majority vote across several *query*
     # photos of the same change (paper Table 11: 59-80% -> 95-98% precision
@@ -952,6 +961,7 @@ def resolve_three_image_changes(
     render_t0_corroboration: np.ndarray | None = None,
     above_horizon: np.ndarray | None = None,
     ceiling_sky_mask: np.ndarray | None = None,
+    movable_object_mask: np.ndarray | None = None,
 ) -> tuple[np.ndarray, list[ObjectMask], list[dict[str, Any]], dict[str, Any]]:
     """Resolve unchanged/moved/removed/added object states.
 
@@ -1256,6 +1266,27 @@ def resolve_three_image_changes(
                 row["ceiling_sky_fraction"] = fraction
         output_objects = retained_objects
 
+    movable_object_gate_rejected = 0
+    if settings.enable_movable_object_gate and movable_object_mask is not None:
+        allowed = np.asarray(movable_object_mask, bool)
+        decision_by_ids = {(row.get("t0_object_id"), row.get("t1_object_id")): row for row in decisions}
+        retained_objects = []
+        for item in output_objects:
+            mask = np.asarray(item.mask, bool)
+            area = int(mask.sum())
+            fraction = float((mask & allowed).sum()) / area if area else 0.0
+            item.metadata["movable_object_fraction"] = fraction
+            if fraction >= settings.minimum_movable_object_fraction:
+                retained_objects.append(item)
+                continue
+            movable_object_gate_rejected += 1
+            ids = (item.metadata.get("t0_object_id"), item.metadata.get("t1_object_id"))
+            row = decision_by_ids.get(ids)
+            if row is not None:
+                row["decision"] = "movable_object_gate_rejected"
+                row["movable_object_fraction"] = fraction
+        output_objects = retained_objects
+
     corroboration_rejected = 0
     if settings.enable_reference_corroboration and render_t0_corroboration is not None:
         decision_by_ids = {(row.get("t0_object_id"), row.get("t1_object_id")): row for row in decisions}
@@ -1296,6 +1327,7 @@ def resolve_three_image_changes(
         "visibility_filter_rejected": visibility_filter_rejected,
         "horizon_suppressed": horizon_suppressed,
         "ceiling_sky_suppressed": ceiling_sky_suppressed,
+        "movable_object_gate_rejected": movable_object_gate_rejected,
         "corroboration_rejected": corroboration_rejected,
         "changed_pixel_fraction": float(np.mean(labels != int(Label.UNCHANGED))),
         "association_evidence": {
@@ -2032,6 +2064,7 @@ def run_object_state_resolution(
     render_t0_corroboration: np.ndarray | None = None,
     above_horizon: np.ndarray | None = None,
     ceiling_sky_mask: np.ndarray | None = None,
+    movable_object_mask: np.ndarray | None = None,
     dump_stages: str | Path | None = None,
     sam_render_t0: np.ndarray | None = None,
     sam_clean_render: np.ndarray | None = None,
@@ -2277,7 +2310,7 @@ def run_object_state_resolution(
     labels, objects, decisions, diagnostics = resolve_three_image_changes(
         inventory_t0, inventory_clean, inventory_t1, tracking, settings, scene_scale,
         render_t0_coverage, render_t0_confidence, render_t0_corroboration, above_horizon,
-        ceiling_sky_mask,
+        ceiling_sky_mask, movable_object_mask,
     )
     timings["04_object_state_resolution"] = time.perf_counter() - started
 

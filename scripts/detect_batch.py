@@ -128,6 +128,14 @@ def main() -> int:
                 geometry_kwargs["dump_inventory_to"] = item["dump_inventory_to"]
             if item.get("load_inventory_from"):
                 geometry_kwargs["load_inventory_from"] = item["load_inventory_from"]
+            if item.get("ceiling_sky_mask"):
+                # Optional externally computed structural-surface mask (bool .npy at the
+                # working resolution). When present it takes precedence over both the
+                # bundle-cached mask and in-resolver recomputation -- plumbing only,
+                # added 2026-09-12 for the surface-prompt ablation.
+                geometry_kwargs["ceiling_sky_mask"] = np.load(item["ceiling_sky_mask"]).astype(bool)
+            if item.get("movable_object_mask"):
+                geometry_kwargs["movable_object_mask"] = np.load(item["movable_object_mask"]).astype(bool)
             if "sam_render_t0" in item:
                 geometry_kwargs["sam_render_t0"] = np.asarray(Image.open(item["sam_render_t0"]).convert("RGB"))
                 geometry_kwargs["sam_clean_render"] = np.asarray(Image.open(item["sam_clean_render"]).convert("RGB"))
