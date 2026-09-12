@@ -22,10 +22,36 @@ CONFIG=configs/scenediff_v10_no_dino_no_refine.yaml
 QUERIES=$ROOT/manifest_test_top1.runner_queries.json
 CHUNKS=data/scenediff_benchmark/test_split_250_chunks
 LOGS=$ROOT/SceneDiff/_experiments/$EXP/logs; mkdir -p "$LOGS"
+# Safety guard added 2026-09-11 after repeated system-wide OOM events this week
+# (Chrome + this pipeline competing for RAM took down the GNOME session and this
+# launcher as collateral, twice). Neither failure was this script's own memory use,
+# but nothing here checked headroom before proceeding either. Checked once at start
+# and again before every chunk, so pressure building mid-run (e.g. Chrome reopened)
+# is caught at the next chunk boundary rather than mid-chunk. A refusal here exits
+# cleanly with no partial/corrupt state -- same as any other chunk failure, just
+# re-run this script once headroom is back.
+MIN_AVAIL_MB=5000
+MIN_GPU_FREE_MB=4000
+check_headroom() {
+  local avail_mb gpu_free_mb
+  avail_mb=$(awk '/MemAvailable/ {print int($2/1024)}' /proc/meminfo)
+  if [ "$avail_mb" -lt "$MIN_AVAIL_MB" ]; then
+    echo "$(date '+%F %T') ABORT: only ${avail_mb} MB RAM available (< ${MIN_AVAIL_MB} MB threshold). Free up memory (check for Chrome/other jobs) and re-run this script -- completed chunks are preserved."
+    exit 1
+  fi
+  gpu_free_mb=$(nvidia-smi --query-gpu=memory.free --format=csv,noheader,nounits 2>/dev/null | head -1)
+  if [ -n "$gpu_free_mb" ] && [ "$gpu_free_mb" -lt "$MIN_GPU_FREE_MB" ]; then
+    echo "$(date '+%F %T') ABORT: only ${gpu_free_mb} MiB GPU memory free (< ${MIN_GPU_FREE_MB} MiB threshold). Check nvidia-smi for a stale/orphaned process and re-run this script."
+    exit 1
+  fi
+}
+
+check_headroom
 echo "$(date '+%F %T') COVIS_P1_TEST_START commit=$(git rev-parse --short HEAD) config_sha=$(sha256sum $CONFIG | cut -c1-16) queries_sha=$(sha256sum $QUERIES | cut -c1-16) manifest_sha=$(sha256sum $ROOT/manifest_test_top1.json | cut -c1-16)"
 for c in "$CHUNKS"/chunk_*.txt; do
   n=$(basename "$c" .txt)
   [ -f "$LOGS/$n.done" ] && { echo "$(date '+%F %T') skip $n (done)"; continue; }
+  check_headroom
   echo "$(date '+%F %T') === $n START ($(wc -l < "$c") pairs)"
   python scripts/run_scenediff_diagnostic.py --root "$ROOT" --experiment "$EXP" --config "$CONFIG" \
       --pair-ids-file "$c" --queries-file "$QUERIES" \

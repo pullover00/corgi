@@ -161,7 +161,13 @@ three_image_comparison:
   # keeps the one known false-positive class, thin draped high-confidence-
   # free objects like a caution tape, from eroding precision while genuinely
   # recovering new true positives: 22 REPLACED detections across 6 queries).
-  enable_color_replacement_detection: true
+  # Disabled for SceneDiff (2026-09-12, Tessa's request): that validation was
+  # PASLCD-specific, and SceneDiff's official benchmark has no "replaced"
+  # class at all -- scenediff_covis_official_eval.py exports REPLACED pixels
+  # as generic "changed" against a GT schema that can't credit them as their
+  # own category, so the signal can only add unrewarded noise here, never a
+  # correctly-scored true positive.
+  enable_color_replacement_detection: false
   color_replacement_minimum_colorfulness: 40.0
   color_replacement_residual_percentile: 90.0
   minimum_color_replacement_area: 40
