@@ -78,11 +78,14 @@ def main() -> int:
     W(f"Same method, same config, same whitelist -- the only variable is which frame is queried.")
     W(f"Subset: {sum(1 for v in subset_of.values() if v == 'SD-V')} SD-V + "
       f"{sum(1 for v in subset_of.values() if v == 'SD-K')} SD-K pairs, drawn before any per-pair score was read.\n")
-    W("| protocol | frames scored | pooled IoU | precision | recall |")
-    W("|---|---|---|---|---|")
+    W("| protocol | queries | scored frames | pooled IoU | precision | recall |")
+    W("|---|---|---|---|---|---|")
+    nq = {"single-query (rank 1)": sum(1 for q in man["queries"] if q["rank"] == 1), "multi-query (ranks 1-8)": len(man["queries"])}
     for name, d in (("single-query (rank 1)", sp), ("multi-query (ranks 1-8)", mp)):
         g = lambda x: "—" if x is None else f"{x:.4f}"
-        W(f"| {name} | {d['n']} | **{g(d['iou'])}** | {g(d['p'])} | {g(d['r'])} |")
+        W(f"| {name} | {nq[name]} | {d['n']} | **{g(d['iou'])}** | {g(d['p'])} | {g(d['r'])} |")
+    W("\n*Scored frames* counts evaluated frames that carry a prediction or ground truth; a frame with "
+      "neither contributes nothing to a pooled metric and is omitted.")
     if sp["iou"] and mp["iou"]:
         delta = mp["iou"] - sp["iou"]
         W(f"\nHandicap: **{delta:+.4f} IoU** ({delta / sp['iou'] * 100:+.1f}% relative) when the same method "
