@@ -1,0 +1,240 @@
+# GATE + REFINE arm: configs/ablate_v10_no_dino.yaml (refine ON, replacement OFF) plus the two gate keys.
+# Config for the VGGT-Omega -> depth-conflict clean render -> DI2FIX refine
+# -> SAM3/DINOv2/SAM2 change-detection pipeline. ${VAR}-style placeholders are
+# expanded from the environment by ocmask_pipeline.config.load_config -- see
+# README.md's "External SAM3 dependency" section.
+schema_version: 1
+
+reconstruction:
+  frames_per_video: 10
+  image_resolution: 512
+  depth_confidence_percentile: 20.0
+  cleaned_depth_confidence_percentile: 35.0
+  depth_epsilon: 0.001
+  minimum_valid_depth: 1.0e-6
+  z_buffer_epsilon: 0.0001
+  splat_radius: 1
+  hole_fill_enabled: true
+  hole_fill_min_neighbors: 5
+  hole_fill_max_relative_depth: 0.02
+  vggt_omega_checkpoint: /home/tessa/vggt-omega/vggt_omega/models/vggt_omega_1b_512.pt
+  vggt_omega_root: /home/tessa/vggt-omega
+  # Cross-reference-view corroboration (roadmap item 6): 3D agreement radius
+  # between an individual reference frame's own render and the aggregate
+  # render_t0, as a fraction of scene_scale -- same fraction-of-scale
+  # convention as three_image_comparison's geometric thresholds, since
+  # reconstruction scale is not guaranteed metric or consistent across
+  # scenes. Not yet validated on PASLCD; starts at the same 0.08 the
+  # geometric-identity/part-suppression tests converged on after tuning.
+  corroboration_radius_fraction: 0.08
+
+# MASt3R reference-scene reconstruction, for the VGGT-Omega-vs-MASt3R
+# ablation (reconstruction_mast3r.py). Same hyperparameters as the original
+# change_detect repo's two-image Mast3rAdapter, generalized to N images.
+reconstruction_mast3r:
+  device: cuda
+  checkpoint: checkpoints/MASt3R_ViTLarge_BaseDecoder_512_catmlpdpt_metric.pth
+  mast3r_root: /home/tessa/goldilocs/src/mast3r
+  lr1: 0.07
+  niter1: 500
+  lr2: 0.014
+  niter2: 200
+  optim_level: coarse
+  matching_conf_thr: 0
+  shared_intrinsics: false
+  desc_conf_output_key: desc_conf
+  subsample: 8
+  scenegraph_type: complete
+
+refine:
+  enabled: true
+  model: nvidia/difix_ref
+  prompt: remove degradation
+  num_inference_steps: 1
+  timestep: 199
+  guidance_scale: 0.0
+  di2fix_root: /home/tessa/DF3DV/DI2FIX
+
+# Object-inventory cleanup and association/classification thresholds for
+# change_detection.run_object_state_resolution. See its docstring.
+three_image_comparison:
+  # MOVED-state probe requested by the PASLCD session 2026-09-14. Sole difference
+  # from the final arm. Takes priority over reject_low_confidence_moved in the
+  # branch order (change_detection.py:1134), so that key is deliberately unchanged.
+  enable_location_mismatch_state_resolver: true
+  use_dino_features: false
+  minimum_mask_area: 16
+  maximum_mask_area_fraction: 0.25
+  duplicate_iou: 0.80
+  duplicate_containment: 0.65
+  duplicate_minimum_area_ratio: 0.0
+  part_maximum_area_ratio: 0.40
+  part_bbox_margin_pixels: 3
+  minimum_sam_feature_cells: 1.0
+  minimum_dino_feature_cells: 1.0
+  minimum_sam_cosine: 0.65
+  minimum_dino_cosine: 0.60
+  minimum_identity_margin: 0.02
+  area_ratio_low: 0.25
+  area_ratio_high: 4.0
+  minimum_track_iou: 0.20
+  same_location_iou: 0.45
+  reject_low_confidence_moved: true
+  tracking_batch_size: 16
+  recover_unmatched_via_tracking: true
+  # Geometric-identity test (docs/goldilocs_analysis.html roadmap item 2):
+  # masks each object proposal against its frame's 3D world-position buffer
+  # and compares centroid distance + point-set overlap between candidates.
+  # Runs as a second assignment pass, strictly after and separate from the
+  # original identity & (tracked | reciprocal) pass, restricted to objects
+  # the first pass left unmatched on both sides -- so it can only rescue
+  # otherwise-removed+added objects, never perturb a match the original
+  # gate already resolved (see _identity_candidates). Thresholds are
+  # fractions of a per-scene scale (not absolute distances) since
+  # reconstruction scale is not guaranteed to be metric or consistent
+  # across scenes.
+  #
+  # Tightened from the initial defaults (0.15/0.15/0.20) after real
+  # end-to-end validation (Cantina_Instance_1, n=6, properly controlled
+  # against a same-reconstruction geometric-off run): at the original
+  # defaults, pass 2 made one bad rescue that nearly doubled
+  # changed_pixel_fraction on one query, for a net -3.8% mean F1 / -8.7%
+  # precision across the sample with the other 5/6 queries unaffected.
+  enable_geometric_identity: true
+  geometric_centroid_fraction: 0.08
+  geometric_overlap_fraction: 0.08
+  minimum_geometric_overlap: 0.40
+  # Visibility filter (docs/goldilocs_analysis.html roadmap item 4): drops
+  # a removed/added/moved decision whose mask is mostly supported by
+  # unrendered pixels rather than real geometry -- replaces this pipeline's
+  # removed border-touching-proposal filter (destroyed real edge-adjacent
+  # objects far more than it removed background; see
+  # select_object_proposals's border_sides comment) with the actual
+  # underlying signal border-touching was a poor proxy for. 0.8 is
+  # ChangeSim's / every GOLDILOCS config's own published default
+  # (masks.py's filter_visible docstring), not yet validated on PASLCD.
+  enable_visibility_filter: true
+  enable_ceiling_sky_suppression: true
+  enable_occlusion_aware_removal_suppression: true
+  maximum_removed_behind_added_fraction: 0.5
+  occlusion_depth_margin_fraction: 0.05
+  minimum_occluded_fraction: 0.25
+  ceiling_sky_confidence_threshold: 0.5
+  maximum_ceiling_sky_fraction: 0.5
+  minimum_render_support_fraction: 0.8
+  # Our extension: use the continuous confidence-weighted score
+  # (change_detection._confidence_weighted_visible_fraction) instead of the
+  # binary coverage-fraction test above. Needs render_t0_confidence, which
+  # only fresh reconstructions after this setting was added will have.
+  # false (binary, matching GOLDILOCS/SceneDiff) until validated against it.
+  use_confidence_weighted_visibility: false
+  # Cross-reference-view corroboration (docs/goldilocs_analysis.html
+  # roadmap item 6): a PASLCD-specific precision safeguard, since GOLDILOCS's
+  # own dominant precision mechanism (cross-*query*-view majority vote,
+  # paper Table 11) needs multiple query images PASLCD does not provide.
+  # Neither GOLDILOCS nor SceneDiff have a reference-side equivalent -- see
+  # reconstruction.ReconstructionResult.render_t0_corroboration and
+  # resolve_three_image_changes's docstring.
+  #
+  # Validated end-to-end (Cantina_Instance_1, n=6, same reconstruction as the
+  # shipped binary filter): net -10.6% F1, -14.3% recall, driven almost
+  # entirely by one query where the filter rejected two genuine decisions (a
+  # MOVED and a REMOVED object, median reference_corroboration 0 and 1) whose
+  # own reference-side geometry was real but only lightly covered by the
+  # capture trajectory -- not a reconstruction artifact, which is what this
+  # gate was meant to catch. Threshold=2 does not yet distinguish "spurious
+  # single-view artifact" from "genuine but sparsely-observed surface."
+  # Candidate untested fixes: widen corroboration_radius_fraction (more
+  # triangulation-noise tolerance per agreeing frame, which a true degenerate
+  # artifact should still fail regardless of radius); or score robustness
+  # near mask edges instead of the whole object. Not adopted -- keep false.
+  enable_reference_corroboration: false
+  minimum_corroborating_views: 2
+  # Same-footprint object-replacement detection (docs/goldilocs_analysis.html
+  # roadmap item 5's replacement -- dropped the ported SSIM/Warped idea for a
+  # mechanism grounded in an actual verified PASLCD failure instead of an
+  # unquantified capability gap): a dense chromaticity-residual pass over
+  # render_t0/image_t1 directly, catching same-footprint color swaps (e.g. a
+  # red block replaced by a blue one) that SAM3 never segments as their own
+  # proposal in either frame -- absorbed into a single larger surface's mask
+  # instead -- so no per-object comparison, color-aware or not, ever runs on
+  # them. Neither GOLDILOCS nor SceneDiff have an equivalent. See
+  # color_residual.py and change_detection.find_color_replacement_regions.
+  # Validated end-to-end (Cantina_Instance_1, n=6, same reconstructions as
+  # item 6's validation): 6/6 queries improved, 0 regressed. Mean F1 +2.8%,
+  # recall +4.5%, precision +0.3% (essentially flat -- the confidence gate
+  # keeps the one known false-positive class, thin draped high-confidence-
+  # free objects like a caution tape, from eroding precision while genuinely
+  # recovering new true positives: 22 REPLACED detections across 6 queries).
+  # Disabled for SceneDiff (2026-09-12, Tessa's request): that validation was
+  # PASLCD-specific, and SceneDiff's official benchmark has no "replaced"
+  # class at all -- scenediff_covis_official_eval.py exports REPLACED pixels
+  # as generic "changed" against a GT schema that can't credit them as their
+  # own category, so the signal can only add unrewarded noise here, never a
+  # correctly-scored true positive.
+  enable_color_replacement_detection: false
+  # Movable-object gate, refine-ON arm (2026-09-13): identical to the refine-OFF gate
+  # config except that refine.enabled stays true, so SAM3 sees DI2FIX-refined renders
+  # and the whitelist is built on the same refined render_t0 (--render-t0-source refine).
+  enable_movable_object_gate: true
+  minimum_movable_object_fraction: 0.5
+  color_replacement_minimum_colorfulness: 40.0
+  color_replacement_residual_percentile: 90.0
+  minimum_color_replacement_area: 40
+  color_replacement_minimum_confidence: 0.3
+
+sam3_proposals:
+  sam3_source: ${SAM3_SOURCE}
+  sam3_image_checkpoint: ${SAM3_IMAGE_CHECKPOINT}
+  proposals:
+    points_per_side: 96
+    points_per_batch: 32
+    pred_iou_threshold: 0.8
+    stability_threshold: 0.8
+    stability_offset: 1.0
+    crop_layers: 1
+    crop_downscale_factor: 2
+    box_nms_threshold: 0.7
+    crop_nms_threshold: 0.7
+    minimum_mask_area: 16
+    multimask_output: true
+    mask_to_mask_refinement: false
+
+dinov2_features:
+  dinov2:
+    source: src/dinov2
+    checkpoint: checkpoints/dinov2_vitb14_reg4_pretrain.pth
+    checkpoint_sha256: 73182a088cf94833c94b1666d1c99e02fe87e2007bff57b564fb6206e25dba71
+    model: dinov2_vitb14_reg
+    mixed_precision: true
+    full_image_width: 896
+    full_image_height: 672
+    patch_size: 14
+    minimum_feature_cells: 4.0
+
+# Sam2MaskTracker's config (mask-prompted tracking between render_t0,
+# clean_render, and image_t1 -- not video tracking).
+sam2_tracking:
+  device: cuda
+  sam2:
+    checkpoint: checkpoints/sam2.1_hiera_large.pt
+    checkpoint_sha256: 2647878d5dfa5098f2f8649825738a9345572bae2d4350a2468587ece47dd318
+    model_cfg: configs/sam2.1/sam2.1_hiera_l.yaml
+    mixed_precision: true
+    compile_image_encoder: true
+    vos_optimized: true
+    points_per_side: 64
+    pred_iou_thresh: 0.8
+    stability_score_thresh: 0.8
+    crop_n_layers: 1
+    crop_n_points_downscale_factor: 2
+    multimask_output: true
+    use_m2m: false
+  tracking:
+    minimum_mask_area: 32
+    minimum_track_iou: 0.2
+    track_area_ratio_bounds: [0.5, 2.0]
+    minimum_track_score: 0.0
+    no3d_movement_iou: 0.5
+    visibility_alpha: 0.8
+    replacement_overlap_iou: 0.1
