@@ -32,8 +32,18 @@ CONFIG=configs/scenediff_v10_no_dino_refine_gate.yaml
 QDIR=$ROOT/multiquery_rank_queries
 PAIRS=data/scenediff_benchmark/multiquery_subset_25.txt
 MASKS=$ROOT/movable_masks_refined          # same root as the main arm; rank-1 masks are already there
-LOGS=$ROOT/SceneDiff/_experiments/$EXP/logs; mkdir -p "$LOGS"
+WORKER=$ROOT/refine_worker
+LOGS=$ROOT/SceneDiff/_experiments/$EXP/logs; mkdir -p "$LOGS" "$WORKER"
 RANKS=${RANKS:-"2 3 4 5 6 7 8"}
+
+# Resident DI2FIX worker. Without it the runner reloads DifixPipeline in a fresh process for
+# every pair (~60 s each, measured 2026-09-13 on the first attempt at this run); with it the
+# refine stage is ~1 s per query. The runner falls back to per-run loading if it is not alive,
+# so a dead worker costs time, never correctness.
+if ! [ -f "$WORKER/heartbeat" ] || [ $(( $(date +%s) - $(stat -c %Y "$WORKER/heartbeat") )) -gt 10 ]; then
+  nohup conda run --no-capture-output -n difix3d python scripts/refine_worker.py --dir "$WORKER" > "$LOGS/refine_worker.log" 2>&1 &
+  echo "$(date '+%F %T') started refine worker (pid $!)"; sleep 25
+fi
 
 MIN_AVAIL_MB=5000
 MIN_GPU_FREE_MB=4000
@@ -66,7 +76,7 @@ for r in $RANKS; do
   echo "$(date '+%F %T') === rank$r REFINE START ($(wc -l < "$QDIR/rank${r}_pairs.txt") pairs)"
   python scripts/run_scenediff_diagnostic.py --root "$ROOT" --experiment "$EXP" --config "$CONFIG" \
       --pair-ids-file "$QDIR/rank${r}_pairs.txt" --queries-file "$QDIR/rank${r}.json" \
-      --through refine > "$LOGS/rank${r}.refine.log" 2>&1
+      --refine-worker-dir "$WORKER" --through refine > "$LOGS/rank${r}.refine.log" 2>&1
   rc=$?; echo "$(date '+%F %T') --- rank$r refine exit $rc  (reconstruction cache hits: $(grep -c 'reference reconstruction: cached' "$LOGS/rank${r}.refine.log"))"
   if [ $rc -ne 0 ]; then
     echo "$(date '+%F %T') rank$r REFINE FAILED -- skipping its detect; other ranks continue"
@@ -75,6 +85,10 @@ for r in $RANKS; do
   fi
   touch "$LOGS/rank${r}.refine.done"
 done
+
+# The worker has done its job: refine is now cached for every rank, so step 3 never calls it.
+# Release its ~5 GB of GPU before the detect stage, which needs SAM3 + DINOv2 + SAM2 resident.
+pkill -f "refine_worker.py --dir $WORKER" 2>/dev/null && { echo "$(date '+%F %T') released refine worker"; sleep 5; }
 
 # --- step 2: movable-object whitelist on the new query frames ---------------------------
 # One pass over the 25 pairs: every t1_* dir, refined render_t0 (--render-t0-source refine),
@@ -111,4 +125,5 @@ for r in $RANKS; do
     grep -E "RECONSTRUCTION FAILED|EVAL FAILED|Traceback|FileNotFoundError|No space left" "$LOGS/rank${r}.detect.log" | tail -3
   fi
 done
+pkill -f "refine_worker.py --dir $WORKER" 2>/dev/null
 echo "$(date '+%F %T') MULTIQUERY_DONE"
