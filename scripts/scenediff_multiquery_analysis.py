@@ -93,19 +93,53 @@ def main() -> int:
 
     W("### Per-rank curve (inside the multi-query run)\n")
     W("Rank 1 is the most co-visible annotated frame with the reconstruction; rank 8 the least of the top eight.\n")
-    W("| rank | frames | median co-visibility | pooled IoU | precision | recall |")
-    W("|---|---|---|---|---|---|")
+
     by_rank = {}
     for r in mrows:
         by_rank.setdefault(r["rank"], []).append(r)
-    for k in sorted(x for x in by_rank if x is not None):
-        d = pooled(by_rank[k]); cv = sorted(covis_by_rank.get(k, []))
-        med = f"{cv[len(cv) // 2]:.3f}" if cv else "—"
-        g = lambda x: "—" if x is None else f"{x:.4f}"
-        W(f"| {k} | {d['n']} | {med} | {g(d['iou'])} | {g(d['p'])} | {g(d['r'])} |")
-    r1 = pooled(by_rank.get(1, [])); rest = pooled([r for k, v in by_rank.items() if k and k > 1 for r in v])
+    # from the MANIFEST, not the results: a partially-complete run must not silently
+    # redefine "all ranks" as "the ranks that happen to have finished"
+    max_rank = max(q["rank"] for q in man["queries"])
+
+    # A pair only reaches rank k if it HAS k annotated frames, so pooling each rank over
+    # whatever pairs happen to have it compares different scene sets at every rank -- a
+    # composition effect that can invert the curve. The balanced panel below restricts the
+    # curve to the pairs present at EVERY rank, which is the only within-pair comparison.
+    ranks_per_pair = {}
+    for q in man["queries"]:
+        ranks_per_pair.setdefault(q["pair"], set()).add(q["rank"])
+    complete = {p for p, rs in ranks_per_pair.items() if len(rs) == max_rank}
+
+    def rank_table(rows_by_rank, title, note):
+        W(f"**{title}**  \n{note}\n")
+        W("| rank | frames | median co-visibility | pooled IoU | precision | recall |")
+        W("|---|---|---|---|---|---|")
+        for k in sorted(x for x in rows_by_rank if x is not None):
+            d = pooled(rows_by_rank[k]); cv = sorted(covis_by_rank.get(k, []))
+            med = f"{cv[len(cv) // 2]:.3f}" if cv else "—"
+            g = lambda x: "—" if x is None else f"{x:.4f}"
+            W(f"| {k} | {d['n']} | {med} | {g(d['iou'])} | {g(d['p'])} | {g(d['r'])} |")
+        W("")
+
+    bal = {}
+    for r in mrows:
+        if r["scene"] in complete:
+            bal.setdefault(r["rank"], []).append(r)
+    comp = {s: sum(1 for p in complete if subset_of.get(p) == s) for s in ("SD-V", "SD-K")}
+    rank_table(bal, f"Balanced panel — the {len(complete)} pairs that have all {max_rank} ranks",
+               "Constant scene set at every rank, so the trend is the frame choice and nothing else. "
+               "**This is the curve to read.** "
+               f"Composition: {comp['SD-V']} SD-V + {comp['SD-K']} SD-K — a pair only reaches rank "
+               f"{max_rank} if it has that many annotated after-frames, and SD-V pairs have more of them, "
+               "so this panel is not subset-balanced and its absolute level should not be compared to "
+               "the headline numbers.")
+    rank_table(by_rank, "All pairs (unbalanced — for completeness only)",
+               "Each rank pools over whatever pairs reach it, so differences here mix frame difficulty "
+               "with which scenes are present. Do not read a trend from this table.")
+
+    r1 = pooled(bal.get(1, [])); rest = pooled([r for k, v in bal.items() if k and k > 1 for r in v])
     if r1["iou"] is not None and rest["iou"] is not None:
-        W(f"\nrank 1 alone {fmt(r1)}\nranks 2-8   {fmt(rest)}\n"
+        W(f"On the balanced panel:\n\nrank 1 alone {fmt(r1)}\nranks 2-{max_rank}   {fmt(rest)}\n\n"
           f"=> the frame the single-query protocol picks scores **{r1['iou'] - rest['iou']:+.4f} IoU** "
           f"above the frames it does not pick.\n")
 
