@@ -82,8 +82,15 @@ def export_query(results_root: Path, experiment: str, q: dict, per_pair: dict, e
         return out
     masks, labels, (h, w) = unpack(npz)
     obj = per_pair.setdefault(pair, {"H": h, "W": w})
-    if (obj["H"], obj["W"]) != (h, w):
-        raise ValueError(f"{pair}: query frames disagree on image size {(obj['H'], obj['W'])} vs {(h, w)}")
+    # A query that predicted nothing stores a placeholder shape (n=0, 1, 1), so only a query
+    # that actually carries masks may define the scene's image size -- and only two such
+    # queries disagreeing is a real inconsistency worth failing on. The size is near-cosmetic
+    # anyway: the evaluator takes H/W from the ground truth and falls back to the prediction's
+    # only when the GT supplies none.
+    if len(masks):
+        if obj.get("_hw_from_masks") and (obj["H"], obj["W"]) != (h, w):
+            raise ValueError(f"{pair}: query frames disagree on image size {(obj['H'], obj['W'])} vs {(h, w)}")
+        obj["H"], obj["W"], obj["_hw_from_masks"] = h, w, True
     for i, (m, lab) in enumerate(zip(masks, labels)):
         if int(lab) not in LABEL_NAME or int(lab) in exclude or not m.any():
             continue
@@ -138,6 +145,7 @@ def main() -> int:
     exclude = frozenset(int(x) for x in args.exclude_labels.split(",") if x.strip())
     exports = [export_query(args.results_root, args.experiment, q, per_pair, exclude) for q in queries]
     for pair, obj in per_pair.items():
+        obj.pop("_hw_from_masks", None)  # bookkeeping only; never goes into the official format
         d = pred_root / pair; d.mkdir(parents=True, exist_ok=True)
         (d / "object_masks.pkl").write_bytes(pickle.dumps(obj))
     frames_by_pair = {}
