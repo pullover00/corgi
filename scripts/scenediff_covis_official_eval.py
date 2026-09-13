@@ -62,19 +62,30 @@ def unpack(npz_path: Path):
     return masks, z["labels"].astype(int) if "labels" in z else np.zeros(n, int), (h, w)
 
 
-def export_query(results_root: Path, experiment: str, q: dict, pred_root: Path) -> dict:
+def export_query(results_root: Path, experiment: str, q: dict, per_pair: dict, exclude: frozenset = frozenset()) -> dict:
+    """Accumulate one query's objects into per_pair[pair]; the caller writes one pkl per pair.
+
+    A pair may carry several query frames (the multi-query protocol), and SceneDiff's format
+    holds every frame of a scene in a single object_masks.pkl, so exporting per query would
+    overwrite. CORGI has no cross-frame object identity, so each query's objects are exported
+    as their own object ids (the key carries t1): honest, and the pooled pixel metric merges
+    per frame anyway.
+    """
     from pycocotools import mask as mask_utils
     pair, t1 = q["pair"], q["t1_annotation_idx"]
-    qdir = results_root / "SceneDiff" / pair / f"t1_{t1:04d}" / experiment
+    exp = q.get("experiment", experiment)
+    qdir = results_root / "SceneDiff" / pair / f"t1_{t1:04d}" / exp
     npz = qdir / "resolution" / "final_objects.npz"
-    out = {"pair": pair, "t1_annotation_idx": t1, "resampled_idx": t1 // 30, "exported": False,
-           "n_objects": 0, "by_label": {}, "no_prediction": True}
+    out = {"pair": pair, "t1_annotation_idx": t1, "resampled_idx": t1 // 30, "rank": q.get("rank"),
+           "experiment": exp, "exported": False, "n_objects": 0, "by_label": {}, "no_prediction": True}
     if not npz.exists():
         return out
     masks, labels, (h, w) = unpack(npz)
-    obj = {"H": h, "W": w}
+    obj = per_pair.setdefault(pair, {"H": h, "W": w})
+    if (obj["H"], obj["W"]) != (h, w):
+        raise ValueError(f"{pair}: query frames disagree on image size {(obj['H'], obj['W'])} vs {(h, w)}")
     for i, (m, lab) in enumerate(zip(masks, labels)):
-        if int(lab) not in LABEL_NAME or not m.any():
+        if int(lab) not in LABEL_NAME or int(lab) in exclude or not m.any():
             continue
         rle = mask_utils.encode(np.asfortranarray(m.astype(np.uint8)))
         rle["counts"] = rle["counts"].decode("ascii") if isinstance(rle["counts"], bytes) else rle["counts"]
@@ -82,8 +93,6 @@ def export_query(results_root: Path, experiment: str, q: dict, pred_root: Path) 
         obj[key] = {"video_2": {t1 // 30: {"mask": rle, "cost": 1.0}}}
         out["by_label"][LABEL_NAME[int(lab)]] = out["by_label"].get(LABEL_NAME[int(lab)], 0) + 1
         out["n_objects"] += 1
-    d = pred_root / pair; d.mkdir(parents=True, exist_ok=True)
-    (d / "object_masks.pkl").write_bytes(pickle.dumps(obj))
     out.update({"exported": True, "no_prediction": out["n_objects"] == 0})
     return out
 
@@ -110,6 +119,10 @@ def main() -> int:
     ap.add_argument("--out-dir", type=Path, required=True)
     ap.add_argument("--iou-threshold", type=float, default=0.5)
     ap.add_argument("--max-length", type=int, default=1024)
+    ap.add_argument("--exclude-labels", default="", help="comma-separated CORGI label codes to drop at export, "
+                    "e.g. 5 to score an arm that ran with colour replacement ON as if it were OFF. The replacement "
+                    "pass is strictly additive on already-changed pixels, so dropping label 5 reproduces "
+                    "enable_color_replacement_detection: false exactly (verified byte-identical on the label maps).")
     ap.add_argument("--split", choices=("val", "test"), default=None, help="for the official CLI's --splits; default: manifest's split")
     args = ap.parse_args()
 
@@ -121,7 +134,12 @@ def main() -> int:
         if d.exists():
             shutil.rmtree(d)
 
-    exports = [export_query(args.results_root, args.experiment, q, pred_root) for q in queries]
+    per_pair: dict = {}
+    exclude = frozenset(int(x) for x in args.exclude_labels.split(",") if x.strip())
+    exports = [export_query(args.results_root, args.experiment, q, per_pair, exclude) for q in queries]
+    for pair, obj in per_pair.items():
+        d = pred_root / pair; d.mkdir(parents=True, exist_ok=True)
+        (d / "object_masks.pkl").write_bytes(pickle.dumps(obj))
     frames_by_pair = {}
     for q in queries:
         frames_by_pair.setdefault(q["pair"], set()).add(q["t1_annotation_idx"])
@@ -159,11 +177,16 @@ def main() -> int:
             if vid != 2: continue
             gm[fi] = np.logical_or(gm.get(fi, np.zeros((H, W), bool)), (m.numpy() if isinstance(m, torch.Tensor) else np.asarray(m)).astype(bool))
         s_tp = s_fp = s_fn = 0.0
+        per_frame = {}
         for fi in set(pm) | set(gm):
             p, g = pm.get(fi, np.zeros((H, W), bool)), gm.get(fi, np.zeros((H, W), bool))
-            s_tp += float((p & g).sum()); s_fp += float((p & ~g).sum()); s_fn += float((~p & g).sum())
+            f_tp, f_fp, f_fn = float((p & g).sum()), float((p & ~g).sum()), float((~p & g).sum())
+            # keyed by the evaluator's resampled index; x30 recovers the annotation index / manifest rank
+            per_frame[int(fi)] = {"tp": f_tp, "fp": f_fp, "fn": f_fn}
+            s_tp += f_tp; s_fp += f_fp; s_fn += f_fn
         tp += s_tp; fp += s_fp; fn += s_fn
-        per_scene[scene] = {"tp": s_tp, "fp": s_fp, "fn": s_fn, "iou": s_tp / (s_tp + s_fp + s_fn) if s_tp + s_fp + s_fn else None,
+        per_scene[scene] = {"tp": s_tp, "fp": s_fp, "fn": s_fn, "per_frame": per_frame,
+                            "iou": s_tp / (s_tp + s_fp + s_fn) if s_tp + s_fp + s_fn else None,
                             "n_gt_regions": len(gt_objs), "n_detections": len(dets), "target_hw": [int(H), int(W)]}
         pd = {k: v for k, v in pred_data.items() if k not in ("H", "W")}
         for k, v in pd.items():
@@ -181,7 +204,7 @@ def main() -> int:
     obj_p = r_tp / (r_tp + r_fp) if r_tp + r_fp else None
     obj_r = r_tp / total_gt_regions if total_gt_regions else None
     summary = {
-        "n_scenes_scored": len(scenes), "n_queries": len(queries),
+        "n_scenes_scored": len(scenes), "n_queries": len(queries), "excluded_labels": sorted(exclude),
         "n_queries_no_prediction": sum(1 for e in exports if e["no_prediction"]),
         "n_queries_not_exported": sum(1 for e in exports if not e["exported"]),
         "predicted_objects_by_label": {k: sum(e["by_label"].get(k, 0) for e in exports) for k in LABEL_NAME.values()},
